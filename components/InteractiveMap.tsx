@@ -34,6 +34,7 @@ export default function InteractiveMap() {
     canvas.width = w * 2;
     canvas.height = w * 2;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     globeRef.current = createGlobe(canvas, {
       devicePixelRatio: 2,
       width: w * 2,
@@ -56,7 +57,7 @@ export default function InteractiveMap() {
         state.width = w * 2;
         state.height = w * 2;
       },
-    });
+    } as any);
 
     // Resize observer
     const ro = new ResizeObserver(() => {
