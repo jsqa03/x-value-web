@@ -7,6 +7,7 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
+import VideoBackground from "@/components/VideoBackground";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
 import FeatureCards from "@/components/FeatureCards";
@@ -18,6 +19,15 @@ import VoiceAgentDemo from "@/components/VoiceAgentDemo";
 import InstagramMedia from "@/components/InstagramMedia";
 import ConversionModal from "@/components/ConversionModal";
 import CalendlyCTA from "@/components/CalendlyCTA";
+import Marquee from "react-fast-marquee";
+
+// ─── Hero marquee brands ──────────────────────────────────────────────────────
+
+const HERO_BRANDS = [
+  "HubSpot", "Salesforce", "Pipedrive", "Monday.com", "Zoho CRM",
+  "Shopify", "Stripe", "Notion", "Slack", "Intercom",
+  "Zendesk", "ActiveCampaign", "Klaviyo", "Segment", "Twilio",
+];
 
 // ─── Agent data ───────────────────────────────────────────────────────────────
 
@@ -102,86 +112,191 @@ export default function PlataformaPage() {
         </nav>
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section className="pt-36 pb-20 px-6 relative overflow-hidden">
+        <section
+          className="pt-36 pb-0 px-6 relative overflow-hidden"
+          style={{ background: "hsl(260 87% 3%)" }}
+        >
+          {/* Video background with rAF fade loop */}
+          <VideoBackground />
+
+          {/* Cinematic overlay — keeps text readable */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[280px] pointer-events-none"
+            className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse at center top, rgba(209,255,72,0.055) 0%, transparent 70%)",
+                "linear-gradient(180deg, rgba(3,1,18,0.55) 0%, rgba(3,1,18,0.2) 45%, rgba(3,1,18,0.72) 100%)",
+              zIndex: 1,
             }}
           />
 
-          <div className="max-w-6xl mx-auto relative z-10">
+          {/* Indigo ambient glow */}
+          <div
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at center top, rgba(99,102,241,0.13) 0%, transparent 65%)",
+              zIndex: 1,
+            }}
+          />
+
+          {/* Content */}
+          <div className="max-w-6xl mx-auto relative pb-20" style={{ zIndex: 2 }}>
             {/* Status pill */}
             <motion.div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-10"
               style={{
-                background: "rgba(209,255,72,0.06)",
-                border: "1px solid rgba(209,255,72,0.12)",
+                background: "rgba(99,102,241,0.08)",
+                border: "1px solid rgba(99,102,241,0.2)",
               }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#D1FF48" }} />
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#818cf8" }} />
               <span
                 className="text-xs font-medium tracking-[0.2em] uppercase"
-                style={{ color: "#D1FF48" }}
+                style={{ color: "#818cf8" }}
               >
                 Plataforma B2B · IA a Medida
               </span>
             </motion.div>
 
-            {/* H1 with SplitText */}
-            <h1
-              className="text-[clamp(3.5rem,9vw,8.5rem)] leading-[0.92] tracking-tight text-white mb-8"
-              style={{ fontFamily: "var(--font-bebas), 'Bebas Neue', Impact, sans-serif" }}
+            {/* H1 "Power AI" */}
+            <motion.h1
+              className="leading-[1.02] tracking-tight text-white mb-8"
+              style={{
+                fontFamily: "var(--font-general), 'General Sans', system-ui, sans-serif",
+                fontWeight: 700,
+                fontSize: "clamp(4rem,13vw,13.75rem)",
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <SplitText text="EMPRESAS" delay={0.05} stagger={0.07} />
+              Power
               <br />
-              <SplitText text="QUE YA ESTÁN" delay={0.2} stagger={0.06} className="text-white/35" />
-              <br />
-              <SplitText text="ADELANTE" delay={0.4} stagger={0.07} />
-            </h1>
+              <span
+                style={{
+                  background:
+                    "linear-gradient(135deg, #6366f1 0%, #a855f7 52%, #f59e0b 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                AI
+              </span>
+            </motion.h1>
 
             <motion.p
               className="text-gray-300 text-lg max-w-lg leading-relaxed mb-10"
+              style={{ fontFamily: "var(--font-general), system-ui, sans-serif" }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.55 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
             >
               Agentes de inteligencia artificial que automatizan ventas, retención
               y seguimiento — desplegados en{" "}
-              <span className="text-white/80">72 horas</span>, adaptados a tu empresa.
+              <span className="text-white/85">72 horas</span>, adaptados a tu empresa.
             </motion.p>
 
             {/* Hero CTAs */}
             <motion.div
-              className="flex flex-wrap gap-3"
+              className="flex flex-wrap gap-4"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.65 }}
+              transition={{ duration: 0.5, delay: 0.48 }}
             >
+              {/* Primary — premium lime */}
               <button
                 onClick={() => openModal("Agente x-value IA")}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm text-black transition-all hover:scale-[1.02]"
-                style={{ background: "#D1FF48" }}
-              >
-                Agendar Consultoría Gratuita
-                <ArrowRight size={15} />
-              </button>
-              <span
-                className="flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm"
+                className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-base text-black transition-all hover:scale-[1.03]"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  color: "rgba(255,255,255,0.45)",
+                  background: "linear-gradient(135deg, #D1FF48 0%, #b8f000 100%)",
+                  fontFamily: "var(--font-general), system-ui, sans-serif",
+                  letterSpacing: "-0.01em",
+                  boxShadow: "0 0 0 0 rgba(209,255,72,0)",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                    "0 0 40px rgba(209,255,72,0.35)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                    "0 0 0 0 rgba(209,255,72,0)";
                 }}
               >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#D1FF48" }} />
+                Agendar Consultoría Gratuita
+                <ArrowRight size={17} />
+              </button>
+
+              {/* Secondary ghost */}
+              <span
+                className="flex items-center gap-2 px-5 py-4 rounded-2xl text-sm"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  color: "rgba(255,255,255,0.45)",
+                  fontFamily: "var(--font-general), system-ui, sans-serif",
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#D1FF48" }} />
                 Demo disponible en 72 horas
               </span>
             </motion.div>
+          </div>
+
+          {/* ── Brand marquee at bottom of hero ───────────────────────────── */}
+          <div className="relative pb-10" style={{ zIndex: 2 }}>
+            <div className="mb-5 text-center">
+              <span
+                className="text-xs tracking-[0.25em] uppercase"
+                style={{
+                  color: "rgba(255,255,255,0.18)",
+                  fontFamily: "var(--font-general), system-ui, sans-serif",
+                }}
+              >
+                Integra con las herramientas que ya usas
+              </span>
+            </div>
+
+            {/* Fade masks */}
+            <div className="relative">
+              <div
+                className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none"
+                style={{
+                  background: "linear-gradient(to right, hsl(260 87% 3%), transparent)",
+                  zIndex: 3,
+                }}
+              />
+              <div
+                className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
+                style={{
+                  background: "linear-gradient(to left, hsl(260 87% 3%), transparent)",
+                  zIndex: 3,
+                }}
+              />
+
+              <Marquee speed={38} gradient={false} pauseOnHover autoFill>
+                {HERO_BRANDS.map((brand) => (
+                  <div
+                    key={brand}
+                    className="liquid-glass mx-3 px-5 py-2.5 rounded-xl"
+                  >
+                    <span
+                      className="text-sm font-medium whitespace-nowrap"
+                      style={{
+                        color: "rgba(255,255,255,0.45)",
+                        fontFamily: "var(--font-general), system-ui, sans-serif",
+                      }}
+                    >
+                      {brand}
+                    </span>
+                  </div>
+                ))}
+              </Marquee>
+            </div>
           </div>
         </section>
 
