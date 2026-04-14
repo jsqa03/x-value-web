@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp:*)",
+      "Bash(npm install:*)",
+      "Bash(kill 25026)",
+      "Bash(rm -rf node_modules package-lock.json)",
+      "Bash(npm run:*)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s http://localhost:3000/plataforma)",
+      "Bash(curl -s http://localhost:3000/plataforma -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code} gate\\\\n\")",
+      "Bash(curl -s http://localhost:3000/plataforma -o /dev/null -w \"%{http_code} plataforma\\\\n\")",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code} /\\\\n\")",
+      "Bash(curl -s http://localhost:3000/plataforma -o /dev/null -w \"%{http_code} /plataforma\\\\n\")",
+      "Bash(curl -s http://localhost:3000/plataforma -o /dev/null -w \"%{http_code}\\\\n\")"
+    ]
+  }
+}

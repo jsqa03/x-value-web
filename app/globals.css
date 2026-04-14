@@ -1,26 +1,212 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Core palette */
+  --color-background: #050505;
+  --color-surface: #111111;
+  --color-foreground: #f5f5f5;
+  --color-muted: #6b7280;
+
+  /* Brand colors */
+  --color-cyan: #00c0f3;
+  --color-cyan-glow: rgba(0, 192, 243, 0.2);
+  --color-lime: #D1FF48;
+
+  /* Glass */
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Fonts */
+  --font-display: var(--font-bebas), 'Bebas Neue', sans-serif;
+  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #0a0a0a;
+  color: #f5f5f5;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Mesh grid background ──────────────────────────────────────────────────── */
+.mesh-bg {
+  background-image:
+    linear-gradient(rgba(0, 192, 243, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 192, 243, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── Glassmorphism ─────────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Glow ──────────────────────────────────────────────────────────────────── */
+.glow-cyan {
+  box-shadow: 0 0 30px rgba(0, 192, 243, 0.15), inset 0 0 30px rgba(0, 192, 243, 0.03);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 20px rgba(0, 192, 243, 0.6);
+}
+
+/* ── OTP inputs ────────────────────────────────────────────────────────────── */
+.otp-input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #D1FF48;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 48px;
+  height: 56px;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: #D1FF48;
+  box-shadow: 0 0 12px rgba(209, 255, 72, 0.35);
+}
+
+/* ── Voice agent form inputs ───────────────────────────────────────────────── */
+.voice-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 12px 16px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.voice-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.voice-input:focus {
+  border-color: rgba(209, 255, 72, 0.45);
+  box-shadow: 0 0 0 3px rgba(209, 255, 72, 0.08);
+}
+
+/* ── react-phone-number-input dark override ────────────────────────────────── */
+.phone-input-wrapper {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: rgba(209, 255, 72, 0.45);
+  box-shadow: 0 0 0 3px rgba(209, 255, 72, 0.08);
+}
+
+.phone-input-wrapper .PhoneInput {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.phone-input-wrapper .PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.phone-input-wrapper .PhoneInputCountrySelect {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 0.8rem;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2px;
+}
+
+.phone-input-wrapper .PhoneInputCountrySelect:focus {
+  outline: none;
+}
+
+.phone-input-wrapper .PhoneInputCountrySelectArrow {
+  color: rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.phone-input-wrapper .PhoneInputInput {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.875rem;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.phone-input-wrapper .PhoneInputInput::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* Country flag icon */
+.phone-input-wrapper .PhoneInputCountryIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.phone-input-wrapper .PhoneInputCountryIcon--border {
+  box-shadow: none;
+}
+
+/* ── Hide scrollbar utility ────────────────────────────────────────────────── */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Snap carousel ─────────────────────────────────────────────────────────── */
+.snap-card {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* ── Scrollbar (minimal) ───────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 2px;
 }

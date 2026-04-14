@@ -1,0 +1,136 @@
+"use client";
+
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+import { Play, ExternalLink } from "lucide-react";
+
+// Replace REEL_URL with the actual Instagram reel embed URL
+// e.g. https://www.instagram.com/reel/XXXX/embed/
+const REEL_PLACEHOLDER = "https://www.instagram.com/xvalueai/embed/";
+
+interface InstagramMediaProps {
+  /** Paste the full Instagram reel/post URL here */
+  url?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+export default function InstagramMedia({
+  url = REEL_PLACEHOLDER,
+  title = "Míranos en acción",
+  subtitle = "Descubre cómo nuestros agentes transforman negocios reales.",
+}: InstagramMediaProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+
+  return (
+    <section ref={ref} className="py-20 px-6">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <motion.div
+          className="flex items-center gap-3 mb-4"
+          initial={{ opacity: 0, x: -50 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="w-px h-8 bg-white/20" />
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-white/20 tracking-widest">▶ IG</span>
+            <span className="text-xs tracking-[0.3em] text-white/30 uppercase">
+              x-value IA
+            </span>
+          </div>
+        </motion.div>
+
+        <motion.h2
+          className="text-4xl md:text-5xl text-white mb-2"
+          style={{ fontFamily: "var(--font-bebas), 'Bebas Neue', Impact, sans-serif" }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 }}
+        >
+          {title}
+        </motion.h2>
+
+        <motion.p
+          className="text-sm text-gray-300 mb-10 max-w-md"
+          initial={{ opacity: 0, x: -50 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.12 }}
+        >
+          {subtitle}
+        </motion.p>
+
+        {/* Iframe container */}
+        <motion.div
+          className="relative mx-auto rounded-2xl overflow-hidden"
+          style={{
+            maxWidth: 420,
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            backdropFilter: "blur(16px)",
+            boxShadow: "0 0 60px rgba(0,192,243,0.06), 0 0 0 1px rgba(255,255,255,0.04)",
+          }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+        >
+          {/* Top bar */}
+          <div
+            className="flex items-center gap-2 px-4 py-3 border-b"
+            style={{ borderColor: "rgba(255,255,255,0.06)" }}
+          >
+            <div className="w-2 h-2 rounded-full bg-white/15" />
+            <span className="text-xs text-white/30 flex-1">instagram.com · x-value IA</span>
+            <a
+              href="https://www.instagram.com/xvalueai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/20 hover:text-white/60 transition-colors"
+            >
+              <ExternalLink size={12} />
+            </a>
+          </div>
+
+          {/* Reel iframe */}
+          <div className="relative" style={{ paddingBottom: "177.77%", height: 0 }}>
+            <iframe
+              src={url}
+              title="x-value IA — Instagram Reel"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen
+              loading="lazy"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                border: "none",
+              }}
+            />
+          </div>
+        </motion.div>
+
+        {/* CTA link */}
+        <motion.div
+          className="flex justify-center mt-6"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <a
+            href="https://www.instagram.com/xvalueai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-white/30 hover:text-white/60 transition-colors"
+          >
+            <span className="text-base leading-none">📸</span>
+            Síguenos en Instagram
+            <ExternalLink size={10} />
+          </a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
