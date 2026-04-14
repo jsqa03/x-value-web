@@ -90,22 +90,22 @@ export default function ComparisonTable() {
         >
           {/* Table header */}
           <div
-            className="grid grid-cols-3 px-6 py-4"
+            className="grid grid-cols-3 px-3 py-3 md:px-6 md:py-4"
             style={{
               background: "rgba(255,255,255,0.03)",
               borderBottom: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            <span className="text-xs text-white/25 uppercase tracking-widest">
+            <span className="text-[10px] md:text-xs text-white/25 uppercase tracking-widest">
               Capacidad
             </span>
             <span
-              className="text-xs uppercase tracking-widest font-semibold"
-              style={{ color: "#D1FF48" }}
+              className="text-[10px] md:text-xs uppercase tracking-widest font-semibold"
+              style={{ color: "#00c0f3" }}
             >
               x-value IA
             </span>
-            <span className="text-xs text-white/25 uppercase tracking-widest">
+            <span className="text-[10px] md:text-xs text-white/25 uppercase tracking-widest">
               Personal Humano
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function ComparisonTable() {
           {ROWS.map((row, i) => (
             <div
               key={row.feature}
-              className="grid grid-cols-3 px-6 py-4 transition-colors hover:bg-white/[0.02]"
+              className="grid grid-cols-3 px-3 py-3 md:px-6 md:py-4 transition-colors hover:bg-white/[0.02]"
               style={{
                 borderBottom:
                   i < ROWS.length - 1
@@ -122,27 +122,27 @@ export default function ComparisonTable() {
                     : "none",
               }}
             >
-              <span className="text-sm text-white/50 self-center">
+              <span className="text-xs md:text-sm text-white/50 self-center pr-2">
                 {row.feature}
               </span>
 
               {/* x-value */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 md:gap-2 pr-2">
                 <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(209,255,72,0.12)" }}
+                  className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: "rgba(0,192,243,0.12)" }}
                 >
-                  <Check size={11} style={{ color: "#D1FF48" }} />
+                  <Check size={9} style={{ color: "#00c0f3" }} />
                 </div>
-                <span className="text-sm text-white/80">{row.xvalue}</span>
+                <span className="text-xs md:text-sm text-white/80 leading-tight">{row.xvalue}</span>
               </div>
 
               {/* Human */}
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-white/5">
-                  <X size={11} className="text-white/25" />
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shrink-0 bg-white/5">
+                  <X size={9} className="text-white/25" />
                 </div>
-                <span className="text-sm text-white/30">{row.human}</span>
+                <span className="text-xs md:text-sm text-white/30 leading-tight">{row.human}</span>
               </div>
             </div>
           ))}

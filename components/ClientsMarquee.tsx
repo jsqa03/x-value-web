@@ -45,14 +45,14 @@ export default function ClientsMarquee() {
           <span
             key={name}
             className="mx-10 text-sm font-semibold tracking-[0.2em] uppercase"
-            style={{ color: "rgba(255,255,255,0.18)" }}
+            style={{ color: "rgba(255,255,255,0.65)" }}
           >
             {name}
           </span>
         ))}
       </Marquee>
 
-      <p className="text-center text-xs text-white/15 tracking-widest uppercase mt-6">
+      <p className="text-center text-xs text-white/40 tracking-widest uppercase mt-6">
         Empresas que ya confían en x-value ia
       </p>
     </section>
