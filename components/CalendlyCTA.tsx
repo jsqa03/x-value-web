@@ -17,8 +17,8 @@ export default function CalendlyCTA() {
         onClick={() => setOpen(true)}
         className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-5 py-3 rounded-full font-bold text-sm text-black shadow-2xl"
         style={{
-          background: "#D1FF48",
-          boxShadow: "0 0 30px rgba(209,255,72,0.35), 0 4px 20px rgba(0,0,0,0.5)",
+          background: "#00c0f3",
+          boxShadow: "0 0 30px rgba(0,192,243,0.35), 0 4px 20px rgba(0,0,0,0.5)",
         }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -72,7 +72,7 @@ export default function CalendlyCTA() {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ background: "#D1FF48" }}
+                      style={{ background: "#00c0f3" }}
                     />
                     <span className="text-sm font-semibold text-white">
                       Agendar Consultoría Gratuita
@@ -88,7 +88,7 @@ export default function CalendlyCTA() {
 
                 {/* Calendly iframe */}
                 <iframe
-                  src={`${CALENDLY_URL}?hide_landing_page_details=1&hide_gdpr_banner=1&background_color=0a0a0a&text_color=ffffff&primary_color=D1FF48`}
+                  src={`${CALENDLY_URL}?hide_landing_page_details=1&hide_gdpr_banner=1&background_color=0a0a0a&text_color=ffffff&primary_color=00c0f3`}
                   width="100%"
                   height="620"
                   frameBorder="0"

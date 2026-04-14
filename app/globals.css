@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* ── Official brand token ──────────────────────────────────────────────────── */
+:root {
+  --brand-primary:      #00c0f3;
+  --brand-primary-glow: rgba(0, 192, 243, 0.3);
+  --brand-primary-dim:  rgba(0, 192, 243, 0.08);
+  --font-geist: 'Geist', system-ui, sans-serif;
+}
+
 @theme inline {
   /* Core palette */
   --color-background: #050505;
@@ -75,7 +83,7 @@ body {
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: #D1FF48;
+  color: var(--brand-primary);
   font-size: 1.5rem;
   font-weight: 700;
   text-align: center;
@@ -86,8 +94,8 @@ body {
 
 .otp-input:focus {
   outline: none;
-  border-color: #D1FF48;
-  box-shadow: 0 0 12px rgba(209, 255, 72, 0.35);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 12px rgba(0, 192, 243, 0.35);
 }
 
 /* ── Voice agent form inputs ───────────────────────────────────────────────── */
@@ -108,8 +116,8 @@ body {
 }
 
 .voice-input:focus {
-  border-color: rgba(209, 255, 72, 0.45);
-  box-shadow: 0 0 0 3px rgba(209, 255, 72, 0.08);
+  border-color: rgba(0, 192, 243, 0.45);
+  box-shadow: 0 0 0 3px rgba(0, 192, 243, 0.08);
 }
 
 /* ── react-phone-number-input dark override ────────────────────────────────── */
@@ -122,8 +130,8 @@ body {
 }
 
 .phone-input-wrapper:focus-within {
-  border-color: rgba(209, 255, 72, 0.45);
-  box-shadow: 0 0 0 3px rgba(209, 255, 72, 0.08);
+  border-color: rgba(0, 192, 243, 0.45);
+  box-shadow: 0 0 0 3px rgba(0, 192, 243, 0.08);
 }
 
 .phone-input-wrapper .PhoneInput {
@@ -231,6 +239,96 @@ body {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* ── react-phone-input-2 dark theme override ───────────────────────────────── */
+.react-tel-input .flag-dropdown {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-right: none !important;
+  border-radius: 8px 0 0 8px !important;
+}
+.react-tel-input .flag-dropdown.open {
+  border-color: rgba(0, 192, 243, 0.45) !important;
+  border-radius: 8px 0 0 8px !important;
+}
+.react-tel-input .selected-flag {
+  background: transparent !important;
+  border-radius: 8px 0 0 8px !important;
+  padding: 0 8px 0 12px !important;
+}
+.react-tel-input .selected-flag:hover,
+.react-tel-input .selected-flag:focus,
+.react-tel-input .flag-dropdown.open .selected-flag {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 8px 0 0 8px !important;
+}
+.react-tel-input .form-control {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: #fff !important;
+  font-size: 0.875rem !important;
+  height: 46px !important;
+  width: 100% !important;
+  padding-left: 14px !important;
+  font-family: 'Geist', var(--font-inter), sans-serif !important;
+}
+.react-tel-input .form-control:focus {
+  border-color: rgba(0, 192, 243, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(0, 192, 243, 0.08) !important;
+  outline: none !important;
+}
+.react-tel-input .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.2) !important;
+}
+.react-tel-input .country-list {
+  background: rgba(8, 8, 18, 0.97) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  margin-top: 4px !important;
+}
+.react-tel-input .country-list .country {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-size: 0.83rem !important;
+  padding: 7px 12px !important;
+}
+.react-tel-input .country-list .country:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+.react-tel-input .country-list .country.highlight {
+  background: rgba(0, 192, 243, 0.12) !important;
+  color: #00c0f3 !important;
+}
+.react-tel-input .country-list .country-name {
+  color: inherit !important;
+  margin-right: 6px !important;
+}
+.react-tel-input .country-list .dial-code {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+.react-tel-input .search {
+  background: rgba(0, 0, 0, 0.5) !important;
+  padding: 8px 10px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+.react-tel-input .search-box {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  color: #fff !important;
+  font-size: 0.83rem !important;
+  margin: 0 !important;
+  padding: 6px 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.react-tel-input .search-box:focus {
+  outline: none !important;
+  border-color: rgba(0, 192, 243, 0.4) !important;
 }
 
 /* ── Scrollbar (minimal) ───────────────────────────────────────────────────── */

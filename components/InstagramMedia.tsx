@@ -2,26 +2,30 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Play, ExternalLink } from "lucide-react";
+import { ExternalLink, Play } from "lucide-react";
 
-// Replace REEL_URL with the actual Instagram reel embed URL
-// e.g. https://www.instagram.com/reel/XXXX/embed/
-const REEL_PLACEHOLDER = "https://www.instagram.com/xvalueai/embed/";
+// ─── Replace VIDEO_ID with your actual YouTube video ID ────────────────────
+// Example: "dQw4w9WgXcQ" → https://www.youtube.com/watch?v=dQw4w9WgXcQ
+const YOUTUBE_VIDEO_ID = "YOUR_VIDEO_ID";
+const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@xvalueai"; // ← update
 
-interface InstagramMediaProps {
-  /** Paste the full Instagram reel/post URL here */
-  url?: string;
+const EMBED_SRC = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1&color=white&controls=1`;
+
+interface VideoMediaProps {
+  videoId?: string;
   title?: string;
   subtitle?: string;
 }
 
 export default function InstagramMedia({
-  url = REEL_PLACEHOLDER,
+  videoId = YOUTUBE_VIDEO_ID,
   title = "Míranos en acción",
   subtitle = "Descubre cómo nuestros agentes transforman negocios reales.",
-}: InstagramMediaProps) {
+}: VideoMediaProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+
+  const src = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&color=white&controls=1`;
 
   return (
     <section ref={ref} className="py-20 px-6">
@@ -35,8 +39,8 @@ export default function InstagramMedia({
         >
           <div className="w-px h-8 bg-white/20" />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-white/20 tracking-widest">▶ IG</span>
-            <span className="text-xs tracking-[0.3em] text-white/30 uppercase">
+            <Play size={12} fill="#00c0f3" style={{ color: "#00c0f3" }} />
+            <span className="text-xs tracking-[0.3em] text-white/50 uppercase">
               x-value IA
             </span>
           </div>
@@ -53,7 +57,8 @@ export default function InstagramMedia({
         </motion.h2>
 
         <motion.p
-          className="text-sm text-gray-300 mb-10 max-w-md"
+          className="text-sm mb-10 max-w-md"
+          style={{ color: "rgba(255,255,255,0.55)" }}
           initial={{ opacity: 0, x: -50 }}
           animate={inView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.12 }}
@@ -61,12 +66,12 @@ export default function InstagramMedia({
           {subtitle}
         </motion.p>
 
-        {/* Iframe container */}
+        {/* 16:9 video container */}
         <motion.div
           className="relative mx-auto rounded-2xl overflow-hidden"
           style={{
-            maxWidth: 420,
-            background: "rgba(255,255,255,0.03)",
+            maxWidth: 760,
+            background: "rgba(255,255,255,0.02)",
             border: "1px solid rgba(255,255,255,0.07)",
             backdropFilter: "blur(16px)",
             boxShadow: "0 0 60px rgba(0,192,243,0.06), 0 0 0 1px rgba(255,255,255,0.04)",
@@ -80,24 +85,26 @@ export default function InstagramMedia({
             className="flex items-center gap-2 px-4 py-3 border-b"
             style={{ borderColor: "rgba(255,255,255,0.06)" }}
           >
-            <div className="w-2 h-2 rounded-full bg-white/15" />
-            <span className="text-xs text-white/30 flex-1">instagram.com · x-value IA</span>
+            <Play size={11} fill="#00c0f3" style={{ color: "#00c0f3", opacity: 0.8 }} />
+            <span className="text-xs text-white/40 flex-1">
+              youtube.com · x-value IA
+            </span>
             <a
-              href="https://www.instagram.com/xvalueai/"
+              href={YOUTUBE_CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/20 hover:text-white/60 transition-colors"
+              className="text-white/20 hover:text-white/50 transition-colors"
             >
               <ExternalLink size={12} />
             </a>
           </div>
 
-          {/* Reel iframe */}
-          <div className="relative" style={{ paddingBottom: "177.77%", height: 0 }}>
+          {/* YouTube iframe — 16:9 */}
+          <div className="relative" style={{ paddingBottom: "56.25%", height: 0 }}>
             <iframe
-              src={url}
-              title="x-value IA — Instagram Reel"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              src={src}
+              title="x-value IA — Demo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               loading="lazy"
               style={{
@@ -120,13 +127,16 @@ export default function InstagramMedia({
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <a
-            href="https://www.instagram.com/xvalueai/"
+            href={YOUTUBE_CHANNEL_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs text-white/30 hover:text-white/60 transition-colors"
+            className="flex items-center gap-2 text-xs transition-colors"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.6)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.3)"; }}
           >
-            <span className="text-base leading-none">📸</span>
-            Síguenos en Instagram
+            <span style={{ fontSize: "0.85rem" }}>▶</span>
+            Síguenos en YouTube
             <ExternalLink size={10} />
           </a>
         </motion.div>

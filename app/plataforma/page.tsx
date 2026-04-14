@@ -8,6 +8,7 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
 import VideoBackground from "@/components/VideoBackground";
+import { InlineWidget } from "react-calendly";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
 import FeatureCards from "@/components/FeatureCards";
@@ -103,7 +104,7 @@ export default function PlataformaPage() {
             <button
               onClick={() => openModal("Agente x-value IA")}
               className="flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-lg transition-all text-black"
-              style={{ background: "#D1FF48" }}
+              style={{ background: "#00c0f3" }}
             >
               Agendar Consultoría
               <ArrowRight size={13} />
@@ -212,19 +213,19 @@ export default function PlataformaPage() {
                 onClick={() => openModal("Agente x-value IA")}
                 className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-base text-black transition-all hover:scale-[1.03]"
                 style={{
-                  background: "linear-gradient(135deg, #D1FF48 0%, #b8f000 100%)",
+                  background: "#00c0f3",
                   fontFamily: "var(--font-general), system-ui, sans-serif",
                   letterSpacing: "-0.01em",
-                  boxShadow: "0 0 0 0 rgba(209,255,72,0)",
+                  boxShadow: "0 0 0 0 rgba(0,192,243,0)",
                   transition: "transform 0.2s ease, box-shadow 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                    "0 0 40px rgba(209,255,72,0.35)";
+                    "0 0 40px rgba(0,192,243,0.4)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                    "0 0 0 0 rgba(209,255,72,0)";
+                    "0 0 0 0 rgba(0,192,243,0)";
                 }}
               >
                 Agendar Consultoría Gratuita
@@ -237,11 +238,11 @@ export default function PlataformaPage() {
                 style={{
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.07)",
-                  color: "rgba(255,255,255,0.45)",
+                  color: "rgba(255,255,255,0.55)",
                   fontFamily: "var(--font-general), system-ui, sans-serif",
                 }}
               >
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#D1FF48" }} />
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00c0f3" }} />
                 Demo disponible en 72 horas
               </span>
             </motion.div>
@@ -253,7 +254,7 @@ export default function PlataformaPage() {
               <span
                 className="text-xs tracking-[0.25em] uppercase"
                 style={{
-                  color: "rgba(255,255,255,0.18)",
+                  color: "rgba(255,255,255,0.5)",
                   fontFamily: "var(--font-general), system-ui, sans-serif",
                 }}
               >
@@ -320,7 +321,7 @@ export default function PlataformaPage() {
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <div className="w-px h-8 bg-white/20" />
-              <span className="text-xs tracking-[0.3em] text-white/30 uppercase">Agentes IA</span>
+              <span className="text-xs tracking-[0.3em] text-white/50 uppercase">Agentes IA</span>
             </motion.div>
 
             <motion.h2
@@ -410,6 +411,68 @@ export default function PlataformaPage() {
 
         {/* ── GROWTH BANNER CTA ───────────────────────────────────────────── */}
         <GrowthBanner onCTA={() => openModal("Agente x-value IA")} />
+
+        {/* ── CALENDLY INLINE ──────────────────────────────────────────── */}
+        <section className="py-20 px-6">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              className="flex items-center gap-3 mb-4"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <div className="w-px h-8 bg-white/20" />
+              <span className="text-xs tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.5)" }}>
+                Agendar
+              </span>
+            </motion.div>
+
+            <motion.h2
+              className="text-4xl md:text-5xl text-white mb-3"
+              style={{ fontFamily: "var(--font-bebas), 'Bebas Neue', Impact, sans-serif" }}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 }}
+            >
+              Agenda tu{" "}
+              <span style={{ color: "#00c0f3" }}>consultoría</span>
+            </motion.h2>
+
+            <motion.p
+              className="text-sm mb-10 max-w-md"
+              style={{ color: "rgba(255,255,255,0.55)" }}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.12 }}
+            >
+              Elige la fecha y hora que más te convenga. Sin compromiso, sin tarjeta de crédito.
+            </motion.p>
+
+            <motion.div
+              className="liquid-glass rounded-2xl overflow-hidden"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            >
+              {/* ↓ Replace the URL below with your Calendly booking page URL */}
+              <InlineWidget
+                url="https://calendly.com/juansquiceno-xvalueaigrowth/llamada-de-consultoria-inicial"
+                styles={{ height: "700px", minWidth: "320px" }}
+                pageSettings={{
+                  backgroundColor: "050505",
+                  hideEventTypeDetails: false,
+                  hideGdprBanner: true,
+                  primaryColor: "00c0f3",
+                  textColor: "f5f5f5",
+                }}
+              />
+            </motion.div>
+          </div>
+        </section>
 
         {/* Footer */}
         <footer className="border-t px-6 py-8" style={{ borderColor: "rgba(255,255,255,0.05)" }}>

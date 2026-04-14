@@ -18,30 +18,30 @@ export default function GrowthBanner({ onCTA }: GrowthBannerProps) {
         <motion.div
           className="relative rounded-3xl overflow-hidden px-8 py-12 md:px-14 md:py-16 flex flex-col md:flex-row items-center justify-between gap-8"
           style={{
-            background: "rgba(209,255,72,0.04)",
-            border: "1px solid rgba(209,255,72,0.15)",
+            background: "rgba(0,192,243,0.04)",
+            border: "1px solid rgba(0,192,243,0.15)",
           }}
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Background accent */}
+          {/* Background accents */}
           <div
             className="absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl pointer-events-none"
-            style={{ background: "rgba(209,255,72,0.06)" }}
+            style={{ background: "rgba(0,192,243,0.06)" }}
           />
           <div
             className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full blur-3xl pointer-events-none"
-            style={{ background: "rgba(0,192,243,0.04)" }}
+            style={{ background: "rgba(0,192,243,0.03)" }}
           />
 
           {/* Left text */}
           <div className="relative z-10 flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <Sparkles size={14} style={{ color: "#D1FF48" }} />
+              <Sparkles size={14} style={{ color: "#00c0f3" }} />
               <span
                 className="text-xs tracking-[0.25em] uppercase font-medium"
-                style={{ color: "#D1FF48" }}
+                style={{ color: "#00c0f3" }}
               >
                 Escala sin límites
               </span>
@@ -53,9 +53,9 @@ export default function GrowthBanner({ onCTA }: GrowthBannerProps) {
               }}
             >
               X-VALUE IA TE AYUDA A ESCALAR{" "}
-              <span style={{ color: "#D1FF48" }}>X10</span> MÁS RÁPIDO
+              <span style={{ color: "#00c0f3" }}>X10</span> MÁS RÁPIDO
             </h2>
-            <p className="text-sm text-white/35 max-w-sm">
+            <p className="text-sm max-w-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
               Agentes de IA desplegados en 72h. Sin contratar, sin entrenar, sin
               esperar.
             </p>
@@ -66,8 +66,8 @@ export default function GrowthBanner({ onCTA }: GrowthBannerProps) {
             <motion.button
               onClick={onCTA}
               className="flex items-center gap-3 px-7 py-4 rounded-2xl font-bold text-sm tracking-wide text-black transition-all"
-              style={{ background: "#D1FF48" }}
-              whileHover={{ scale: 1.03, background: "#c8f53e" }}
+              style={{ background: "#00c0f3" }}
+              whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(0,192,243,0.4)" }}
               whileTap={{ scale: 0.97 }}
             >
               Agendar Consultoría Gratuita

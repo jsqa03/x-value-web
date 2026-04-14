@@ -29,13 +29,26 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${bebas.variable} h-full`}>
       <head>
+        {/* Favicon */}
+        <link rel="icon" href="/logo.png" />
+        {/* Geist Sans — Vercel's typeface */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+        {/* General Sans — hero headlines */}
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link
           href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full bg-[#050505] text-[#f5f5f5] antialiased">
+      <body
+        className="min-h-full bg-[#050505] text-[#f5f5f5] antialiased"
+        style={{ fontFamily: "'Geist', var(--font-inter), system-ui, sans-serif" }}
+      >
         {children}
       </body>
     </html>

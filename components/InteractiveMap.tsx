@@ -1,110 +1,108 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import createGlobe from "cobe";
+import { useEffect, useRef, useState } from "react";
 
-// Mercator coords for each country (lat, lng)
-const MARKERS = [
-  { location: [23.6345, -102.5528] as [number, number], size: 0.07 }, // México
-  { location: [4.5709, -74.2973] as [number, number], size: 0.06 },   // Colombia
-  { location: [6.4238, -66.5897] as [number, number], size: 0.055 },  // Venezuela
-  { location: [-1.8312, -78.1834] as [number, number], size: 0.055 }, // Ecuador
-  { location: [-14.235, -51.9253] as [number, number], size: 0.09 },  // Brasil
-  { location: [-38.4161, -63.6167] as [number, number], size: 0.07 }, // Argentina
-  { location: [40.4637, -3.7492] as [number, number], size: 0.065 },  // España
-  { location: [39.3999, -8.2245] as [number, number], size: 0.055 },  // Portugal
-  { location: [41.8719, 12.5674] as [number, number], size: 0.055 },  // Italia
-  { location: [35.9375, 14.3754] as [number, number], size: 0.045 },  // Malta
+interface Marker {
+  lat: number;
+  lng: number;
+  flag: string;
+  name: string;
+}
+
+const MARKERS: Marker[] = [
+  { lat: 23.63,  lng: -102.55, flag: "🇲🇽", name: "México"    },
+  { lat:  4.57,  lng:  -74.30, flag: "🇨🇴", name: "Colombia"  },
+  { lat:  6.42,  lng:  -66.59, flag: "🇻🇪", name: "Venezuela" },
+  { lat: -1.83,  lng:  -78.18, flag: "🇪🇨", name: "Ecuador"   },
+  { lat:-14.24,  lng:  -51.93, flag: "🇧🇷", name: "Brasil"    },
+  { lat:-38.42,  lng:  -63.62, flag: "🇦🇷", name: "Argentina" },
+  { lat: 40.46,  lng:   -3.75, flag: "🇪🇸", name: "España"    },
+  { lat: 39.40,  lng:   -8.22, flag: "🇵🇹", name: "Portugal"  },
+  { lat: 41.87,  lng:   12.57, flag: "🇮🇹", name: "Italia"    },
+  { lat: 35.94,  lng:   14.38, flag: "🇲🇹", name: "Malta"     },
 ];
 
+type GlobeInstance = {
+  controls: () => {
+    autoRotate: boolean;
+    autoRotateSpeed: number;
+    minDistance: number;
+    maxDistance: number;
+  };
+};
+
 export default function InteractiveMap() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const phiRef = useRef(0.6);
-  const isDragging = useRef(false);
-  const prevX = useRef(0);
-  const globeRef = useRef<ReturnType<typeof createGlobe> | null>(null);
+  const globeRef = useRef<GlobeInstance | null>(null);
+  const [Globe, setGlobe] = useState<React.ComponentType<any> | null>(null);
+  const [size, setSize] = useState(0);
 
+  // Lazy-load react-globe.gl (client-only — uses WebGL / browser APIs)
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    let w = container.offsetWidth;
-    canvas.width = w * 2;
-    canvas.height = w * 2;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    globeRef.current = createGlobe(canvas, {
-      devicePixelRatio: 2,
-      width: w * 2,
-      height: w * 2,
-      phi: phiRef.current,
-      theta: 0.25,
-      dark: 1,
-      diffuse: 1.4,
-      mapSamples: 20000,
-      mapBrightness: 5,
-      baseColor: [0.07, 0.07, 0.07],
-      markerColor: [0.0, 0.75, 0.95],
-      glowColor: [0.0, 0.3, 0.45],
-      markers: MARKERS,
-      onRender(state) {
-        if (!isDragging.current) {
-          phiRef.current += 0.004;
-        }
-        state.phi = phiRef.current;
-        state.width = w * 2;
-        state.height = w * 2;
-      },
-    } as any);
-
-    // Resize observer
-    const ro = new ResizeObserver(() => {
-      w = container.offsetWidth;
+    import("react-globe.gl").then((mod) => {
+      setGlobe(() => mod.default as React.ComponentType<any>);
     });
-    ro.observe(container);
-
-    return () => {
-      globeRef.current?.destroy();
-      ro.disconnect();
-    };
   }, []);
+
+  // Track container dimensions
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setSize(el.offsetWidth));
+    ro.observe(el);
+    setSize(el.offsetWidth);
+    return () => ro.disconnect();
+  }, []);
+
+  // Configure OrbitControls after globe mounts
+  const onGlobeReady = () => {
+    const ctrl = globeRef.current?.controls?.();
+    if (ctrl) {
+      ctrl.autoRotate = true;
+      ctrl.autoRotateSpeed = 0.35;
+      ctrl.minDistance = 240;
+      ctrl.maxDistance = 520;
+    }
+  };
+
+  const htmlElementBuilder = (d: object): HTMLElement => {
+    const marker = d as Marker;
+    const el = document.createElement("div");
+    el.style.cssText = [
+      "font-size:1.55rem",
+      "line-height:1",
+      "user-select:none",
+      "pointer-events:none",
+      "filter:drop-shadow(0 2px 6px rgba(0,0,0,0.75))",
+    ].join(";");
+    el.title = marker.name;
+    el.textContent = marker.flag;
+    return el;
+  };
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full"
-      style={{ aspectRatio: "1/1" }}
+      style={{ width: "100%", aspectRatio: "1 / 1", overflow: "hidden" }}
     >
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: "100%",
-          height: "100%",
-          cursor: isDragging.current ? "grabbing" : "grab",
-          contain: "layout paint size",
-        }}
-        onPointerDown={(e) => {
-          isDragging.current = true;
-          prevX.current = e.clientX;
-          (e.currentTarget as HTMLCanvasElement).style.cursor = "grabbing";
-        }}
-        onPointerUp={(e) => {
-          isDragging.current = false;
-          (e.currentTarget as HTMLCanvasElement).style.cursor = "grab";
-        }}
-        onPointerOut={(e) => {
-          isDragging.current = false;
-          (e.currentTarget as HTMLCanvasElement).style.cursor = "grab";
-        }}
-        onPointerMove={(e) => {
-          if (!isDragging.current) return;
-          const delta = e.clientX - prevX.current;
-          phiRef.current += delta * 0.006;
-          prevX.current = e.clientX;
-        }}
-      />
+      {Globe && size > 0 && (
+        <Globe
+          ref={globeRef as any}
+          width={size}
+          height={size}
+          backgroundColor="rgba(0,0,0,0)"
+          globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+          atmosphereColor="#00c0f3"
+          atmosphereAltitude={0.18}
+          htmlElementsData={MARKERS}
+          htmlLat="lat"
+          htmlLng="lng"
+          htmlAltitude={0.02}
+          htmlElement={htmlElementBuilder}
+          enablePointerInteraction={true}
+          onGlobeReady={onGlobeReady}
+        />
+      )}
     </div>
   );
 }

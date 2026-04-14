@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Shield, CheckCircle, ChevronDown, Loader2, Calendar } from "lucide-react";
+import { X, Shield, CheckCircle, Loader2, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,25 +24,6 @@ const VALID_OTP = "123456";
 const CALENDLY_URL =
   "https://calendly.com/juansquiceno-xvalueaigrowth/llamada-de-consultoria-inicial";
 
-const COUNTRY_CODES = [
-  { flag: "🇨🇴", name: "Colombia",   dial: "+57"  },
-  { flag: "🇲🇽", name: "México",     dial: "+52"  },
-  { flag: "🇦🇷", name: "Argentina",  dial: "+54"  },
-  { flag: "🇧🇷", name: "Brasil",     dial: "+55"  },
-  { flag: "🇻🇪", name: "Venezuela",  dial: "+58"  },
-  { flag: "🇪🇨", name: "Ecuador",    dial: "+593" },
-  { flag: "🇵🇪", name: "Perú",       dial: "+51"  },
-  { flag: "🇨🇱", name: "Chile",      dial: "+56"  },
-  { flag: "🇺🇾", name: "Uruguay",    dial: "+598" },
-  { flag: "🇵🇾", name: "Paraguay",   dial: "+595" },
-  { flag: "🇧🇴", name: "Bolivia",    dial: "+591" },
-  { flag: "🇪🇸", name: "España",     dial: "+34"  },
-  { flag: "🇵🇹", name: "Portugal",   dial: "+351" },
-  { flag: "🇮🇹", name: "Italia",     dial: "+39"  },
-  { flag: "🇲🇹", name: "Malta",      dial: "+356" },
-  { flag: "🇺🇸", name: "EE.UU.",     dial: "+1"   },
-];
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ConversionModal({
@@ -56,9 +39,7 @@ export default function ConversionModal({
   // Lead form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [countryCode, setCountryCode] = useState(COUNTRY_CODES[0]);
-  const [countryOpen, setCountryOpen] = useState(false);
+  const [phone, setPhone] = useState("57"); // react-phone-input-2 value (no + prefix)
 
   // OTP
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -71,9 +52,7 @@ export default function ConversionModal({
         setStep("lead");
         setName("");
         setEmail("");
-        setWhatsapp("");
-        setCountryCode(COUNTRY_CODES[0]);
-        setCountryOpen(false);
+        setPhone("57");
         setOtp(["", "", "", "", "", ""]);
         setError("");
         setLoading(false);
@@ -82,12 +61,12 @@ export default function ConversionModal({
     }
   }, [isOpen]);
 
-  // ── Lead submit (Supabase logic untouched) ──────────────────────────────────
+  // ── Lead submit — Supabase logic untouched ──────────────────────────────────
   async function handleLeadSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (!name.trim() || !email.trim() || !whatsapp.trim()) {
+    if (!name.trim() || !email.trim() || phone.length < 8) {
       setError("Todos los campos son obligatorios.");
       return;
     }
@@ -105,8 +84,8 @@ export default function ConversionModal({
       console.log("[x-value] Intentando insertar lead en Supabase...");
       console.log("[x-value] URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
 
-      // Prepend country code to whatsapp before storing
-      const fullWhatsapp = `${countryCode.dial} ${whatsapp.trim()}`;
+      // Format phone: react-phone-input-2 returns digits without +, e.g. "573001234567"
+      const fullWhatsapp = `+${phone}`;
 
       const { data, error: dbError } = await supabase
         .from("leads")
@@ -223,16 +202,22 @@ export default function ConversionModal({
               {/* Header */}
               <div className="relative px-6 pt-6 pb-4 border-b border-white/5">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-[#D1FF48] animate-pulse" />
-                  <span className="text-xs text-[#D1FF48] font-medium tracking-wider uppercase">
-                    {step === "lead" && "Consultoría Gratuita"}
-                    {step === "otp" && "Verificación de Seguridad"}
+                  <div
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ background: "#00c0f3" }}
+                  />
+                  <span
+                    className="text-xs font-medium tracking-wider uppercase"
+                    style={{ color: "#00c0f3" }}
+                  >
+                    {step === "lead"    && "Consultoría Gratuita"}
+                    {step === "otp"     && "Verificación de Seguridad"}
                     {step === "success" && "Acceso Concedido"}
                   </span>
                 </div>
                 <h2 className="text-lg font-bold text-white pr-8">
-                  {step === "lead" && "Agendar Consultoría Gratuita"}
-                  {step === "otp" && "Confirma tu identidad"}
+                  {step === "lead"    && "Agendar Consultoría Gratuita"}
+                  {step === "otp"     && "Confirma tu identidad"}
                   {step === "success" && `Bienvenido, ${name.split(" ")[0]}`}
                 </h2>
                 <button
@@ -268,7 +253,18 @@ export default function ConversionModal({
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Juan Pérez"
-                          className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D1FF48]/50 focus:ring-1 focus:ring-[#D1FF48]/20 transition-all"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none transition-all"
+                          style={{
+                            fontFamily: "'Geist', var(--font-inter), sans-serif",
+                          }}
+                          onFocus={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(0,192,243,0.45)";
+                            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,192,243,0.08)";
+                          }}
+                          onBlur={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                            e.currentTarget.style.boxShadow = "none";
+                          }}
                         />
                       </div>
 
@@ -282,80 +278,34 @@ export default function ConversionModal({
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="juan@empresa.com"
-                          className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D1FF48]/50 focus:ring-1 focus:ring-[#D1FF48]/20 transition-all"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none transition-all"
+                          style={{
+                            fontFamily: "'Geist', var(--font-inter), sans-serif",
+                          }}
+                          onFocus={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(0,192,243,0.45)";
+                            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,192,243,0.08)";
+                          }}
+                          onBlur={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                            e.currentTarget.style.boxShadow = "none";
+                          }}
                         />
                       </div>
 
-                      {/* WhatsApp + Country code */}
+                      {/* WhatsApp — react-phone-input-2 */}
                       <div>
                         <label className="block text-xs text-white/40 mb-1.5 tracking-wide">
                           WhatsApp
                         </label>
-                        <div className="flex gap-2">
-                          {/* Country selector */}
-                          <div className="relative shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => setCountryOpen((v) => !v)}
-                              className="flex items-center gap-1.5 h-full px-3 py-3 bg-black/40 border border-white/10 rounded-lg text-sm text-white transition-all focus:outline-none focus:border-[#D1FF48]/50 hover:border-white/20"
-                            >
-                              <span className="text-base leading-none">{countryCode.flag}</span>
-                              <span className="text-white/60 text-xs font-mono">{countryCode.dial}</span>
-                              <ChevronDown size={12} className={`text-white/30 transition-transform ${countryOpen ? "rotate-180" : ""}`} />
-                            </button>
-
-                            {/* Dropdown */}
-                            <AnimatePresence>
-                              {countryOpen && (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 4, scale: 0.97 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                                  transition={{ duration: 0.15 }}
-                                  className="absolute top-full left-0 mt-1 z-50 rounded-xl overflow-hidden overflow-y-auto"
-                                  style={{
-                                    background: "rgba(10,10,10,0.95)",
-                                    border: "1px solid rgba(255,255,255,0.08)",
-                                    backdropFilter: "blur(20px)",
-                                    maxHeight: 220,
-                                    minWidth: 180,
-                                  }}
-                                >
-                                  {COUNTRY_CODES.map((c) => (
-                                    <button
-                                      key={c.dial + c.name}
-                                      type="button"
-                                      onClick={() => {
-                                        setCountryCode(c);
-                                        setCountryOpen(false);
-                                      }}
-                                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-white/5"
-                                      style={{
-                                        color:
-                                          c.dial === countryCode.dial
-                                            ? "#D1FF48"
-                                            : "rgba(255,255,255,0.6)",
-                                      }}
-                                    >
-                                      <span className="text-base">{c.flag}</span>
-                                      <span className="flex-1 text-xs">{c.name}</span>
-                                      <span className="text-xs font-mono text-white/30">{c.dial}</span>
-                                    </button>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-
-                          {/* Number input */}
-                          <input
-                            type="tel"
-                            value={whatsapp}
-                            onChange={(e) => setWhatsapp(e.target.value)}
-                            placeholder="300 000 0000"
-                            className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D1FF48]/50 focus:ring-1 focus:ring-[#D1FF48]/20 transition-all"
-                          />
-                        </div>
+                        <PhoneInput
+                          country="co"
+                          value={phone}
+                          onChange={(value: string) => setPhone(value)}
+                          enableSearch
+                          searchPlaceholder="Buscar país..."
+                          containerStyle={{ width: "100%" }}
+                        />
                       </div>
 
                       {/* Error */}
@@ -371,7 +321,7 @@ export default function ConversionModal({
                         type="submit"
                         disabled={loading}
                         className="w-full font-bold py-3.5 rounded-lg text-sm tracking-wide transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-black"
-                        style={{ background: "#D1FF48" }}
+                        style={{ background: "#00c0f3" }}
                       >
                         {loading ? (
                           <Loader2 size={16} className="animate-spin" />
@@ -403,16 +353,14 @@ export default function ConversionModal({
                       <div
                         className="flex items-center gap-3 p-3 rounded-lg"
                         style={{
-                          background: "rgba(209,255,72,0.04)",
-                          border: "1px solid rgba(209,255,72,0.12)",
+                          background: "rgba(0,192,243,0.04)",
+                          border: "1px solid rgba(0,192,243,0.12)",
                         }}
                       >
-                        <Shield size={18} style={{ color: "#D1FF48" }} className="shrink-0" />
+                        <Shield size={18} style={{ color: "#00c0f3" }} className="shrink-0" />
                         <p className="text-xs text-white/40">
                           Código de 6 dígitos enviado a{" "}
-                          <span className="text-white/80">
-                            {countryCode.dial} {whatsapp}
-                          </span>
+                          <span className="text-white/80">+{phone}</span>
                         </p>
                       </div>
 
@@ -446,7 +394,7 @@ export default function ConversionModal({
                         type="submit"
                         disabled={loading || otp.join("").length < 6}
                         className="w-full font-bold py-3.5 rounded-lg text-sm tracking-wide transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-black"
-                        style={{ background: "#D1FF48" }}
+                        style={{ background: "#00c0f3" }}
                       >
                         {loading ? (
                           <Loader2 size={16} className="animate-spin text-black" />
@@ -457,7 +405,9 @@ export default function ConversionModal({
 
                       <p className="text-center text-xs text-white/20">
                         Demo: código{" "}
-                        <span className="text-[#D1FF48] font-mono">123456</span>
+                        <span style={{ color: "#00c0f3" }} className="font-mono">
+                          123456
+                        </span>
                       </p>
                     </motion.form>
                   )}
@@ -476,11 +426,11 @@ export default function ConversionModal({
                         <div
                           className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                           style={{
-                            background: "rgba(209,255,72,0.1)",
-                            border: "1px solid rgba(209,255,72,0.2)",
+                            background: "rgba(0,192,243,0.1)",
+                            border: "1px solid rgba(0,192,243,0.2)",
                           }}
                         >
-                          <CheckCircle size={20} style={{ color: "#D1FF48" }} />
+                          <CheckCircle size={20} style={{ color: "#00c0f3" }} />
                         </div>
                         <div>
                           <p className="text-white font-semibold text-sm">
@@ -498,7 +448,7 @@ export default function ConversionModal({
                         style={{ border: "1px solid rgba(255,255,255,0.06)" }}
                       >
                         <iframe
-                          src={`${CALENDLY_URL}?hide_landing_page_details=1&hide_gdpr_banner=1&background_color=0a0a0a&text_color=ffffff&primary_color=D1FF48`}
+                          src={`${CALENDLY_URL}?hide_landing_page_details=1&hide_gdpr_banner=1&background_color=0a0a0a&text_color=ffffff&primary_color=00c0f3`}
                           width="100%"
                           height="580"
                           frameBorder="0"
