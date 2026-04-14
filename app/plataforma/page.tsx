@@ -22,12 +22,22 @@ import ConversionModal from "@/components/ConversionModal";
 import CalendlyCTA from "@/components/CalendlyCTA";
 import Marquee from "react-fast-marquee";
 
-// ─── Hero marquee brands ──────────────────────────────────────────────────────
+// ─── Integration logo images (from /public) ───────────────────────────────────
 
-const HERO_BRANDS = [
-  "HubSpot", "Salesforce", "Pipedrive", "Monday.com", "Zoho CRM",
-  "Shopify", "Stripe", "Notion", "Slack", "Intercom",
-  "Zendesk", "ActiveCampaign", "Klaviyo", "Segment", "Twilio",
+const INTEGRATION_LOGOS = [
+  { src: "/hubspot.jpg",        alt: "HubSpot"     },
+  { src: "/KLAVIYO.png",        alt: "Klaviyo"     },
+  { src: "/KOMMO.jpg",          alt: "Kommo"       },
+  { src: "/MONDAY.COM.png",     alt: "Monday.com"  },
+  { src: "/NOTION.png",         alt: "Notion"      },
+  { src: "/Pipedrive.png",      alt: "Pipedrive"   },
+  { src: "/Salesforce.png",     alt: "Salesforce"  },
+  { src: "/segment-1.svg",      alt: "Segment"     },
+  { src: "/Shopify-Logo.png",   alt: "Shopify"     },
+  { src: "/Slack.png",          alt: "Slack"       },
+  { src: "/Stripe.png",         alt: "Stripe"      },
+  { src: "/Twilio.png",         alt: "Twilio"      },
+  { src: "/ZENDESK.png",        alt: "Zendesk"     },
 ];
 
 // ─── Agent data ───────────────────────────────────────────────────────────────
@@ -248,9 +258,9 @@ export default function PlataformaPage() {
             </motion.div>
           </div>
 
-          {/* ── Brand marquee at bottom of hero ───────────────────────────── */}
+          {/* ── Integration logos grid ────────────────────────────────────── */}
           <div className="relative pb-10" style={{ zIndex: 2 }}>
-            <div className="mb-5 text-center">
+            <div className="mb-6 text-center">
               <span
                 className="text-xs tracking-[0.25em] uppercase"
                 style={{
@@ -262,41 +272,33 @@ export default function PlataformaPage() {
               </span>
             </div>
 
-            {/* Fade masks */}
-            <div className="relative">
-              <div
-                className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none"
-                style={{
-                  background: "linear-gradient(to right, hsl(260 87% 3%), transparent)",
-                  zIndex: 3,
-                }}
-              />
-              <div
-                className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
-                style={{
-                  background: "linear-gradient(to left, hsl(260 87% 3%), transparent)",
-                  zIndex: 3,
-                }}
-              />
-
-              <Marquee speed={38} gradient={false} pauseOnHover autoFill>
-                {HERO_BRANDS.map((brand) => (
-                  <div
-                    key={brand}
-                    className="liquid-glass mx-3 px-5 py-2.5 rounded-xl"
-                  >
-                    <span
-                      className="text-sm font-medium whitespace-nowrap"
-                      style={{
-                        color: "rgba(255,255,255,0.45)",
-                        fontFamily: "var(--font-general), system-ui, sans-serif",
-                      }}
-                    >
-                      {brand}
-                    </span>
-                  </div>
-                ))}
-              </Marquee>
+            <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/hubspot.jpg"       alt="Hubspot"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/KLAVIYO.png"       alt="Klaviyo"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/KOMMO.jpg"         alt="Kommo"      className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/MONDAY.COM.png"    alt="Monday"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/NOTION.png"        alt="Notion"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/Pipedrive.png"     alt="Pipedrive"  className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/Salesforce.png"    alt="Salesforce" className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/segment-1.svg"     alt="Segment"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/Shopify-Logo.png"  alt="Shopify"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/Slack.png"         alt="Slack"      className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/Stripe.png"        alt="Stripe"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/Twilio.png"        alt="Twilio"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/ZENDESK.png"       alt="Zendesk"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
             </div>
           </div>
         </section>
