@@ -121,7 +121,7 @@ export default function PlataformaPage() {
         </nav>
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section className="pt-36 pb-0 px-6 relative overflow-hidden bg-transparent">
+        <section className="pt-36 pb-0 px-6 relative overflow-hidden" style={{ background: "hsl(260 87% 3%)" }}>
           {/* Indigo ambient glow over global video */}
           <div
             className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none z-[1]"
@@ -333,13 +333,39 @@ export default function PlataformaPage() {
           </div>
         </section>
 
-        {/* ── REVENUE BANNER ──────────────────────────────────────────────── */}
-        <RevenueBanner />
+        {/* ── RESULTADO ACUMULADO — pure black ──────────────────────────── */}
+        <div className="bg-black">
+          <RevenueBanner />
+          <ClientsMarquee />
+        </div>
 
-        {/* ── CLIENTS MARQUEE ─────────────────────────────────────────────── */}
-        <ClientsMarquee />
+        {/* ── LOWER SECTIONS — glassmorphic with ambient blobs ──────────── */}
+        <div className="relative" style={{ background: "rgba(0,0,0,0.95)" }}>
+          {/* Floating ambient blobs — ultra-subtle, 30–52s loops */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+            <motion.div
+              className="absolute w-[700px] h-[700px] rounded-full blur-[120px]"
+              style={{ background: "#00c0f3", opacity: 0.05, top: "5%", left: "10%" }}
+              animate={{ x: [0, 100, -60, 0], y: [0, -80, 50, 0] }}
+              transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute w-[600px] h-[600px] rounded-full blur-[120px]"
+              style={{ background: "#A78BFA", opacity: 0.05, top: "40%", right: "5%" }}
+              animate={{ x: [0, -80, 60, 0], y: [0, 90, -40, 0] }}
+              transition={{ duration: 38, repeat: Infinity, ease: "linear", delay: 8 }}
+            />
+            <motion.div
+              className="absolute w-[500px] h-[500px] rounded-full blur-[120px]"
+              style={{ background: "#00c0f3", opacity: 0.04, bottom: "15%", left: "45%" }}
+              animate={{ x: [0, 70, -50, 0], y: [0, -50, 70, 0] }}
+              transition={{ duration: 52, repeat: Infinity, ease: "linear", delay: 15 }}
+            />
+          </div>
 
-        {/* ── FEATURE CARDS ───────────────────────────────────────────────── */}
+          {/* Content above the blobs */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+
         <FeatureCards />
 
         {/* ── AGENTS GRID ─────────────────────────────────────────────────── */}
@@ -523,7 +549,9 @@ export default function PlataformaPage() {
             </p>
           </div>
         </footer>
-      </div>
+          </div>{/* end content-above-blobs */}
+        </div>{/* end glassmorphic zone */}
+      </div>{/* end outer zIndex wrapper */}
 
       {/* ── Modals / CTAs (outside scroll container) ─────────────────────── */}
       <ConversionModal

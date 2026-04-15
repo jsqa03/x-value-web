@@ -78,7 +78,7 @@ type CardData = (typeof CARDS)[0] & { accent: string };
 function Card({ card }: { card: CardData }) {
   const Icon = card.icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   return (
-    <div className="group liquid-glass relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full hover:scale-[1.015]">
+    <div className="group relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full hover:scale-[1.015] backdrop-blur-sm bg-white/5 border border-white/10">
       <span
         className="absolute top-4 right-5 text-xs font-mono tracking-widest"
         style={{ color: "rgba(255,255,255,0.15)" }}
@@ -95,12 +95,12 @@ function Card({ card }: { card: CardData }) {
 
       <div className="flex flex-col gap-2 flex-1">
         <h3
-          className="text-lg text-white leading-tight"
-          style={{ fontFamily: "var(--font-instrument), 'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}
+          className="text-lg text-white leading-tight font-semibold"
+          style={{ fontFamily: "'Geist', var(--font-barlow), var(--font-inter), system-ui, sans-serif" }}
         >
           {card.title}
         </h3>
-        <p className="text-sm leading-relaxed flex-1 text-white/80">
+        <p className="text-sm leading-relaxed flex-1 text-white/75">
           {card.desc}
         </p>
       </div>
@@ -141,7 +141,7 @@ export default function FeatureCards() {
 
         <motion.h2
           className="text-4xl md:text-5xl text-white mb-10"
-          style={{ fontFamily: "var(--font-instrument), 'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}
+          style={{ fontFamily: "'Geist', var(--font-barlow), var(--font-inter), system-ui, sans-serif", fontWeight: 700 }}
           initial={{ opacity: 0, x: -50 }}
           animate={inView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 }}
