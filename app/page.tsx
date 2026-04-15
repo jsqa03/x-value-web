@@ -9,7 +9,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-[#05010d]">
+    <main className="min-h-screen relative overflow-hidden bg-transparent">
       {/* Hero Section */}
       <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 opacity-80">
         <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" type="video/mp4" />
