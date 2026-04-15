@@ -2,73 +2,115 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { TrendingUp, Zap, Layers } from "lucide-react";
+import {
+  TrendingUp,
+  Settings,
+  BookOpen,
+  Code,
+  FileText,
+  BarChart2,
+  Users,
+  DollarSign,
+  Home,
+} from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
+
+const ACCENTS = ["#00c0f3", "#A78BFA", "#00c0f3", "#A78BFA", "#00c0f3", "#A78BFA", "#00c0f3", "#A78BFA", "#00c0f3"];
 
 const CARDS = [
   {
     icon: TrendingUp,
-    accent: "#D1FF48",
     label: "01",
-    title: "Vende Más",
-    desc: "Identifica leads calificados automáticamente, prioriza los más rentables y cierra oportunidades mientras tu competencia duerme.",
-    detail: "+68% tasa de cierre",
+    title: "Software AI Sales Tools",
+    desc: "Plataforma de ventas inteligente que califica leads, automatiza el outreach y cierra oportunidades 24/7 — tu propio CRM potenciado con IA.",
   },
   {
-    icon: Zap,
-    accent: "#00C0F3",
+    icon: Settings,
     label: "02",
-    title: "Responde al Instante",
-    desc: "Voz natural 24/7. Tu agente atiende prospectos en segundos, sin esperas ni guiones robóticos. Conversaciones reales, resultados reales.",
-    detail: "< 2 seg respuesta",
+    title: "Software AI for Business Operations",
+    desc: "Centraliza y automatiza tus operaciones con IA que toma decisiones en tiempo real, elimina procesos manuales y escala sin fricción.",
   },
   {
-    icon: Layers,
-    accent: "#A78BFA",
+    icon: BookOpen,
     label: "03",
-    title: "CRM Integration",
-    desc: "Se conecta a tu ecosistema actual — HubSpot, Salesforce, Pipedrive, Notion. Cero fricción, máxima visibilidad de cada interacción.",
-    detail: "40+ integraciones",
+    title: "Software AI Automation for Education",
+    desc: "Plataformas educativas adaptativas que personalizan el aprendizaje para cada estudiante, automatizan la evaluación y optimizan los resultados.",
+  },
+  {
+    icon: Code,
+    label: "04",
+    title: "Software AI SaaS Solutions",
+    desc: "Construimos tu producto SaaS con IA nativa desde la arquitectura hasta el lanzamiento — listo para escalar a miles de usuarios.",
+  },
+  {
+    icon: FileText,
+    label: "05",
+    title: "Software AI for Law Firms",
+    desc: "Revisión de contratos, investigación legal automatizada y gestión de casos — herramientas de IA diseñadas para la precisión que el derecho exige.",
+  },
+  {
+    icon: BarChart2,
+    label: "06",
+    title: "Software AI Powered Marketing",
+    desc: "Campañas hiper-personalizadas impulsadas por IA que predicen comportamientos, capturan audiencias ideales y maximizan el ROAS.",
+  },
+  {
+    icon: Users,
+    label: "07",
+    title: "Software AI for Human Resources",
+    desc: "Reclutamiento, onboarding y gestión del talento optimizados con IA que evalúa, recomienda y retiene a las personas correctas.",
+  },
+  {
+    icon: DollarSign,
+    label: "08",
+    title: "Software AI Debt Collection",
+    desc: "Automatiza y humaniza la cobranza con IA conversacional que maximiza la recuperación de cartera mientras preserva la relación con el cliente.",
+  },
+  {
+    icon: Home,
+    label: "09",
+    title: "Software AI in Real Estate",
+    desc: "Valuación automatizada, generación de leads cualificados y gestión de propiedades con IA especializada en el mercado inmobiliario.",
   },
 ];
 
-function Card({ card }: { card: (typeof CARDS)[0] }) {
-  const Icon = card.icon;
+type CardData = (typeof CARDS)[0] & { accent: string };
+
+function Card({ card }: { card: CardData }) {
+  const Icon = card.icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   return (
-    <div
-      className="group relative rounded-2xl p-7 flex flex-col gap-6 overflow-hidden cursor-default transition-all duration-300 h-full"
-      style={{
-        background: "rgba(255,255,255,0.025)",
-        border: "1px solid rgba(255,255,255,0.06)",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.border = "1px solid rgba(255,255,255,0.1)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.border = "1px solid rgba(255,255,255,0.06)";
-      }}
-    >
-      <span className="absolute top-5 right-6 text-xs font-mono tracking-widest"
-        style={{ color: "rgba(255,255,255,0.1)" }}>
+    <div className="group liquid-glass relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full hover:scale-[1.015]">
+      <span
+        className="absolute top-4 right-5 text-xs font-mono tracking-widest"
+        style={{ color: "rgba(255,255,255,0.15)" }}
+      >
         {card.label}
       </span>
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-        style={{ background: `${card.accent}12`, border: `1px solid ${card.accent}20` }}>
-        <Icon size={18} style={{ color: card.accent }} />
+
+      <div
+        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: `${card.accent}18`, border: `1px solid ${card.accent}30` }}
+      >
+        <Icon size={16} style={{ color: card.accent }} />
       </div>
-      <div className="flex flex-col gap-3 flex-1">
-        <h3 className="text-2xl text-white"
-          style={{ fontFamily: "var(--font-bebas), 'Bebas Neue', Impact, sans-serif" }}>
+
+      <div className="flex flex-col gap-2 flex-1">
+        <h3
+          className="text-lg text-white leading-tight"
+          style={{ fontFamily: "var(--font-instrument), 'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}
+        >
           {card.title}
         </h3>
-        <p className="text-sm text-gray-300 leading-relaxed flex-1">{card.desc}</p>
+        <p className="text-sm leading-relaxed flex-1 text-white/80">
+          {card.desc}
+        </p>
       </div>
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide self-start"
-        style={{ background: `${card.accent}10`, color: card.accent, border: `1px solid ${card.accent}20` }}>
-        {card.detail}
-      </div>
-      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ background: card.accent }} />
+
+      {/* Hover accent glow */}
+      <div
+        className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none"
+        style={{ background: card.accent }}
+      />
     </div>
   );
 }
@@ -77,12 +119,12 @@ export default function FeatureCards() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
 
-  // Mobile Embla carousel
-  const [emblaRef] = useEmblaCarousel({
-    align: "start",
-    loop: false,
-    dragFree: true,
-  });
+  const [emblaRef] = useEmblaCarousel({ align: "start", loop: false, dragFree: true });
+
+  const cardsWithAccent: CardData[] = CARDS.map((card, i) => ({
+    ...card,
+    accent: ACCENTS[i % ACCENTS.length],
+  }));
 
   return (
     <section ref={ref} className="py-20">
@@ -94,24 +136,24 @@ export default function FeatureCards() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <div className="w-px h-8 bg-white/20" />
-          <span className="text-xs tracking-[0.3em] text-white/30 uppercase">Capacidades</span>
+          <span className="text-xs tracking-[0.3em] text-white/50 uppercase">Servicios</span>
         </motion.div>
 
         <motion.h2
           className="text-4xl md:text-5xl text-white mb-10"
-          style={{ fontFamily: "var(--font-bebas), 'Bebas Neue', Impact, sans-serif" }}
+          style={{ fontFamily: "var(--font-instrument), 'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}
           initial={{ opacity: 0, x: -50 }}
           animate={inView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 }}
         >
-          Lo que <span style={{ color: "#D1FF48" }}>hacemos</span>
+          Lo que <span style={{ color: "#00c0f3" }}>hacemos</span>
         </motion.h2>
       </div>
 
-      {/* ── Mobile carousel (< md) ── */}
+      {/* ── Mobile: Embla swipe carousel ── */}
       <div className="md:hidden overflow-hidden" ref={emblaRef}>
         <div className="flex gap-4 px-6">
-          {CARDS.map((card) => (
+          {cardsWithAccent.map((card) => (
             <motion.div
               key={card.title}
               className="snap-card"
@@ -123,19 +165,18 @@ export default function FeatureCards() {
               <Card card={card} />
             </motion.div>
           ))}
-          {/* trailing space */}
           <div style={{ flex: "0 0 24px" }} />
         </div>
       </div>
 
-      {/* ── Desktop grid (>= md) ── */}
-      <div className="hidden md:grid grid-cols-3 gap-4 max-w-6xl mx-auto px-6">
-        {CARDS.map((card, i) => (
+      {/* ── Desktop: 3-col grid ── */}
+      <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto px-6">
+        {cardsWithAccent.map((card, i) => (
           <motion.div
             key={card.title}
             initial={{ opacity: 0, y: 24 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
           >
             <Card card={card} />
           </motion.div>

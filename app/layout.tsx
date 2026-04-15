@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Bebas_Neue } from "next/font/google";
+import { Inter, Bebas_Neue, Instrument_Serif, Barlow } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,6 +15,21 @@ const bebas = Bebas_Neue({
   display: "swap",
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const barlow = Barlow({
+  variable: "--font-barlow",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "x-value IA — Inteligencia Artificial para Empresas",
   description:
@@ -27,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${bebas.variable} h-full`}>
+    <html lang="es" className={`${inter.variable} ${bebas.variable} ${instrumentSerif.variable} ${barlow.variable} h-full`}>
       <head>
         {/* Favicon */}
         <link rel="icon" href="/logo.png" />
@@ -46,8 +61,8 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="min-h-full bg-[#050505] text-[#f5f5f5] antialiased"
-        style={{ fontFamily: "'Geist', var(--font-inter), system-ui, sans-serif" }}
+        className="min-h-full bg-black text-white antialiased"
+        style={{ fontFamily: "var(--font-barlow), var(--font-inter), system-ui, sans-serif" }}
       >
         {children}
       </body>

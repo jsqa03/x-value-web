@@ -83,20 +83,6 @@ export default function PlataformaPage() {
 
   return (
     <>
-      {/* Fixed full-page video background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed top-0 left-0 w-full h-full object-cover -z-10"
-      >
-        <source
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4"
-          type="video/mp4"
-        />
-      </video>
-
       {/* Particle background */}
       <AntigravityBg />
 
@@ -135,29 +121,41 @@ export default function PlataformaPage() {
         </nav>
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section className="pt-36 pb-0 px-6 relative overflow-hidden bg-transparent">
-          {/* Cinematic overlay — keeps text readable */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(3,1,18,0.55) 0%, rgba(3,1,18,0.2) 45%, rgba(3,1,18,0.72) 100%)",
-              zIndex: 1,
-            }}
-          />
+        <section className="pt-36 pb-0 px-6 relative overflow-hidden bg-black">
+          {/* Hero video background */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover z-0"
+          >
+            <source
+              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          {/* Dark overlay — ensures text legibility */}
+          <div className="absolute inset-0 bg-black/60 z-[1] pointer-events-none" />
 
           {/* Indigo ambient glow */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none z-[1]"
             style={{
               background:
-                "radial-gradient(ellipse at center top, rgba(99,102,241,0.13) 0%, transparent 65%)",
-              zIndex: 1,
+                "radial-gradient(ellipse at center top, rgba(99,102,241,0.18) 0%, transparent 65%)",
             }}
           />
 
+          {/* Bottom fade — blends hero into the black page */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-[1]"
+            style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
+          />
+
           {/* Content */}
-          <div className="max-w-6xl mx-auto relative pb-20" style={{ zIndex: 2 }}>
+          <div className="max-w-6xl mx-auto relative pb-20 z-[2]">
             {/* Status pill */}
             <motion.div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-10"
@@ -265,27 +263,28 @@ export default function PlataformaPage() {
           </div>
 
           {/* ── Integration logos — CSS infinite marquee ──────────────────── */}
-          <div className="relative pb-10 overflow-hidden" style={{ zIndex: 2 }}>
+          <div className="relative pb-10 overflow-hidden z-[2]">
             <div className="mb-6 text-center">
               <span
                 className="text-xs tracking-[0.25em] uppercase"
                 style={{
-                  color: "rgba(255,255,255,0.5)",
-                  fontFamily: "var(--font-general), system-ui, sans-serif",
+                  color: "rgba(255,255,255,0.6)",
+                  fontFamily: "var(--font-barlow), var(--font-general), system-ui, sans-serif",
+                  letterSpacing: "0.3em",
                 }}
               >
                 Integra con las herramientas que ya usas
               </span>
             </div>
 
-            {/* Fade masks */}
+            {/* Fade masks — fade to black */}
             <div
-              className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none"
-              style={{ background: "linear-gradient(to right, rgba(3,1,18,0.9), transparent)", zIndex: 3 }}
+              className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none z-10"
+              style={{ background: "linear-gradient(to right, #000, transparent)" }}
             />
             <div
-              className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
-              style={{ background: "linear-gradient(to left, rgba(3,1,18,0.9), transparent)", zIndex: 3 }}
+              className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none z-10"
+              style={{ background: "linear-gradient(to left, #000, transparent)" }}
             />
 
             {/* Duplicated logos for seamless loop */}
@@ -301,7 +300,13 @@ export default function PlataformaPage() {
                     alt={logo.alt}
                     width={100}
                     height={26}
-                    style={{ height: "26px", width: "auto", maxWidth: "100px", objectFit: "contain" }}
+                    style={{
+                      height: "26px",
+                      width: "auto",
+                      maxWidth: "100px",
+                      objectFit: "contain",
+                      filter: "grayscale(100%) brightness(200%)",
+                    }}
                   />
                 </div>
               ))}
