@@ -50,6 +50,7 @@ export default function VoiceAgentDemo() {
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [phone, setPhone] = useState<string>("");
+  const [waCode, setWaCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -176,9 +177,18 @@ export default function VoiceAgentDemo() {
 
                   {/* Phone — react-phone-number-input */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs text-white/40 tracking-wide">
-                      Número de teléfono
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-white/40 tracking-wide">
+                        Número de teléfono
+                      </label>
+                      <button
+                        type="button"
+                        className="text-xs font-medium transition-colors"
+                        style={{ color: "#D1FF48" }}
+                      >
+                        Enviar código
+                      </button>
+                    </div>
                     <div className="phone-input-wrapper">
                       <PhoneInput
                         international
@@ -188,6 +198,21 @@ export default function VoiceAgentDemo() {
                         placeholder="300 000 0000"
                       />
                     </div>
+                  </div>
+
+                  {/* WhatsApp verification code */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs text-white/40 tracking-wide">
+                      Código de verificación WhatsApp
+                    </label>
+                    <input
+                      type="text"
+                      value={waCode}
+                      onChange={(e) => setWaCode(e.target.value)}
+                      placeholder="Ingresa el código de 6 dígitos"
+                      maxLength={6}
+                      className="voice-input"
+                    />
                   </div>
 
                   {/* Error */}

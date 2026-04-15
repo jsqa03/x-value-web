@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, RefreshCw, Bell, Play, ChevronLeft, ChevronRight, Sparkles, Cpu } from "lucide-react";
+import { ArrowRight, TrendingUp, RefreshCw, Bell, Play, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
@@ -50,19 +50,20 @@ function LogoMarquee() {
         style={{ background: "linear-gradient(to right, rgba(0,0,0,0.85), transparent)" }} />
       <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
         style={{ background: "linear-gradient(to left, rgba(0,0,0,0.85), transparent)" }} />
-      {/* eslint-disable @next/next/no-img-element */}
       <div className="marquee-track items-center gap-10 py-2">
         {loopLogos.map((logo, i) => (
           <div key={`${logo.alt}-${i}`} className="shrink-0 mx-5">
-            <img
+            <Image
               src={`/${logo.src}`}
               alt={logo.alt}
-              className="h-10 md:h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+              width={120}
+              height={48}
+              style={{ height: "40px", width: "auto" }}
+              className="object-contain opacity-80 hover:opacity-100 transition-opacity"
             />
           </div>
         ))}
       </div>
-      {/* eslint-enable @next/next/no-img-element */}
     </div>
   );
 }
@@ -106,6 +107,7 @@ const ALL_AGENT_COUNT = AGENTS.length + 1; // 3 agentes + 1 "próximamente"
 export default function PlataformaPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState("Agente x-value IA");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ── Agents carousel ────────────────────────────────────────────────────────
   const [agentIdx, setAgentIdx] = useState(0);
@@ -157,15 +159,38 @@ export default function PlataformaPage() {
             borderColor: "rgba(255,255,255,0.05)",
           }}
         >
-          <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-              {/* Logo */}
-            <div className="flex items-center">
+          <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between relative">
+
+            {/* Left: hamburger (mobile) | logo (desktop) */}
+            <div className="flex items-center gap-3">
+              <button
+                className="md:hidden text-white/80 hover:text-white transition-colors p-1"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Menú"
+              >
+                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+              {/* Logo — desktop only */}
+              <div className="hidden md:flex items-center">
+                <Image
+                  src="/logo.png"
+                  alt="x-value IA"
+                  width={130}
+                  height={32}
+                  style={{ height: "32px", width: "auto" }}
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Logo — mobile centered (absolute) */}
+            <div className="absolute left-1/2 -translate-x-1/2 md:hidden pointer-events-none">
               <Image
                 src="/logo.png"
                 alt="x-value IA"
-                width={130}
-                height={32}
-                style={{ height: "32px", width: "auto" }}
+                width={110}
+                height={28}
+                style={{ height: "28px", width: "auto" }}
                 priority
               />
             </div>
@@ -186,122 +211,133 @@ export default function PlataformaPage() {
               </Link>
             </div>
 
-            {/* CTA button */}
+            {/* CTA button — desktop only */}
             <button
               onClick={() => openModal("Agente x-value IA")}
-              className="bg-[#00c0f3] text-black font-semibold rounded-full px-5 py-2 text-sm hover:bg-[#00a8d6] transition-colors"
+              className="hidden md:flex items-center bg-[#00c0f3] text-black font-semibold rounded-full px-5 py-2 text-sm hover:bg-[#00a8d6] transition-colors animate-pulse hover:animate-none shadow-[0_0_15px_rgba(0,192,243,0.5)]"
             >
-              Book a Demo
+              Agendar Consultoría Gratuita
             </button>
           </div>
+
+          {/* Mobile dropdown */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden absolute top-full left-0 w-full bg-[#05010d]/95 backdrop-blur-xl border-b border-white/10 p-4 flex flex-col gap-1 z-50">
+              <Link
+                href="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-white/80 hover:text-white text-sm transition-colors py-3 px-2 border-b border-white/5"
+              >
+                Home
+              </Link>
+              <button
+                onClick={() => { openModal("Agente x-value IA"); setIsMobileMenuOpen(false); }}
+                className="text-white/80 hover:text-white text-sm transition-colors py-3 px-2 border-b border-white/5 text-left"
+              >
+                Book a Demo
+              </button>
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-white/80 hover:text-white text-sm transition-colors py-3 px-2 border-b border-white/5"
+              >
+                Sign In
+              </Link>
+              <button
+                onClick={() => { openModal("Agente x-value IA"); setIsMobileMenuOpen(false); }}
+                className="mt-3 w-full bg-[#00c0f3] text-black font-semibold rounded-full px-5 py-3 text-sm hover:bg-[#00a8d6] transition-colors"
+              >
+                Agendar Consultoría Gratuita
+              </button>
+            </div>
+          )}
         </nav>
 
-        {/* ── ZONA 1: HERO — 2 columnas Z-pattern ───────────────────────── */}
-        <section className="relative min-h-screen overflow-hidden bg-[#05010d] pt-20">
+        {/* ── ZONA 1: HERO — centrado Web3 ──────────────────────────────── */}
+        <section className="relative min-h-screen overflow-hidden bg-[#05010d] flex flex-col items-center justify-center pt-14">
 
           {/* Video de fondo */}
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-          <video autoPlay loop muted playsInline
+          <video autoPlay loop muted playsInline preload="none"
             className="absolute inset-0 w-full h-full object-cover z-0 opacity-30">
             <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" type="video/mp4" />
           </video>
 
-          {/* Ambient glow */}
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none z-0" />
+          {/* Ambient glow — center */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <div className="w-[900px] h-[900px] rounded-full bg-indigo-600/10 blur-[140px]" />
+          </div>
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-cyan-500/5 blur-[100px] pointer-events-none z-0" />
 
-          {/* 2-column grid */}
-          <div className="relative z-20 max-w-6xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-16 min-h-[calc(100vh-80px)] py-16">
+          {/* Hero content — centrado */}
+          <div className="relative z-20 flex flex-col items-center justify-center text-center max-w-5xl mx-auto px-6 py-24 flex-1">
 
-            {/* ── Left column ── */}
-            <div className="flex-1 flex flex-col gap-6 text-left">
+            {/* Pill superior */}
+            <motion.div
+              className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8 flex items-center gap-2"
+              initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse inline-block" />
+              Early access disponible · Únete a la nueva era de la IA
+            </motion.div>
 
-              {/* Badge */}
-              <motion.div className="flex items-center gap-2 w-fit rounded-full px-4 py-1.5"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}>
-                <Sparkles size={13} style={{ color: "#00c0f3" }} />
-                <span className="text-white/60 text-xs font-medium tracking-wide">Inteligencia Artificial para Empresas</span>
-              </motion.div>
+            {/* H1 */}
+            <motion.h1
+              className="font-sans tracking-tight text-6xl md:text-7xl lg:text-[100px] font-bold leading-[1.05] mb-6"
+              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}>
+              <span className="text-white">X-Value </span>
+              <motion.span
+                className="inline-block bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: "linear-gradient(to left, #6366f1, #a855f7, #fcd34d)",
+                  backgroundSize: "200% auto",
+                }}
+                animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}>
+                IA
+              </motion.span>
+            </motion.h1>
 
-              {/* H1 */}
-              <motion.h1
-                className="font-sans tracking-tight text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05]"
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}>
-                <span className="text-white">X-Value </span>
-                <motion.span
-                  className="inline-block bg-clip-text text-transparent bg-gradient-to-l from-[#6366f1] via-[#a855f7] to-[#fcd34d]"
-                  animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                  style={{ backgroundSize: "200% auto" }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "linear" }}>
-                  IA
-                </motion.span>
-              </motion.h1>
+            {/* Subtítulo */}
+            <motion.p
+              className="text-white/80 text-lg md:text-xl leading-relaxed font-light max-w-3xl mb-10"
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}>
+              Aumenta tu rentabilidad y reduce gastos operativos. Un software de
+              inteligencia artificial a medida que trabaja 24/7, capaz de realizar
+              tareas y asumir la carga operativa de hasta 5 empleados.
+            </motion.p>
 
-              {/* Description */}
-              <motion.p className="text-white/80 text-lg leading-relaxed font-light max-w-lg"
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.25 }}>
-                Aumenta tu rentabilidad y reduce gastos operativos. Un software de
-                inteligencia artificial a medida que trabaja 24/7, capaz de realizar
-                tareas y asumir la carga operativa de hasta 5 empleados.
-              </motion.p>
+            {/* CTA */}
+            <motion.button
+              onClick={() => openModal("Agente x-value IA")}
+              className="flex items-center gap-2 px-9 py-4 rounded-2xl font-semibold text-base text-black transition-all hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(0,192,243,0.4)]"
+              style={{ background: "#00c0f3" }}
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.38 }}>
+              Agendar Consultoría Gratuita
+              <ArrowRight size={16} />
+            </motion.button>
 
-              {/* CTA */}
-              <motion.button
-                onClick={() => openModal("Agente x-value IA")}
-                className="w-fit flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-base text-black transition-all hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(0,192,243,0.4)]"
-                style={{ background: "#00c0f3" }}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.38 }}>
-                Agendar Consultoría Gratuita
-                <ArrowRight size={16} />
-              </motion.button>
-            </div>
-
-            {/* ── Right column — AI metrics visual ── */}
-            <motion.div className="flex-1 w-full"
-              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}>
-              <div className="rounded-2xl overflow-hidden p-8 flex flex-col gap-5"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
-
-                {/* Top badge */}
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-white/40 text-xs font-medium">Sistema activo · respondiendo en tiempo real</span>
+            {/* Metric pills row */}
+            <motion.div
+              className="flex flex-wrap items-center justify-center gap-3 mt-10"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.55 }}>
+              {[
+                { value: "340%", label: "ROI promedio", color: "#00c0f3" },
+                { value: "72 h", label: "Deploy", color: "#a855f7" },
+                { value: "24/7", label: "Disponibilidad", color: "#fcd34d" },
+                { value: "5×", label: "Fuerza operativa", color: "rgba(255,255,255,0.7)" },
+              ].map((m) => (
+                <div key={m.label}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <span className="font-bold" style={{ color: m.color }}>{m.value}</span>
+                  <span className="text-white/40">{m.label}</span>
                 </div>
-
-                {/* Metrics grid */}
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { label: "ROI Promedio",       value: "340%",   accent: "#00c0f3" },
-                    { label: "Deploy en",           value: "72 h",   accent: "#a855f7" },
-                    { label: "Disponibilidad",      value: "24/7",   accent: "#fcd34d" },
-                    { label: "Equiv. operativo",    value: "5 emp.", accent: "rgba(255,255,255,0.8)" },
-                  ].map((m) => (
-                    <div key={m.label} className="rounded-xl p-4"
-                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                      <p className="text-white/40 text-xs mb-1">{m.label}</p>
-                      <p className="text-2xl font-bold" style={{ color: m.accent }}>{m.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Icon row */}
-                <div className="flex items-center gap-3 pt-2"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ background: "rgba(0,192,243,0.12)", border: "1px solid rgba(0,192,243,0.2)" }}>
-                    <Cpu size={16} style={{ color: "#00c0f3" }} />
-                  </div>
-                  <div>
-                    <p className="text-white/70 text-sm font-medium">Software a medida</p>
-                    <p className="text-white/30 text-xs">Entrenado en tus datos · diseñado para tus procesos</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </motion.div>
           </div>
 
