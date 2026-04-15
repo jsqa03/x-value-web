@@ -121,37 +121,19 @@ export default function PlataformaPage() {
         </nav>
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section className="pt-36 pb-0 px-6 relative overflow-hidden bg-black">
-          {/* Hero video background */}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover z-0"
-          >
-            <source
-              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
-              type="video/mp4"
-            />
-          </video>
-
-          {/* Dark overlay — ensures text legibility */}
-          <div className="absolute inset-0 bg-black/60 z-[1] pointer-events-none" />
-
-          {/* Indigo ambient glow */}
+        <section className="pt-36 pb-0 px-6 relative overflow-hidden bg-transparent">
+          {/* Indigo ambient glow over global video */}
           <div
             className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none z-[1]"
             style={{
-              background:
-                "radial-gradient(ellipse at center top, rgba(99,102,241,0.18) 0%, transparent 65%)",
+              background: "radial-gradient(ellipse at center top, rgba(99,102,241,0.22) 0%, transparent 65%)",
             }}
           />
 
-          {/* Bottom fade — blends hero into the black page */}
+          {/* Bottom fade — softens section boundary */}
           <div
             className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-[1]"
-            style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
+            style={{ background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.6))" }}
           />
 
           {/* Content */}
@@ -160,25 +142,22 @@ export default function PlataformaPage() {
             <motion.div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-10"
               style={{
-                background: "rgba(99,102,241,0.08)",
-                border: "1px solid rgba(99,102,241,0.2)",
+                background: "rgba(99,102,241,0.1)",
+                border: "1px solid rgba(99,102,241,0.25)",
               }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#818cf8" }} />
-              <span
-                className="text-xs font-medium tracking-[0.2em] uppercase"
-                style={{ color: "#818cf8" }}
-              >
+              <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: "#818cf8" }}>
                 Plataforma B2B · IA a Medida
               </span>
             </motion.div>
 
-            {/* H1 "Power AI" */}
+            {/* H1 "Power AI" — ShinyText sweep on "Power" */}
             <motion.h1
-              className="leading-[1.02] tracking-tight text-white mb-8"
+              className="leading-[1.02] tracking-tight mb-8"
               style={{
                 fontFamily: "var(--font-general), 'General Sans', system-ui, sans-serif",
                 fontWeight: 700,
@@ -188,12 +167,24 @@ export default function PlataformaPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              Power
+              <motion.span
+                className="inline-block"
+                style={{
+                  background: "linear-gradient(120deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 25%, #fff 45%, rgba(255,255,255,0.5) 65%, rgba(255,255,255,0.5) 100%)",
+                  backgroundSize: "250% auto",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+                animate={{ backgroundPosition: ["100% 0%", "-100% 0%"] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
+              >
+                Power
+              </motion.span>
               <br />
               <span
                 style={{
-                  background:
-                    "linear-gradient(135deg, #6366f1 0%, #a855f7 52%, #f59e0b 100%)",
+                  background: "linear-gradient(135deg, #6366f1 0%, #a855f7 52%, #f59e0b 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -204,15 +195,15 @@ export default function PlataformaPage() {
             </motion.h1>
 
             <motion.p
-              className="text-gray-300 text-lg max-w-lg leading-relaxed mb-10"
-              style={{ fontFamily: "var(--font-general), system-ui, sans-serif" }}
+              className="text-white/80 text-lg max-w-lg leading-relaxed mb-10"
+              style={{ fontFamily: "var(--font-barlow), var(--font-general), system-ui, sans-serif" }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.35 }}
             >
               Agentes de inteligencia artificial que automatizan ventas, retención
               y seguimiento — desplegados en{" "}
-              <span className="text-white/85">72 horas</span>, adaptados a tu empresa.
+              <span className="text-white">72 horas</span>, adaptados a tu empresa.
             </motion.p>
 
             {/* Hero CTAs */}
@@ -277,39 +268,67 @@ export default function PlataformaPage() {
               </span>
             </div>
 
-            {/* Fade masks — fade to black */}
+            {/* Fade masks */}
             <div
               className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to right, #000, transparent)" }}
+              style={{ background: "linear-gradient(to right, rgba(0,0,0,0.85), transparent)" }}
             />
             <div
               className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to left, #000, transparent)" }}
+              style={{ background: "linear-gradient(to left, rgba(0,0,0,0.85), transparent)" }}
             />
 
-            {/* Duplicated logos for seamless loop */}
+            {/* Duplicated logos for seamless loop — plain <img> for reliable rendering */}
             <div className="marquee-track">
-              {[...INTEGRATION_LOGOS, ...INTEGRATION_LOGOS].map((logo, i) => (
+              {/* eslint-disable @next/next/no-img-element */}
+              {[
+                { src: "/hubspot.jpg",      alt: "HubSpot"    },
+                { src: "/KLAVIYO.png",      alt: "Klaviyo"    },
+                { src: "/KOMMO.jpg",        alt: "Kommo"      },
+                { src: "/MONDAY.COM.png",   alt: "Monday.com" },
+                { src: "/NOTION.png",       alt: "Notion"     },
+                { src: "/Pipedrive.png",    alt: "Pipedrive"  },
+                { src: "/Salesforce.png",   alt: "Salesforce" },
+                { src: "/segment-1.svg",    alt: "Segment"    },
+                { src: "/Shopify-Logo.png", alt: "Shopify"    },
+                { src: "/Slack.png",        alt: "Slack"      },
+                { src: "/Stripe.png",       alt: "Stripe"     },
+                { src: "/Twilio.png",       alt: "Twilio"     },
+                { src: "/ZENDESK.png",      alt: "Zendesk"    },
+                // duplicate for seamless loop
+                { src: "/hubspot.jpg",      alt: "HubSpot-2"    },
+                { src: "/KLAVIYO.png",      alt: "Klaviyo-2"    },
+                { src: "/KOMMO.jpg",        alt: "Kommo-2"      },
+                { src: "/MONDAY.COM.png",   alt: "Monday.com-2" },
+                { src: "/NOTION.png",       alt: "Notion-2"     },
+                { src: "/Pipedrive.png",    alt: "Pipedrive-2"  },
+                { src: "/Salesforce.png",   alt: "Salesforce-2" },
+                { src: "/segment-1.svg",    alt: "Segment-2"    },
+                { src: "/Shopify-Logo.png", alt: "Shopify-2"    },
+                { src: "/Slack.png",        alt: "Slack-2"      },
+                { src: "/Stripe.png",       alt: "Stripe-2"     },
+                { src: "/Twilio.png",       alt: "Twilio-2"     },
+                { src: "/ZENDESK.png",      alt: "Zendesk-2"    },
+              ].map((logo) => (
                 <div
-                  key={`${logo.alt}-${i}`}
+                  key={logo.alt}
                   className="liquid-glass mx-3 px-5 py-3 rounded-xl flex items-center justify-center shrink-0"
                   style={{ minWidth: "80px" }}
                 >
-                  <Image
+                  <img
                     src={logo.src}
                     alt={logo.alt}
-                    width={100}
-                    height={26}
                     style={{
-                      height: "26px",
+                      height: "28px",
                       width: "auto",
-                      maxWidth: "100px",
+                      maxWidth: "110px",
                       objectFit: "contain",
                       filter: "grayscale(100%) brightness(200%)",
                     }}
                   />
                 </div>
               ))}
+              {/* eslint-enable @next/next/no-img-element */}
             </div>
           </div>
         </section>

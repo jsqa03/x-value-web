@@ -61,9 +61,27 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="min-h-full bg-black text-white antialiased"
+        className="min-h-full bg-transparent text-white antialiased"
         style={{ fontFamily: "var(--font-barlow), var(--font-inter), system-ui, sans-serif" }}
       >
+        {/* ── Global video background — fixed behind every page ── */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="fixed top-0 left-0 w-full h-full object-cover -z-20"
+          style={{ pointerEvents: "none" }}
+        >
+          <source
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4"
+            type="video/mp4"
+          />
+        </video>
+
+        {/* ── Global dark overlay — guarantees white text contrast ── */}
+        <div className="fixed inset-0 bg-black/60 -z-10 pointer-events-none" />
+
         {children}
       </body>
     </html>

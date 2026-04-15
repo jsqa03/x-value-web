@@ -24,13 +24,13 @@ export default function ClientsMarquee() {
       <div
         className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
         style={{
-          background: "linear-gradient(to right, #0a0a0a, transparent)",
+          background: "linear-gradient(to right, rgba(0,0,0,0.88), transparent)",
         }}
       />
       <div
         className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
         style={{
-          background: "linear-gradient(to left, #0a0a0a, transparent)",
+          background: "linear-gradient(to left, rgba(0,0,0,0.88), transparent)",
         }}
       />
 

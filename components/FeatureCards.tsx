@@ -13,7 +13,6 @@ import {
   DollarSign,
   Home,
 } from "lucide-react";
-import useEmblaCarousel from "embla-carousel-react";
 
 const ACCENTS = ["#00c0f3", "#A78BFA", "#00c0f3", "#A78BFA", "#00c0f3", "#A78BFA", "#00c0f3", "#A78BFA", "#00c0f3"];
 
@@ -119,15 +118,16 @@ export default function FeatureCards() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
 
-  const [emblaRef] = useEmblaCarousel({ align: "start", loop: false, dragFree: true });
-
   const cardsWithAccent: CardData[] = CARDS.map((card, i) => ({
     ...card,
     accent: ACCENTS[i % ACCENTS.length],
   }));
 
+  // Duplicate for seamless loop
+  const loopCards = [...cardsWithAccent, ...cardsWithAccent];
+
   return (
-    <section ref={ref} className="py-20">
+    <section ref={ref} className="py-20 bg-transparent">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
           className="flex items-center gap-3 mb-4"
@@ -150,38 +150,35 @@ export default function FeatureCards() {
         </motion.h2>
       </div>
 
-      {/* ── Mobile: Embla swipe carousel ── */}
-      <div className="md:hidden overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4 px-6">
-          {cardsWithAccent.map((card) => (
-            <motion.div
-              key={card.title}
-              className="snap-card"
-              style={{ flex: "0 0 78vw", maxWidth: 280 }}
-              initial={{ opacity: 0, x: 20 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      {/* ── Horizontal infinite marquee ── */}
+      <motion.div
+        className="relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.15 }}
+      >
+        {/* Fade masks */}
+        <div
+          className="absolute left-0 top-0 bottom-0 w-16 md:w-24 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to right, rgba(0,0,0,0.85), transparent)" }}
+        />
+        <div
+          className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to left, rgba(0,0,0,0.85), transparent)" }}
+        />
+
+        <div className="marquee-track py-2" style={{ animationDuration: "55s" }}>
+          {loopCards.map((card, i) => (
+            <div
+              key={`${card.title}-${i}`}
+              className="shrink-0 mx-3"
+              style={{ width: "280px" }}
             >
               <Card card={card} />
-            </motion.div>
+            </div>
           ))}
-          <div style={{ flex: "0 0 24px" }} />
         </div>
-      </div>
-
-      {/* ── Desktop: 3-col grid ── */}
-      <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto px-6">
-        {cardsWithAccent.map((card, i) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 24 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Card card={card} />
-          </motion.div>
-        ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
