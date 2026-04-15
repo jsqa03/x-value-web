@@ -7,7 +7,9 @@ const VIDEO_URL =
 
 const FADE = 0.5; // seconds for fade-in / fade-out
 
-export default function VideoBackground() {
+interface Props { fixed?: boolean; }
+
+export default function VideoBackground({ fixed = false }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const rafRef = useRef<number>(0);
 
@@ -45,13 +47,15 @@ export default function VideoBackground() {
       loop
       playsInline
       style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
+        position: fixed ? "fixed" : "absolute",
+        top: 0,
+        left: 0,
+        width: fixed ? "100vw" : "100%",
+        height: fixed ? "100vh" : "100%",
         objectFit: "cover",
         opacity: 0,
         zIndex: 0,
+        pointerEvents: "none",
       }}
     />
   );
