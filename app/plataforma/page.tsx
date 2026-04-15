@@ -7,6 +7,7 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
+import PlataformaGate from "@/components/ui/PlataformaGate";
 import { InlineWidget } from "react-calendly";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
@@ -148,151 +149,24 @@ export default function PlataformaPage() {
         </nav>
 
         {/* ── ZONA 1: HERO ──────────────────────────────────────────────── */}
-        <section className="pt-36 pb-0 px-6 relative overflow-hidden" style={{ background: "hsl(260 87% 3%)" }}>
-          {/* Indigo ambient glow */}
-          <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none z-[1]"
-            style={{ background: "radial-gradient(ellipse at center top, rgba(99,102,241,0.28) 0%, transparent 65%)" }}
-          />
+        <PlataformaGate />
 
-          {/* Dark gradient overlay — text contrast + transition to black Zone 2 */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black pointer-events-none z-[1]" />
-
-          {/* Content */}
-          <div className="max-w-6xl mx-auto relative pb-20 z-[2]">
-            {/* Status pill */}
-            <motion.div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-10"
+        {/* ── Integration logos — CSS infinite marquee ──────────────────── */}
+        <div className="relative py-10 overflow-hidden bg-[#05010d]">
+          <div className="mb-6 text-center">
+            <span
+              className="text-xs tracking-[0.25em] uppercase"
               style={{
-                background: "rgba(99,102,241,0.1)",
-                border: "1px solid rgba(99,102,241,0.25)",
+                color: "rgba(255,255,255,0.6)",
+                fontFamily: "var(--font-barlow), var(--font-general), system-ui, sans-serif",
+                letterSpacing: "0.3em",
               }}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
             >
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#818cf8" }} />
-              <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: "#818cf8" }}>
-                Plataforma B2B · IA a Medida
-              </span>
-            </motion.div>
-
-            {/* H1 "Power AI" — ShinyText sweep on "Power" */}
-            <motion.h1
-              className="leading-[1.02] tracking-tight mb-8"
-              style={{
-                fontFamily: "var(--font-general), 'General Sans', system-ui, sans-serif",
-                fontWeight: 700,
-                fontSize: "clamp(4rem,13vw,13.75rem)",
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <motion.span
-                className="inline-block"
-                style={{
-                  background: "linear-gradient(120deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 25%, #fff 45%, rgba(255,255,255,0.5) 65%, rgba(255,255,255,0.5) 100%)",
-                  backgroundSize: "250% auto",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-                animate={{ backgroundPosition: ["100% 0%", "-100% 0%"] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
-              >
-                Power
-              </motion.span>
-              <br />
-              <span
-                style={{
-                  background: "linear-gradient(135deg, #6366f1 0%, #a855f7 52%, #f59e0b 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                AI
-              </span>
-            </motion.h1>
-
-            <motion.p
-              className="text-white/80 text-lg max-w-lg leading-relaxed mb-10"
-              style={{ fontFamily: "var(--font-barlow), var(--font-general), system-ui, sans-serif" }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
-            >
-              Agentes de inteligencia artificial que automatizan ventas, retención
-              y seguimiento — desplegados en{" "}
-              <span className="text-white">72 horas</span>, adaptados a tu empresa.
-            </motion.p>
-
-            {/* Hero CTAs */}
-            <motion.div
-              className="flex flex-wrap gap-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.48 }}
-            >
-              {/* Primary — premium lime */}
-              <button
-                onClick={() => openModal("Agente x-value IA")}
-                className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-base text-black transition-all hover:scale-[1.03]"
-                style={{
-                  background: "#00c0f3",
-                  fontFamily: "var(--font-general), system-ui, sans-serif",
-                  letterSpacing: "-0.01em",
-                  boxShadow: "0 0 0 0 rgba(0,192,243,0)",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                    "0 0 40px rgba(0,192,243,0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                    "0 0 0 0 rgba(0,192,243,0)";
-                }}
-              >
-                Agendar Consultoría Gratuita
-                <ArrowRight size={17} />
-              </button>
-
-              {/* Secondary ghost */}
-              <span
-                className="flex items-center gap-2 px-5 py-4 rounded-2xl text-sm"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  color: "rgba(255,255,255,0.55)",
-                  fontFamily: "var(--font-general), system-ui, sans-serif",
-                }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00c0f3" }} />
-                Demo disponible en 72 horas
-              </span>
-            </motion.div>
+              Integra con las herramientas que ya usas
+            </span>
           </div>
-
-          {/* ── Integration logos — CSS infinite marquee ──────────────────── */}
-          <div className="relative pb-10 overflow-hidden z-[2]">
-            <div className="mb-6 text-center">
-              <span
-                className="text-xs tracking-[0.25em] uppercase"
-                style={{
-                  color: "rgba(255,255,255,0.6)",
-                  fontFamily: "var(--font-barlow), var(--font-general), system-ui, sans-serif",
-                  letterSpacing: "0.3em",
-                }}
-              >
-                Integra con las herramientas que ya usas
-              </span>
-            </div>
-
-            <LogoMarquee />
-          </div>
-        </section>
+          <LogoMarquee />
+        </div>
 
         {/* ── ZONA 2: RESULTADO ACUMULADO — negro sólido puro ──────────── */}
         <section className="relative bg-black w-full z-10">
