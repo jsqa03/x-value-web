@@ -7,7 +7,6 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
-import GradientText from "@/components/ui/GradientText";
 import { InlineWidget } from "react-calendly";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
@@ -148,91 +147,59 @@ export default function PlataformaPage() {
           </div>
         </nav>
 
-        {/* ── ZONA 1: HERO — Your Vision Our Digital Reality ────────────── */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#010101] pt-20 pb-16">
+        {/* ── ZONA 1: HERO — X-Value IA ─────────────────────────────────── */}
+        <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#05010d] pt-20 pb-16">
 
-          {/* Background video — mix-blend-screen so it blends over dark bg */}
+          {/* Video de fondo */}
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             autoPlay
             loop
             muted
             playsInline
-            poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            style={{ mixBlendMode: "screen", opacity: 0.18, zIndex: 0 }}
+            className="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
           >
-            <source src="/_videos/v1/f0c78f536d5f21a047fb7792723a36f9d647daa1.mp4" type="video/mp4" />
+            <source
+              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4"
+              type="video/mp4"
+            />
           </video>
 
-          {/* Subtle radial glow */}
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full pointer-events-none"
-            style={{
-              background: "radial-gradient(ellipse at center, rgba(99,102,241,0.15) 0%, transparent 70%)",
-              zIndex: 1,
-            }}
-          />
+          {/* Blur glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[984px] h-[527px] bg-gray-950/90 blur-[82px] pointer-events-none z-10 rounded-full" />
 
           {/* Content */}
-          <div className="relative flex flex-col items-center text-center px-4 max-w-4xl mx-auto" style={{ zIndex: 2 }}>
+          <div className="relative z-20 flex flex-col items-center text-center px-4 max-w-5xl mx-auto">
 
-            {/* Pill */}
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-10 text-xs font-medium tracking-widest uppercase text-white/60"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              Used by founders. Loved by devs.
-            </div>
-
-            {/* H1 */}
-            <h1
-              className="font-bold tracking-tight leading-[1.05] mb-8"
-              style={{
-                fontFamily: "'General Sans', var(--font-general), system-ui, sans-serif",
-                fontSize: "clamp(3rem, 9vw, 7rem)",
-              }}
-            >
-              <GradientText
-                colors={['#5227FF', '#FF9FFC', '#B497CF', '#00c0f3']}
-                animationSpeed={10}
-                className="block"
-              >
-                Your Vision
-              </GradientText>
-              <GradientText
-                colors={['#00c0f3', '#a855f7', '#5227FF', '#fcd34d']}
-                animationSpeed={12}
-                direction="horizontal"
-                className="block"
-              >
-                Our Digital Reality.
-              </GradientText>
+            {/* H1 gigante */}
+            <h1 className="font-sans tracking-tight text-6xl md:text-8xl lg:text-[140px] font-medium leading-none mb-6">
+              <span className="text-white">X-Value </span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-l from-[#6366f1] via-[#a855f7] to-[#fcd34d]">
+                IA
+              </span>
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-white/65 text-lg md:text-xl max-w-2xl mb-12 leading-relaxed font-light">
-              We turn bold ideas into modern designs that don&apos;t just look
-              amazing — they grow your business fast.
+            {/* Subtítulo */}
+            <p className="text-white/80 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-light">
+              Aumenta tu rentabilidad y reduce gastos operativos. Un software de
+              inteligencia artificial a medida que trabaja 24/7, capaz de
+              automatizar tareas y asumir la carga operativa de hasta 5 empleados.
             </p>
 
             {/* CTA */}
             <button
               onClick={() => openModal("Agente x-value IA")}
-              className="bg-white text-black font-semibold rounded-full px-10 py-4 text-base hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 px-9 py-4 rounded-2xl font-semibold text-base text-black transition-all hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(0,192,243,0.4)]"
+              style={{ background: "#00c0f3" }}
             >
-              Book a 15-min call
+              Agendar Consultoría Gratuita →
             </button>
           </div>
 
-          {/* Logo cloud */}
-          <div className="relative w-full mt-20" style={{ zIndex: 2 }}>
+          {/* Logo marquee */}
+          <div className="relative w-full mt-20 z-20">
             <p className="text-center text-xs tracking-[0.3em] uppercase text-white/30 mb-6">
-              Integrations
+              Integra con las herramientas que ya usas
             </p>
             <LogoMarquee />
           </div>

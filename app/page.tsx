@@ -1,24 +1,31 @@
 import Link from 'next/link';
+import { Brain, ShoppingCart, Lock } from 'lucide-react';
+
+const CARDS = [
+  {
+    icon: Brain,
+    title: 'Software de IA a Medida',
+    text: 'Para empresas que quieren desarrollar su propio software de IA.',
+    href: '/plataforma',
+    accent: '#00c0f3',
+  },
+  {
+    icon: ShoppingCart,
+    title: 'Embudos E-commerce',
+    text: 'Aumenta tu facturación mínimo 5x mediante embudos de venta optimizados para tu tienda.',
+    href: '/plataforma',
+    accent: '#a855f7',
+  },
+  {
+    icon: Lock,
+    title: 'Portal de Clientes',
+    text: 'Si ya eres parte de X-Value, accede con tus credenciales para ver tus rendimientos.',
+    href: '/login',
+    accent: '#fcd34d',
+  },
+];
 
 export default function Home() {
-  const cards = [
-    {
-      title: 'Software de IA a Medida',
-      text: 'Para empresas que quieren desarrollar su propio software de IA.',
-      href: '/plataforma',
-    },
-    {
-      title: 'Embudos E-commerce',
-      text: 'Aumenta tu facturación mínimo 5x mediante embudos creados con IA.',
-      href: '/plataforma',
-    },
-    {
-      title: 'Portal de Clientes',
-      text: 'Si ya eres parte de X-Value, accede con tus credenciales para ver tus rendimientos.',
-      href: '/login',
-    },
-  ];
-
   return (
     <main className="min-h-screen relative overflow-hidden bg-transparent">
       {/* Video de fondo */}
@@ -57,38 +64,51 @@ export default function Home() {
           desde la arquitectura hasta el deployment.
         </p>
 
-        {/* 3 Tarjetas glassmorphism */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-4xl">
-          {cards.map((card) => (
-            <Link
-              key={card.href + card.title}
-              href={card.href}
-              className="group relative flex flex-col gap-3 rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-1"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-              }}
-            >
-              {/* Hover glow */}
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                style={{ boxShadow: '0 0 30px rgba(0,192,243,0.12)' }} />
+        {/* 3 Tarjetas premium */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
+          {CARDS.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group relative flex flex-col justify-between h-full rounded-3xl p-8 text-left transition-all duration-300 bg-white/[0.02] backdrop-blur-xl border border-white/10 hover:border-white/20 hover:bg-white/[0.04] hover:-translate-y-1"
+              >
+                {/* Accent top border */}
+                <div
+                  className="absolute top-0 left-6 right-6 h-px rounded-full opacity-60"
+                  style={{ background: `linear-gradient(to right, transparent, ${card.accent}, transparent)` }}
+                />
 
-              <h3 className="text-white font-semibold text-base leading-snug">
-                {card.title}
-              </h3>
-              <p className="text-white/55 text-sm leading-relaxed">
-                {card.text}
-              </p>
-              <span className="mt-auto text-xs font-medium text-[#00c0f3] flex items-center gap-1">
-                Ingresar
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-            </Link>
-          ))}
+                {/* Icon */}
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-5 shrink-0"
+                  style={{ background: `${card.accent}18`, border: `1px solid ${card.accent}30` }}
+                >
+                  <Icon size={18} style={{ color: card.accent }} />
+                </div>
+
+                <div className="flex flex-col gap-2 flex-1">
+                  <h3 className="text-white font-semibold text-base leading-snug">
+                    {card.title}
+                  </h3>
+                  <p className="text-white/50 text-sm leading-relaxed">
+                    {card.text}
+                  </p>
+                </div>
+
+                <span
+                  className="mt-6 text-xs font-semibold flex items-center gap-1.5 transition-gap duration-200"
+                  style={{ color: card.accent }}
+                >
+                  Ingresar
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              </Link>
+            );
+          })}
         </div>
 
       </div>
