@@ -7,7 +7,7 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
-import PlataformaGate from "@/components/ui/PlataformaGate";
+import GradientText from "@/components/ui/GradientText";
 import { InlineWidget } from "react-calendly";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
@@ -148,25 +148,95 @@ export default function PlataformaPage() {
           </div>
         </nav>
 
-        {/* ── ZONA 1: HERO ──────────────────────────────────────────────── */}
-        <PlataformaGate />
+        {/* ── ZONA 1: HERO — Your Vision Our Digital Reality ────────────── */}
+        <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#010101] pt-20 pb-16">
 
-        {/* ── Integration logos — CSS infinite marquee ──────────────────── */}
-        <div className="relative py-10 overflow-hidden bg-[#05010d]">
-          <div className="mb-6 text-center">
-            <span
-              className="text-xs tracking-[0.25em] uppercase"
+          {/* Background video — mix-blend-screen so it blends over dark bg */}
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ mixBlendMode: "screen", opacity: 0.18, zIndex: 0 }}
+          >
+            <source src="/_videos/v1/f0c78f536d5f21a047fb7792723a36f9d647daa1.mp4" type="video/mp4" />
+          </video>
+
+          {/* Subtle radial glow */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse at center, rgba(99,102,241,0.15) 0%, transparent 70%)",
+              zIndex: 1,
+            }}
+          />
+
+          {/* Content */}
+          <div className="relative flex flex-col items-center text-center px-4 max-w-4xl mx-auto" style={{ zIndex: 2 }}>
+
+            {/* Pill */}
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-10 text-xs font-medium tracking-widest uppercase text-white/60"
               style={{
-                color: "rgba(255,255,255,0.6)",
-                fontFamily: "var(--font-barlow), var(--font-general), system-ui, sans-serif",
-                letterSpacing: "0.3em",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              Integra con las herramientas que ya usas
-            </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              Used by founders. Loved by devs.
+            </div>
+
+            {/* H1 */}
+            <h1
+              className="font-bold tracking-tight leading-[1.05] mb-8"
+              style={{
+                fontFamily: "'General Sans', var(--font-general), system-ui, sans-serif",
+                fontSize: "clamp(3rem, 9vw, 7rem)",
+              }}
+            >
+              <GradientText
+                colors={['#5227FF', '#FF9FFC', '#B497CF', '#00c0f3']}
+                animationSpeed={10}
+                className="block"
+              >
+                Your Vision
+              </GradientText>
+              <GradientText
+                colors={['#00c0f3', '#a855f7', '#5227FF', '#fcd34d']}
+                animationSpeed={12}
+                direction="horizontal"
+                className="block"
+              >
+                Our Digital Reality.
+              </GradientText>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-white/65 text-lg md:text-xl max-w-2xl mb-12 leading-relaxed font-light">
+              We turn bold ideas into modern designs that don&apos;t just look
+              amazing — they grow your business fast.
+            </p>
+
+            {/* CTA */}
+            <button
+              onClick={() => openModal("Agente x-value IA")}
+              className="bg-white text-black font-semibold rounded-full px-10 py-4 text-base hover:bg-gray-100 transition-colors"
+            >
+              Book a 15-min call
+            </button>
           </div>
-          <LogoMarquee />
-        </div>
+
+          {/* Logo cloud */}
+          <div className="relative w-full mt-20" style={{ zIndex: 2 }}>
+            <p className="text-center text-xs tracking-[0.3em] uppercase text-white/30 mb-6">
+              Integrations
+            </p>
+            <LogoMarquee />
+          </div>
+        </section>
 
         {/* ── ZONA 2: RESULTADO ACUMULADO — negro sólido puro ──────────── */}
         <section className="relative bg-black w-full z-10">
