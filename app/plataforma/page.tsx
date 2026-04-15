@@ -7,7 +7,6 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
-import VideoBackground from "@/components/VideoBackground";
 import { InlineWidget } from "react-calendly";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
@@ -20,7 +19,6 @@ import VoiceAgentDemo from "@/components/VoiceAgentDemo";
 import InstagramMedia from "@/components/InstagramMedia";
 import ConversionModal from "@/components/ConversionModal";
 import CalendlyCTA from "@/components/CalendlyCTA";
-import Marquee from "react-fast-marquee";
 
 // ─── Integration logo images (from /public) ───────────────────────────────────
 
@@ -85,6 +83,20 @@ export default function PlataformaPage() {
 
   return (
     <>
+      {/* Fixed full-page video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed top-0 left-0 w-full h-full object-cover -z-10"
+      >
+        <source
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4"
+          type="video/mp4"
+        />
+      </video>
+
       {/* Particle background */}
       <AntigravityBg />
 
@@ -123,13 +135,7 @@ export default function PlataformaPage() {
         </nav>
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section
-          className="pt-36 pb-0 px-6 relative overflow-hidden"
-          style={{ background: "hsl(260 87% 3%)" }}
-        >
-          {/* Video background with rAF fade loop */}
-          <VideoBackground />
-
+        <section className="pt-36 pb-0 px-6 relative overflow-hidden bg-transparent">
           {/* Cinematic overlay — keeps text readable */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -258,8 +264,8 @@ export default function PlataformaPage() {
             </motion.div>
           </div>
 
-          {/* ── Integration logos grid ────────────────────────────────────── */}
-          <div className="relative pb-10" style={{ zIndex: 2 }}>
+          {/* ── Integration logos — CSS infinite marquee ──────────────────── */}
+          <div className="relative pb-10 overflow-hidden" style={{ zIndex: 2 }}>
             <div className="mb-6 text-center">
               <span
                 className="text-xs tracking-[0.25em] uppercase"
@@ -272,33 +278,33 @@ export default function PlataformaPage() {
               </span>
             </div>
 
-            <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hubspot.jpg"       alt="Hubspot"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/KLAVIYO.png"       alt="Klaviyo"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/KOMMO.jpg"         alt="Kommo"      className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/MONDAY.COM.png"    alt="Monday"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/NOTION.png"        alt="Notion"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Pipedrive.png"     alt="Pipedrive"  className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Salesforce.png"    alt="Salesforce" className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/segment-1.svg"     alt="Segment"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Shopify-Logo.png"  alt="Shopify"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Slack.png"         alt="Slack"      className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Stripe.png"        alt="Stripe"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/Twilio.png"        alt="Twilio"     className="h-10 md:h-14 w-auto object-contain rounded-md" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/ZENDESK.png"       alt="Zendesk"    className="h-10 md:h-14 w-auto object-contain rounded-md" />
+            {/* Fade masks */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none"
+              style={{ background: "linear-gradient(to right, rgba(3,1,18,0.9), transparent)", zIndex: 3 }}
+            />
+            <div
+              className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
+              style={{ background: "linear-gradient(to left, rgba(3,1,18,0.9), transparent)", zIndex: 3 }}
+            />
+
+            {/* Duplicated logos for seamless loop */}
+            <div className="marquee-track">
+              {[...INTEGRATION_LOGOS, ...INTEGRATION_LOGOS].map((logo, i) => (
+                <div
+                  key={`${logo.alt}-${i}`}
+                  className="liquid-glass mx-3 px-5 py-3 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ minWidth: "80px" }}
+                >
+                  <Image
+                    src={logo.src}
+                    alt={logo.alt}
+                    width={100}
+                    height={26}
+                    style={{ height: "26px", width: "auto", maxWidth: "100px", objectFit: "contain" }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </section>
