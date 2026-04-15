@@ -7,6 +7,7 @@ import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
 
 import AntigravityBg from "@/components/ui/AntigravityBg";
 import SplitText from "@/components/ui/SplitText";
+import MagicRings from "@/components/ui/MagicRings";
 import { InlineWidget } from "react-calendly";
 import RevenueBanner from "@/components/RevenueBanner";
 import ClientsMarquee from "@/components/ClientsMarquee";
@@ -136,14 +137,27 @@ export default function PlataformaPage() {
                 priority
               />
             </div>
-            <button
-              onClick={() => openModal("Agente x-value IA")}
-              className="flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-lg transition-all text-black"
-              style={{ background: "#00c0f3" }}
+            {/* Pill — Book a Free Consultation */}
+            <div
+              className="flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur-md"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
             >
-              Agendar Consultoría
-              <ArrowRight size={13} />
-            </button>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00c0f3] to-[#a855f7] flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                X
+              </div>
+              <span className="text-white/70 text-xs hidden sm:block">Book a Free Consultation</span>
+              <button
+                onClick={() => openModal("Agente x-value IA")}
+                className="flex items-center gap-1 text-[11px] font-bold px-3 py-1.5 rounded-full text-black transition-all hover:scale-105"
+                style={{ background: "#00c0f3" }}
+              >
+                Agendar
+                <ArrowRight size={11} />
+              </button>
+            </div>
           </div>
         </nav>
 
@@ -171,19 +185,31 @@ export default function PlataformaPage() {
           {/* Content */}
           <div className="relative z-20 flex flex-col items-center text-center px-4 max-w-5xl mx-auto">
 
-            {/* H1 gigante */}
-            <h1 className="font-sans tracking-tight text-6xl md:text-8xl lg:text-[140px] font-medium leading-none mb-6">
+            {/* H1 gigante — animated entrance */}
+            <motion.h1
+              className="font-sans tracking-tight text-6xl md:text-8xl lg:text-[140px] font-medium leading-none mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
               <span className="text-white">X-Value </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-l from-[#6366f1] via-[#a855f7] to-[#fcd34d]">
+              <motion.span
+                className="inline-block bg-clip-text text-transparent bg-gradient-to-l from-[#6366f1] via-[#a855f7] to-[#fcd34d]"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                style={{ backgroundSize: "200% auto" }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+              >
                 IA
-              </span>
-            </h1>
+              </motion.span>
+            </motion.h1>
 
             {/* Subtítulo */}
             <p className="text-white/80 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-light">
               Aumenta tu rentabilidad y reduce gastos operativos. Un software de
               inteligencia artificial a medida que trabaja 24/7, capaz de
-              automatizar tareas y asumir la carga operativa de hasta 5 empleados.
+              realizar tareas y asumir la carga operativa de hasta 5 empleados.
             </p>
 
             {/* CTA */}
@@ -205,10 +231,9 @@ export default function PlataformaPage() {
           </div>
         </section>
 
-        {/* ── ZONA 2: RESULTADO ACUMULADO — negro sólido puro ──────────── */}
+        {/* ── ZONA 2: RESULTADO ACUMULADO ──────────────────────────────── */}
         <section className="relative bg-black w-full z-10">
           <RevenueBanner />
-          <ClientsMarquee />
         </section>
 
         {/* ── ZONA 3: SERVICIOS Y RESTO — glassmorphic con luces de neón ── */}
@@ -241,8 +266,11 @@ export default function PlataformaPage() {
         <FeatureCards />
 
         {/* ── AGENTS GRID ─────────────────────────────────────────────────── */}
-        <section className="py-20 px-6">
-          <div className="max-w-6xl mx-auto">
+        <section className="py-20 px-6 relative">
+          {/* MagicRings — decorative 3D rings flanking the content */}
+          <MagicRings color="#00c0f3" colorTwo="#a855f7" />
+
+          <div className="max-w-6xl mx-auto relative" style={{ zIndex: 1 }}>
             <motion.div
               className="flex items-center gap-3 mb-4"
               initial={{ opacity: 0, x: -50 }}
@@ -265,7 +293,7 @@ export default function PlataformaPage() {
               Elige tu <span style={{ color: "#D1FF48" }}>agente</span>
             </motion.h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:grid-cols-4">
               {AGENTS.map((agent, i) => {
                 const Icon = agent.icon;
                 return (
@@ -320,6 +348,46 @@ export default function PlataformaPage() {
                   </motion.div>
                 );
               })}
+
+              {/* Próximamente — locked card */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-10% 0px" }}
+                transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="rounded-2xl p-6 flex flex-col gap-5 relative overflow-hidden opacity-50"
+                style={{
+                  background: "rgba(255,255,255,0.025)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                {/* Lock badge */}
+                <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase"
+                  style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  Available Soon
+                </div>
+
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="11" width="18" height="11" rx="2" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+                  </svg>
+                </div>
+
+                <div>
+                  <p className="text-xs font-medium tracking-wider uppercase mb-0.5 text-white/25">Próximamente</p>
+                  <h3 className="text-xl text-white/40 leading-tight"
+                    style={{ fontFamily: "var(--font-bebas), 'Bebas Neue', Impact, sans-serif" }}>
+                    Nuevo Agente
+                  </h3>
+                </div>
+
+                <p className="text-sm text-white/25 leading-relaxed flex-1">
+                  Estamos desarrollando un nuevo agente especializado. Pronto disponible para tu empresa.
+                </p>
+              </motion.div>
             </div>
           </div>
         </section>

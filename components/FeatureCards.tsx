@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useState, useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ElectricBorder from "./ui/ElectricBorder";
 import {
   TrendingUp,
@@ -74,6 +75,9 @@ const CARDS = [
   },
 ];
 
+const CARDS_PER_PAGE = 3;
+const TOTAL_PAGES = Math.ceil(CARDS.length / CARDS_PER_PAGE);
+
 type CardData = (typeof CARDS)[0] & { accent: string };
 
 function Card({ card }: { card: CardData }) {
@@ -107,7 +111,6 @@ function Card({ card }: { card: CardData }) {
           </p>
         </div>
 
-        {/* Hover accent glow */}
         <div
           className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none"
           style={{ background: card.accent }}
@@ -120,18 +123,25 @@ function Card({ card }: { card: CardData }) {
 export default function FeatureCards() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const [page, setPage] = useState(0);
 
   const cardsWithAccent: CardData[] = CARDS.map((card, i) => ({
     ...card,
     accent: ACCENTS[i % ACCENTS.length],
   }));
 
-  // Duplicate for seamless loop
-  const loopCards = [...cardsWithAccent, ...cardsWithAccent];
+  const visibleCards = cardsWithAccent.slice(
+    page * CARDS_PER_PAGE,
+    (page + 1) * CARDS_PER_PAGE
+  );
+
+  const prev = () => setPage((p) => Math.max(0, p - 1));
+  const next = () => setPage((p) => Math.min(TOTAL_PAGES - 1, p + 1));
 
   return (
     <section ref={ref} className="py-20 bg-transparent">
       <div className="max-w-6xl mx-auto px-6">
+        {/* Header */}
         <motion.div
           className="flex items-center gap-3 mb-4"
           initial={{ opacity: 0, x: -50 }}
@@ -142,46 +152,86 @@ export default function FeatureCards() {
           <span className="text-xs tracking-[0.3em] text-white/50 uppercase">Servicios</span>
         </motion.div>
 
-        <motion.h2
-          className="text-4xl md:text-5xl text-white mb-10"
-          style={{ fontFamily: "'Geist', var(--font-barlow), var(--font-inter), system-ui, sans-serif", fontWeight: 700 }}
-          initial={{ opacity: 0, x: -50 }}
-          animate={inView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 }}
-        >
-          Lo que <span style={{ color: "#00c0f3" }}>hacemos</span>
-        </motion.h2>
-      </div>
+        <div className="flex items-end justify-between mb-10">
+          <motion.h2
+            className="text-4xl md:text-5xl text-white"
+            style={{ fontFamily: "'Geist', var(--font-barlow), var(--font-inter), system-ui, sans-serif", fontWeight: 700 }}
+            initial={{ opacity: 0, x: -50 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 }}
+          >
+            Lo que <span style={{ color: "#00c0f3" }}>hacemos</span>
+          </motion.h2>
 
-      {/* ── Horizontal infinite marquee ── */}
-      <motion.div
-        className="relative overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={inView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 0.15 }}
-      >
-        {/* Fade masks */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-16 md:w-24 z-10 pointer-events-none"
-          style={{ background: "linear-gradient(to right, rgba(0,0,0,0.85), transparent)" }}
-        />
-        <div
-          className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-10 pointer-events-none"
-          style={{ background: "linear-gradient(to left, rgba(0,0,0,0.85), transparent)" }}
-        />
-
-        <div className="marquee-track py-2" style={{ animationDuration: "55s" }}>
-          {loopCards.map((card, i) => (
-            <div
-              key={`${card.title}-${i}`}
-              className="shrink-0 mx-3"
-              style={{ width: "280px" }}
+          {/* Arrow controls */}
+          <motion.div
+            className="flex gap-2"
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <button
+              onClick={prev}
+              disabled={page === 0}
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-25"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+              aria-label="Anterior"
             >
-              <Card card={card} />
-            </div>
+              <ChevronLeft size={18} className="text-white" />
+            </button>
+            <button
+              onClick={next}
+              disabled={page === TOTAL_PAGES - 1}
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-25"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+              aria-label="Siguiente"
+            >
+              <ChevronRight size={18} className="text-white" />
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Cards grid */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={page}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {visibleCards.map((card) => (
+              <div key={card.title} className="min-h-[260px]">
+                <Card card={card} />
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Pagination dots */}
+        <div className="flex gap-2 justify-center mt-8">
+          {Array.from({ length: TOTAL_PAGES }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i)}
+              aria-label={`Página ${i + 1}`}
+              className="transition-all duration-300 rounded-full"
+              style={{
+                width: i === page ? "24px" : "8px",
+                height: "8px",
+                background: i === page ? "#00c0f3" : "rgba(255,255,255,0.2)",
+              }}
+            />
           ))}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

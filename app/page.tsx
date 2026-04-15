@@ -12,7 +12,7 @@ const CARDS = [
   {
     icon: ShoppingCart,
     title: 'Embudos E-commerce',
-    text: 'Aumenta tu facturación mínimo 5x mediante embudos de venta optimizados para tu tienda.',
+    text: 'Aumenta tu facturación mínimo 5x mediante embudos de venta ejecutados dentro de tu tienda.',
     href: '/plataforma',
     accent: '#a855f7',
   },
