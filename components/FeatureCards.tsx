@@ -78,7 +78,7 @@ type CardData = (typeof CARDS)[0] & { accent: string };
 function Card({ card }: { card: CardData }) {
   const Icon = card.icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   return (
-    <div className="group relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full hover:scale-[1.015] backdrop-blur-sm bg-white/5 border border-white/10">
+    <div className="group relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full hover:scale-[1.015] bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
       <span
         className="absolute top-4 right-5 text-xs font-mono tracking-widest"
         style={{ color: "rgba(255,255,255,0.15)" }}

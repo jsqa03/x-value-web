@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
@@ -20,9 +20,9 @@ import InstagramMedia from "@/components/InstagramMedia";
 import ConversionModal from "@/components/ConversionModal";
 import CalendlyCTA from "@/components/CalendlyCTA";
 
-// ─── Integration logo images (from /public) ───────────────────────────────────
+// ─── Integration logos ────────────────────────────────────────────────────────
 
-const INTEGRATION_LOGOS = [
+const LOGOS = [
   { src: "/hubspot.jpg",        alt: "HubSpot"     },
   { src: "/KLAVIYO.png",        alt: "Klaviyo"     },
   { src: "/KOMMO.jpg",          alt: "Kommo"       },
@@ -37,6 +37,43 @@ const INTEGRATION_LOGOS = [
   { src: "/Twilio.png",         alt: "Twilio"      },
   { src: "/ZENDESK.png",        alt: "Zendesk"     },
 ];
+
+// ─── InfiniteSlider — framer-motion horizontal marquee ────────────────────────
+
+function InfiniteSlider() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [trackWidth, setTrackWidth] = useState(0);
+
+  useEffect(() => {
+    if (trackRef.current) {
+      setTrackWidth(trackRef.current.scrollWidth / 2);
+    }
+  }, []);
+
+  return (
+    <div className="overflow-hidden">
+      <motion.div
+        ref={trackRef}
+        className="flex items-center gap-10"
+        style={{ width: "max-content" }}
+        animate={trackWidth ? { x: [0, -trackWidth] } : {}}
+        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+      >
+        {/* eslint-disable @next/next/no-img-element */}
+        {[...LOGOS, ...LOGOS].map((logo, i) => (
+          <div key={`${logo.alt}-${i}`} className="shrink-0">
+            <img
+              src={logo.src}
+              alt={logo.alt}
+              className="h-10 md:h-12 w-auto object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity"
+            />
+          </div>
+        ))}
+        {/* eslint-enable @next/next/no-img-element */}
+      </motion.div>
+    </div>
+  );
+}
 
 // ─── Agent data ───────────────────────────────────────────────────────────────
 
@@ -120,21 +157,16 @@ export default function PlataformaPage() {
           </div>
         </nav>
 
-        {/* ── HERO ────────────────────────────────────────────────────────── */}
+        {/* ── ZONA 1: HERO ──────────────────────────────────────────────── */}
         <section className="pt-36 pb-0 px-6 relative overflow-hidden" style={{ background: "hsl(260 87% 3%)" }}>
-          {/* Indigo ambient glow over global video */}
+          {/* Indigo ambient glow */}
           <div
             className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none z-[1]"
-            style={{
-              background: "radial-gradient(ellipse at center top, rgba(99,102,241,0.22) 0%, transparent 65%)",
-            }}
+            style={{ background: "radial-gradient(ellipse at center top, rgba(99,102,241,0.28) 0%, transparent 65%)" }}
           />
 
-          {/* Bottom fade — softens section boundary */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-[1]"
-            style={{ background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.6))" }}
-          />
+          {/* Dark gradient overlay — text contrast + transition to black Zone 2 */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black pointer-events-none z-[1]" />
 
           {/* Content */}
           <div className="max-w-6xl mx-auto relative pb-20 z-[2]">
@@ -268,102 +300,41 @@ export default function PlataformaPage() {
               </span>
             </div>
 
-            {/* Fade masks */}
-            <div
-              className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to right, rgba(0,0,0,0.85), transparent)" }}
-            />
-            <div
-              className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-              style={{ background: "linear-gradient(to left, rgba(0,0,0,0.85), transparent)" }}
-            />
-
-            {/* Duplicated logos for seamless loop — plain <img> for reliable rendering */}
-            <div className="marquee-track">
-              {/* eslint-disable @next/next/no-img-element */}
-              {[
-                { src: "/hubspot.jpg",      alt: "HubSpot"    },
-                { src: "/KLAVIYO.png",      alt: "Klaviyo"    },
-                { src: "/KOMMO.jpg",        alt: "Kommo"      },
-                { src: "/MONDAY.COM.png",   alt: "Monday.com" },
-                { src: "/NOTION.png",       alt: "Notion"     },
-                { src: "/Pipedrive.png",    alt: "Pipedrive"  },
-                { src: "/Salesforce.png",   alt: "Salesforce" },
-                { src: "/segment-1.svg",    alt: "Segment"    },
-                { src: "/Shopify-Logo.png", alt: "Shopify"    },
-                { src: "/Slack.png",        alt: "Slack"      },
-                { src: "/Stripe.png",       alt: "Stripe"     },
-                { src: "/Twilio.png",       alt: "Twilio"     },
-                { src: "/ZENDESK.png",      alt: "Zendesk"    },
-                // duplicate for seamless loop
-                { src: "/hubspot.jpg",      alt: "HubSpot-2"    },
-                { src: "/KLAVIYO.png",      alt: "Klaviyo-2"    },
-                { src: "/KOMMO.jpg",        alt: "Kommo-2"      },
-                { src: "/MONDAY.COM.png",   alt: "Monday.com-2" },
-                { src: "/NOTION.png",       alt: "Notion-2"     },
-                { src: "/Pipedrive.png",    alt: "Pipedrive-2"  },
-                { src: "/Salesforce.png",   alt: "Salesforce-2" },
-                { src: "/segment-1.svg",    alt: "Segment-2"    },
-                { src: "/Shopify-Logo.png", alt: "Shopify-2"    },
-                { src: "/Slack.png",        alt: "Slack-2"      },
-                { src: "/Stripe.png",       alt: "Stripe-2"     },
-                { src: "/Twilio.png",       alt: "Twilio-2"     },
-                { src: "/ZENDESK.png",      alt: "Zendesk-2"    },
-              ].map((logo) => (
-                <div
-                  key={logo.alt}
-                  className="liquid-glass mx-3 px-5 py-3 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ minWidth: "80px" }}
-                >
-                  <img
-                    src={logo.src}
-                    alt={logo.alt}
-                    style={{
-                      height: "28px",
-                      width: "auto",
-                      maxWidth: "110px",
-                      objectFit: "contain",
-                      filter: "grayscale(100%) brightness(200%)",
-                    }}
-                  />
-                </div>
-              ))}
-              {/* eslint-enable @next/next/no-img-element */}
-            </div>
+            <InfiniteSlider />
           </div>
         </section>
 
-        {/* ── RESULTADO ACUMULADO — pure black ──────────────────────────── */}
-        <div className="bg-black">
+        {/* ── ZONA 2: RESULTADO ACUMULADO — negro sólido puro ──────────── */}
+        <section className="relative bg-black w-full z-10">
           <RevenueBanner />
           <ClientsMarquee />
-        </div>
+        </section>
 
-        {/* ── LOWER SECTIONS — glassmorphic with ambient blobs ──────────── */}
-        <div className="relative" style={{ background: "rgba(0,0,0,0.95)" }}>
-          {/* Floating ambient blobs — ultra-subtle, 30–52s loops */}
+        {/* ── ZONA 3: SERVICIOS Y RESTO — glassmorphic con luces de neón ── */}
+        <section className="relative w-full bg-[#010101] overflow-hidden">
+          {/* Neon diffuse lights — slow float, non-distracting */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
             <motion.div
-              className="absolute w-[700px] h-[700px] rounded-full blur-[120px]"
-              style={{ background: "#00c0f3", opacity: 0.05, top: "5%", left: "10%" }}
-              animate={{ x: [0, 100, -60, 0], y: [0, -80, 50, 0] }}
-              transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+              className="absolute w-[700px] h-[700px] rounded-full blur-[120px] opacity-20"
+              style={{ background: "radial-gradient(circle, #FA93FA, #C967E8, #983AD6)", top: "5%", left: "-5%" }}
+              animate={{ x: [0, 130, -70, 0], y: [0, -100, 60, 0] }}
+              transition={{ duration: 48, repeat: Infinity, ease: "linear" }}
             />
             <motion.div
-              className="absolute w-[600px] h-[600px] rounded-full blur-[120px]"
-              style={{ background: "#A78BFA", opacity: 0.05, top: "40%", right: "5%" }}
-              animate={{ x: [0, -80, 60, 0], y: [0, 90, -40, 0] }}
-              transition={{ duration: 38, repeat: Infinity, ease: "linear", delay: 8 }}
+              className="absolute w-[600px] h-[600px] rounded-full blur-[120px] opacity-20"
+              style={{ background: "radial-gradient(circle, #FA93FA, #C967E8, #983AD6)", top: "45%", right: "-5%" }}
+              animate={{ x: [0, -110, 80, 0], y: [0, 90, -50, 0] }}
+              transition={{ duration: 40, repeat: Infinity, ease: "linear", delay: 10 }}
             />
             <motion.div
-              className="absolute w-[500px] h-[500px] rounded-full blur-[120px]"
-              style={{ background: "#00c0f3", opacity: 0.04, bottom: "15%", left: "45%" }}
-              animate={{ x: [0, 70, -50, 0], y: [0, -50, 70, 0] }}
-              transition={{ duration: 52, repeat: Infinity, ease: "linear", delay: 15 }}
+              className="absolute w-[500px] h-[500px] rounded-full blur-[120px] opacity-20"
+              style={{ background: "radial-gradient(circle, #C967E8, #983AD6, #FA93FA)", bottom: "10%", left: "35%" }}
+              animate={{ x: [0, 80, -60, 0], y: [0, -60, 80, 0] }}
+              transition={{ duration: 55, repeat: Infinity, ease: "linear", delay: 20 }}
             />
           </div>
 
-          {/* Content above the blobs */}
+          {/* Content — above blobs */}
           <div style={{ position: "relative", zIndex: 1 }}>
 
         <FeatureCards />
@@ -550,7 +521,7 @@ export default function PlataformaPage() {
           </div>
         </footer>
           </div>{/* end content-above-blobs */}
-        </div>{/* end glassmorphic zone */}
+        </section>{/* end ZONA 3 */}
       </div>{/* end outer zIndex wrapper */}
 
       {/* ── Modals / CTAs (outside scroll container) ─────────────────────── */}

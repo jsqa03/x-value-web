@@ -9,22 +9,28 @@ export default function GatePage() {
 
   return (
     <main className="min-h-screen relative overflow-hidden bg-transparent">
-      {/* Page-specific cinematic overlay — heavier bottom-left */}
+      {/* Purple/indigo ambient — matches "Power AI" morado aesthetic */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(135deg, rgba(3,1,18,0.6) 0%, rgba(3,1,18,0.1) 55%, transparent 100%)",
+          background: "radial-gradient(ellipse at 40% 35%, rgba(99,62,201,0.35) 0%, transparent 60%)",
           zIndex: 1,
         }}
       />
 
-      {/* Ambient cyan glow */}
+      {/* Cinematic overlay — heavier bottom-left, lighter top-right */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 65% 30%, rgba(0,192,243,0.07) 0%, transparent 55%)",
+          background: "linear-gradient(135deg, rgba(3,1,18,0.75) 0%, rgba(3,1,18,0.2) 55%, transparent 100%)",
           zIndex: 1,
         }}
+      />
+
+      {/* Gradient overlay — dark at bottom for text readability */}
+      <div
+        className="fixed inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-black/40 to-black/80"
+        style={{ zIndex: 1 }}
       />
 
       {/* ── Content layer ─────────────────────────────────────────── */}
