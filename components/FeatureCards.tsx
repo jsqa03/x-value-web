@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import ElectricBorder from "./ui/ElectricBorder";
 import {
   TrendingUp,
   Settings,
@@ -78,39 +79,41 @@ type CardData = (typeof CARDS)[0] & { accent: string };
 function Card({ card }: { card: CardData }) {
   const Icon = card.icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   return (
-    <div className="group relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full hover:scale-[1.015] bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-      <span
-        className="absolute top-4 right-5 text-xs font-mono tracking-widest"
-        style={{ color: "rgba(255,255,255,0.15)" }}
-      >
-        {card.label}
-      </span>
-
-      <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-        style={{ background: `${card.accent}18`, border: `1px solid ${card.accent}30` }}
-      >
-        <Icon size={16} style={{ color: card.accent }} />
-      </div>
-
-      <div className="flex flex-col gap-2 flex-1">
-        <h3
-          className="text-lg text-white leading-tight font-semibold"
-          style={{ fontFamily: "'Geist', var(--font-barlow), var(--font-inter), system-ui, sans-serif" }}
+    <ElectricBorder color={card.accent} speed={1} chaos={0.1} borderRadius={16} className="h-full">
+      <div className="group relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden cursor-default transition-all duration-300 h-full bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <span
+          className="absolute top-4 right-5 text-xs font-mono tracking-widest"
+          style={{ color: "rgba(255,255,255,0.15)" }}
         >
-          {card.title}
-        </h3>
-        <p className="text-sm leading-relaxed flex-1 text-white/75">
-          {card.desc}
-        </p>
-      </div>
+          {card.label}
+        </span>
 
-      {/* Hover accent glow */}
-      <div
-        className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none"
-        style={{ background: card.accent }}
-      />
-    </div>
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: `${card.accent}18`, border: `1px solid ${card.accent}30` }}
+        >
+          <Icon size={16} style={{ color: card.accent }} />
+        </div>
+
+        <div className="flex flex-col gap-2 flex-1">
+          <h3
+            className="text-lg text-white leading-tight font-semibold"
+            style={{ fontFamily: "'Geist', var(--font-barlow), var(--font-inter), system-ui, sans-serif" }}
+          >
+            {card.title}
+          </h3>
+          <p className="text-sm leading-relaxed flex-1 text-white/75">
+            {card.desc}
+          </p>
+        </div>
+
+        {/* Hover accent glow */}
+        <div
+          className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none"
+          style={{ background: card.accent }}
+        />
+      </div>
+    </ElectricBorder>
   );
 }
 

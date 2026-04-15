@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -19,9 +20,15 @@ export default function Home() {
         <p className="text-white/80 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-light">
           No vendemos automatizaciones genéricas. Desarrollamos el software de inteligencia artificial de tu empresa desde la arquitectura hasta el deployment.
         </p>
-        <Link href="/plataforma" className="bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full px-8 py-4 text-lg hover:bg-white/20 transition-colors">
-          Agendar Consultoría Gratuita
-        </Link>
+        <div className="flex gap-4 items-center justify-center flex-wrap">
+          <Link href="/plataforma" className="bg-[#00c0f3] text-black font-semibold rounded-full px-8 py-4 text-lg hover:bg-[#00a0cc] transition-colors flex items-center gap-2">
+            Agendar Consultoría Gratuita <ArrowRight size={20} />
+          </Link>
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 text-white/60 rounded-full px-6 py-4 text-sm flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+            Demo disponible en 72 horas
+          </div>
+        </div>
       </div>
     </main>
   );

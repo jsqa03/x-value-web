@@ -24,19 +24,19 @@ import CalendlyCTA from "@/components/CalendlyCTA";
 // ─── Integration logos ────────────────────────────────────────────────────────
 
 const LOGOS = [
-  { src: "/hubspot.jpg",        alt: "HubSpot"     },
-  { src: "/KLAVIYO.png",        alt: "Klaviyo"     },
-  { src: "/KOMMO.jpg",          alt: "Kommo"       },
-  { src: "/MONDAY.COM.png",     alt: "Monday.com"  },
-  { src: "/NOTION.png",         alt: "Notion"      },
-  { src: "/Pipedrive.png",      alt: "Pipedrive"   },
-  { src: "/Salesforce.png",     alt: "Salesforce"  },
-  { src: "/segment-1.svg",      alt: "Segment"     },
-  { src: "/Shopify-Logo.png",   alt: "Shopify"     },
-  { src: "/Slack.png",          alt: "Slack"       },
-  { src: "/Stripe.png",         alt: "Stripe"      },
-  { src: "/Twilio.png",         alt: "Twilio"      },
-  { src: "/ZENDESK.png",        alt: "Zendesk"     },
+  { src: "hubspot.jpg",        alt: "HubSpot"     },
+  { src: "KLAVIYO.png",        alt: "Klaviyo"     },
+  { src: "KOMMO.jpg",          alt: "Kommo"       },
+  { src: "MONDAY.COM.png",     alt: "Monday.com"  },
+  { src: "NOTION.png",         alt: "Notion"      },
+  { src: "Pipedrive.png",      alt: "Pipedrive"   },
+  { src: "Salesforce.png",     alt: "Salesforce"  },
+  { src: "segment-1.svg",      alt: "Segment"     },
+  { src: "Shopify-Logo.png",   alt: "Shopify"     },
+  { src: "Slack.png",          alt: "Slack"       },
+  { src: "Stripe.png",         alt: "Stripe"      },
+  { src: "Twilio.png",         alt: "Twilio"      },
+  { src: "ZENDESK.png",        alt: "Zendesk"     },
 ];
 
 // ─── LogoMarquee — CSS marquee ────────────────────────────────────────────────
@@ -54,9 +54,9 @@ function LogoMarquee() {
         {loopLogos.map((logo, i) => (
           <div key={`${logo.alt}-${i}`} className="shrink-0 mx-5">
             <img
-              src={logo.src}
+              src={`/${logo.src}`}
               alt={logo.alt}
-              className="h-10 md:h-12 w-auto object-contain"
+              className="h-10 md:h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
             />
           </div>
         ))}
