@@ -9,28 +9,29 @@ export default function GatePage() {
 
   return (
     <main className="min-h-screen relative overflow-hidden bg-transparent">
-      {/* Purple/indigo ambient — matches "Power AI" morado aesthetic */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse at 40% 35%, rgba(99,62,201,0.35) 0%, transparent 60%)",
-          zIndex: 1,
-        }}
-      />
+      {/* Inline video — overrides global layout video */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+      >
+        <source
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4"
+          type="video/mp4"
+        />
+      </video>
 
-      {/* Cinematic overlay — heavier bottom-left, lighter top-right */}
+      {/* Central blur glow */}
       <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(135deg, rgba(3,1,18,0.75) 0%, rgba(3,1,18,0.2) 55%, transparent 100%)",
-          zIndex: 1,
-        }}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[984px] h-[527px] opacity-90 bg-gray-950 blur-[82px] pointer-events-none z-[1]"
       />
 
       {/* Gradient overlay — dark at bottom for text readability */}
       <div
-        className="fixed inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-black/40 to-black/80"
-        style={{ zIndex: 1 }}
+        className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-black/40 to-black/80 z-[2]"
       />
 
       {/* ── Content layer ─────────────────────────────────────────── */}
@@ -71,32 +72,29 @@ export default function GatePage() {
         <div className="flex-1 flex items-end justify-center md:justify-start pt-16 pb-12 px-6 md:px-12">
           <div className="w-full max-w-[440px] flex flex-col items-center md:items-start text-center md:text-left">
 
-            {/* Headline with ShinyText sweep */}
+            {/* Headline */}
             <motion.h1
-              className="text-5xl md:text-6xl leading-[1.05] mb-4"
+              className="leading-tight mb-4"
               style={{
-                fontFamily: "'Geist', var(--font-bebas), sans-serif",
+                fontFamily: "'General Sans', var(--font-general), system-ui, sans-serif",
                 fontWeight: 700,
-                letterSpacing: "-0.025em",
+                fontSize: "clamp(5rem, 13vw, 13.75rem)",
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             >
-              <motion.span
-                className="inline-block"
+              <span
                 style={{
-                  background: "linear-gradient(120deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.55) 30%, #fff 50%, rgba(255,255,255,0.55) 70%, rgba(255,255,255,0.55) 100%)",
-                  backgroundSize: "250% auto",
+                  background: "linear-gradient(to left, #6366f1, #a855f7, #fcd34d)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                 }}
-                animate={{ backgroundPosition: ["100% 0%", "-100% 0%"] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
               >
-                Tu IA, construida
-              </motion.span>
+                Tu IA,
+              </span>{" "}
+              <span style={{ color: "#ffffff" }}>construida</span>
               <br />
               <span style={{ color: "#00c0f3" }}>desde cero.</span>
             </motion.h1>
@@ -114,9 +112,9 @@ export default function GatePage() {
               procesos.
             </motion.p>
 
-            {/* CTA card → liquid-glass-strong */}
+            {/* CTA card → liquid-glass */}
             <motion.div
-              className="liquid-glass-strong rounded-2xl p-6 cursor-pointer w-full"
+              className="liquid-glass rounded-2xl p-6 cursor-pointer w-full"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}

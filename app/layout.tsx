@@ -79,9 +79,6 @@ export default function RootLayout({
           />
         </video>
 
-        {/* ── Global dark overlay — guarantees white text contrast ── */}
-        <div className="fixed inset-0 bg-black/60 -z-10 pointer-events-none" />
-
         {children}
       </body>
     </html>

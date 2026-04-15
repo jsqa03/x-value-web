@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { ArrowRight, TrendingUp, RefreshCw, Bell, Play } from "lucide-react";
@@ -38,39 +38,29 @@ const LOGOS = [
   { src: "/ZENDESK.png",        alt: "Zendesk"     },
 ];
 
-// ─── InfiniteSlider — framer-motion horizontal marquee ────────────────────────
+// ─── LogoMarquee — CSS marquee ────────────────────────────────────────────────
 
-function InfiniteSlider() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [trackWidth, setTrackWidth] = useState(0);
-
-  useEffect(() => {
-    if (trackRef.current) {
-      setTrackWidth(trackRef.current.scrollWidth / 2);
-    }
-  }, []);
-
+function LogoMarquee() {
+  const loopLogos = [...LOGOS, ...LOGOS];
   return (
-    <div className="overflow-hidden">
-      <motion.div
-        ref={trackRef}
-        className="flex items-center gap-10"
-        style={{ width: "max-content" }}
-        animate={trackWidth ? { x: [0, -trackWidth] } : {}}
-        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-      >
-        {/* eslint-disable @next/next/no-img-element */}
-        {[...LOGOS, ...LOGOS].map((logo, i) => (
-          <div key={`${logo.alt}-${i}`} className="shrink-0">
+    <div className="overflow-hidden relative">
+      <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(to right, rgba(0,0,0,0.85), transparent)" }} />
+      <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(to left, rgba(0,0,0,0.85), transparent)" }} />
+      {/* eslint-disable @next/next/no-img-element */}
+      <div className="marquee-track items-center gap-10 py-2">
+        {loopLogos.map((logo, i) => (
+          <div key={`${logo.alt}-${i}`} className="shrink-0 mx-5">
             <img
               src={logo.src}
               alt={logo.alt}
-              className="h-10 md:h-12 w-auto object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity"
+              className="h-10 md:h-12 w-auto object-contain"
             />
           </div>
         ))}
-        {/* eslint-enable @next/next/no-img-element */}
-      </motion.div>
+      </div>
+      {/* eslint-enable @next/next/no-img-element */}
     </div>
   );
 }
@@ -300,7 +290,7 @@ export default function PlataformaPage() {
               </span>
             </div>
 
-            <InfiniteSlider />
+            <LogoMarquee />
           </div>
         </section>
 
