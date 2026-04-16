@@ -353,6 +353,64 @@ export async function deleteUserAccount(targetUserId: string): Promise<ActionRes
   return { success: true };
 }
 
+// ─── toggleCalendarAccess ─────────────────────────────────────────────────────
+export async function toggleCalendarAccess(
+  targetUserId: string,
+  newValue: boolean
+): Promise<ActionResult> {
+  const caller = await getCallerProfile();
+  if (!caller || caller.role !== "admin") {
+    return { error: "Solo el Admin puede modificar el acceso al calendario." };
+  }
+
+  const ac = getAdminClient();
+  const { error } = await ac
+    .from("profiles")
+    .update({ can_view_calendar: newValue })
+    .eq("id", targetUserId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
+// ─── scheduleMeeting ──────────────────────────────────────────────────────────
+export async function scheduleMeeting(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role as string | undefined;
+  if (!role || !["admin", "manager", "sales"].includes(role)) {
+    return { error: "Sin permisos para agendar citas." };
+  }
+
+  const company_name = (formData.get("company_name") as string | null)?.trim() ?? "";
+  const meeting_date = (formData.get("meeting_date") as string | null) ?? "";
+  const description  = (formData.get("description")  as string | null)?.trim()  || null;
+
+  if (!company_name) return { error: "El nombre de la empresa es obligatorio." };
+  if (!meeting_date) return { error: "La fecha y hora son obligatorias." };
+
+  const ac = getAdminClient();
+  const { error } = await ac.from("meetings").insert({
+    company_name,
+    meeting_date,
+    description,
+    created_by: user.id,
+  });
+
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
 // ─── resetPassword ────────────────────────────────────────────────────────────
 export async function resetPassword(
   targetUserId: string,

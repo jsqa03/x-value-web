@@ -5,6 +5,7 @@ import ManagerView from "@/components/dashboard/ManagerView";
 import SalesView from "@/components/dashboard/SalesView";
 import ClientView from "@/components/dashboard/ClientView";
 import EditProfile from "@/components/dashboard/EditProfile";
+import CalendarView from "@/components/dashboard/CalendarView";
 import RealtimeLeadsListener from "@/components/dashboard/RealtimeLeadsListener";
 import DashboardLayoutClient from "@/components/dashboard/DashboardLayoutClient";
 import type { Profile, Role } from "@/components/dashboard/types";
@@ -34,7 +35,7 @@ export default async function DashboardPage(props: {
 
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("role, full_name, avatar_url, email, university, birth_date, country, nationality, client_type")
+    .select("role, full_name, avatar_url, email, university, birth_date, country, nationality, client_type, can_view_calendar")
     .eq("id", user.id)
     .single();
 
@@ -49,6 +50,8 @@ export default async function DashboardPage(props: {
   const section    = searchParams.section ?? DEFAULT_SECTION[effectiveRole];
   const currentView = simulated ?? profile.role;
 
+  const canSeeCalendar = profile.role === "admin" || profile.can_view_calendar === true;
+
   return (
     <DashboardLayoutClient
       sidebarProps={{
@@ -57,6 +60,7 @@ export default async function DashboardPage(props: {
         activeSection: section,
         isAdmin: profile.role === "admin",
         currentView,
+        canViewCalendar: profile.can_view_calendar ?? false,
       }}
     >
       {/* Realtime leads sync — invisible, active for all roles */}
@@ -65,6 +69,8 @@ export default async function DashboardPage(props: {
       <div className="max-w-5xl mx-auto px-4 sm:px-8 py-10">
         {section === "profile" ? (
           <EditProfile profile={profile} userId={user.id} />
+        ) : section === "calendar" && canSeeCalendar ? (
+          <CalendarView />
         ) : (
           <>
             {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} />}

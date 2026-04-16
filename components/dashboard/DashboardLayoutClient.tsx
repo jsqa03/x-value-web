@@ -13,6 +13,7 @@ interface Props {
     activeSection: string;
     isAdmin: boolean;
     currentView: string;
+    canViewCalendar?: boolean;
   };
   children: React.ReactNode;
 }

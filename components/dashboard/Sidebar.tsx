@@ -15,11 +15,12 @@ interface NavItem { id: string; label: string; icon: LucideIcon }
 
 const NAV: Record<Role, NavItem[]> = {
   admin: [
-    { id: "overview", label: "Resumen",          icon: LayoutDashboard },
-    { id: "crm",      label: "CRM · Leads",       icon: Database        },
-    { id: "team",     label: "Gestión de Equipo", icon: Users           },
-    { id: "settings", label: "Configuración",     icon: Settings        },
-    { id: "profile",  label: "Mi Perfil",         icon: User            },
+    { id: "overview",  label: "Resumen",          icon: LayoutDashboard },
+    { id: "crm",       label: "CRM · Leads",       icon: Database        },
+    { id: "team",      label: "Gestión de Equipo", icon: Users           },
+    { id: "calendar",  label: "Calendario",        icon: Calendar        },
+    { id: "settings",  label: "Configuración",     icon: Settings        },
+    { id: "profile",   label: "Mi Perfil",         icon: User            },
   ],
   manager: [
     { id: "overview", label: "Resumen",          icon: LayoutDashboard },
@@ -52,13 +53,14 @@ interface Props {
   activeSection: string;
   isAdmin: boolean;
   currentView: string;
+  canViewCalendar?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 export default function Sidebar({
   profile, effectiveRole, activeSection, isAdmin, currentView,
-  isOpen = false, onClose,
+  canViewCalendar = false, isOpen = false, onClose,
 }: Props) {
   const router    = useRouter();
   const navItems  = NAV[effectiveRole];
@@ -145,6 +147,30 @@ export default function Sidebar({
             </button>
           );
         })}
+
+        {/* Calendario — visible para no-admin con permiso explícito */}
+        {!isAdmin && canViewCalendar && (() => {
+          const active = activeSection === "calendar";
+          return (
+            <button
+              onClick={() => navigate("calendar")}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left w-full transition-colors relative group ${
+                active
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50"
+              }`}
+            >
+              {active && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-orange-500" />
+              )}
+              <Calendar
+                size={15}
+                className={active ? "text-orange-400" : "text-zinc-600 group-hover:text-zinc-400 transition-colors"}
+              />
+              Calendario
+            </button>
+          );
+        })()}
       </nav>
 
       {/* Bottom */}

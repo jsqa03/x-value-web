@@ -2,6 +2,7 @@ import { TrendingUp, Target, Flame, Calendar, Clock } from "lucide-react";
 import StatCard from "./StatCard";
 import TaskManager from "./TaskManager";
 import CreateLeadModal from "./CreateLeadModal";
+import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import type { Profile } from "./types";
 
 const MY_STATS = [
@@ -25,7 +26,10 @@ function LeadsSection({ name }: { name: string }) {
           <p className="text-zinc-500 text-sm mb-1">¡Buenas, {name}!</p>
           <h1 className="text-2xl font-semibold text-white tracking-tight">Mis Leads</h1>
         </div>
-        <CreateLeadModal callerRole="sales" />
+        <div className="flex items-center gap-3 flex-wrap">
+          <ScheduleMeetingModal />
+          <CreateLeadModal callerRole="sales" />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

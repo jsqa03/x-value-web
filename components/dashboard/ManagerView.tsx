@@ -10,6 +10,7 @@ import CreateUserModal from "./CreateUserModal";
 import CreateLeadModal from "./CreateLeadModal";
 import TeamManagementTable from "./TeamManagementTable";
 import SearchBar from "./SearchBar";
+import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
@@ -224,6 +225,7 @@ function CrmSection() {
           <h1 className="text-2xl font-semibold text-white tracking-tight">Leads del Equipo</h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <ScheduleMeetingModal />
           <CreateLeadModal callerRole="manager" />
           <SearchBar placeholder="Buscar por nombre o email…" />
         </div>

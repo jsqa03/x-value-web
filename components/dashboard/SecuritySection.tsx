@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { ShieldCheck, AlertCircle, Inbox } from "lucide-react";
 import ResetPasswordModal from "./ResetPasswordModal";
 import DeleteUserButton from "./DeleteUserButton";
+import CalendarToggle from "./CalendarToggle";
 import { ROLE_META, computeAge } from "./types";
 import type { Role } from "./types";
 
@@ -16,6 +17,7 @@ interface UserRow {
   university: string | null;
   country: string | null;
   created_at: string;
+  can_view_calendar: boolean;
 }
 
 // Null-safe date formatter
@@ -39,7 +41,7 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
 
   const { data: users, error } = await adminClient
     .from("profiles")
-    .select("id, email, full_name, role, avatar_url, birth_date, university, country, created_at")
+    .select("id, email, full_name, role, avatar_url, birth_date, university, country, created_at, can_view_calendar")
     .order("role")
     .order("full_name");
 
@@ -88,7 +90,7 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-zinc-800/60 text-left">
-                    {["Usuario", "Rol", "Edad / País", "Creado", "Acciones"].map((col) => (
+                    {["Usuario", "Rol", "Edad / País", "Creado", "Calendario", "Acciones"].map((col) => (
                       <th key={col} className="px-5 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
                         {col}
                       </th>
@@ -139,6 +141,21 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                         </td>
                         <td className="px-5 py-3">
                           <span className="text-zinc-600 text-xs">{formatDate(u.created_at)}</span>
+                        </td>
+                        <td className="px-5 py-3">
+                          {u.role !== "admin" ? (
+                            <div className="flex items-center gap-2">
+                              <CalendarToggle
+                                userId={u.id}
+                                initialValue={u.can_view_calendar ?? false}
+                              />
+                              <span className="text-zinc-600 text-[11px]">
+                                {u.can_view_calendar ? "Activo" : "Off"}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-zinc-700 text-xs">—</span>
+                          )}
                         </td>
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
@@ -195,19 +212,27 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                         {meta.label}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
                       <p className="text-zinc-600 text-xs">
                         {age !== null ? `${age} años` : ""}
                         {u.country ? ` · ${u.country}` : ""}
                       </p>
-                      {!isSelf && (
-                        <div className="flex gap-1.5">
-                          <ResetPasswordModal userId={u.id} userName={u.full_name ?? u.email} />
-                          {u.role !== "admin" && (
-                            <DeleteUserButton userId={u.id} userName={u.full_name ?? u.email} />
-                          )}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {u.role !== "admin" && (
+                          <div className="flex items-center gap-1.5">
+                            <CalendarToggle userId={u.id} initialValue={u.can_view_calendar ?? false} />
+                            <span className="text-zinc-600 text-[10px]">Cal.</span>
+                          </div>
+                        )}
+                        {!isSelf && (
+                          <div className="flex gap-1.5">
+                            <ResetPasswordModal userId={u.id} userName={u.full_name ?? u.email} />
+                            {u.role !== "admin" && (
+                              <DeleteUserButton userId={u.id} userName={u.full_name ?? u.email} />
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

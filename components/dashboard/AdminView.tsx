@@ -11,6 +11,7 @@ import CreateLeadModal from "./CreateLeadModal";
 import TeamManagementTable from "./TeamManagementTable";
 import SecuritySection from "./SecuritySection";
 import SearchBar from "./SearchBar";
+import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
@@ -175,9 +176,12 @@ async function AdminTeamCard() {
 function OverviewSection({ name }: { name: string }) {
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <p className="text-zinc-500 text-sm mb-1">Bienvenido de vuelta, {name}</p>
-        <h1 className="text-2xl font-semibold text-white tracking-tight">Resumen de la Empresa</h1>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-zinc-500 text-sm mb-1">Bienvenido de vuelta, {name}</p>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">Resumen de la Empresa</h1>
+        </div>
+        <ScheduleMeetingModal />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -216,6 +220,7 @@ function CrmSection() {
           <h1 className="text-2xl font-semibold text-white tracking-tight">Leads Capturados</h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <ScheduleMeetingModal />
           <CreateLeadModal callerRole="admin" />
           <SearchBar placeholder="Buscar por nombre o email…" />
         </div>

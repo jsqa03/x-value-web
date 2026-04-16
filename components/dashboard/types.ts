@@ -1,15 +1,16 @@
 export type Role = "admin" | "manager" | "sales" | "client";
 
 export interface Profile {
-  role:         Role;
-  full_name:    string | null;
-  avatar_url?:  string | null;
-  email?:       string | null;
-  university?:  string | null;
-  birth_date?:  string | null;
-  country?:     string | null;
-  nationality?: string | null;
-  client_type?: string | null;
+  role:               Role;
+  full_name:          string | null;
+  avatar_url?:        string | null;
+  email?:             string | null;
+  university?:        string | null;
+  birth_date?:        string | null;
+  country?:           string | null;
+  nationality?:       string | null;
+  client_type?:       string | null;
+  can_view_calendar?: boolean;
 }
 
 /** Returns age from a birth_date string (YYYY-MM-DD), or null if unavailable. */
