@@ -1,9 +1,10 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
-import { Users, CheckCircle2, Clock, AlertCircle, Inbox } from "lucide-react";
+import { Users, Clock, Inbox } from "lucide-react";
+import EditLeadModal from "./EditLeadModal";
 import type { Role } from "./types";
 
-interface Lead {
+export interface Lead {
   id: string;
   name: string;
   email: string;
@@ -12,6 +13,8 @@ interface Lead {
   niche: string | null;
   service_type: string | null;
   pipeline_status: string | null;
+  lost_reason: string | null;
+  notes: string | null;
   is_verified: boolean;
   assigned_to: string | null;
   created_at: string;
@@ -62,7 +65,7 @@ function getAdminClient() {
   );
 }
 
-const LEAD_COLS = "id, name, email, whatsapp, company_info, niche, service_type, pipeline_status, is_verified, assigned_to, created_at";
+const LEAD_COLS = "id, name, email, whatsapp, company_info, niche, service_type, pipeline_status, lost_reason, notes, is_verified, assigned_to, created_at";
 
 export default async function LeadsTable() {
   const supabase = await createClient();
@@ -131,8 +134,8 @@ export default async function LeadsTable() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-zinc-800/60">
-              {["Nombre / Empresa", "Contacto", "Servicio", "Estado", "Asignado a", "Fecha"].map((col) => (
-                <th key={col} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
+              {["Nombre / Empresa", "Contacto", "Servicio", "Estado", "Asignado a", "Fecha", ""].map((col, i) => (
+                <th key={i} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
                   {col}
                 </th>
               ))}
@@ -140,7 +143,7 @@ export default async function LeadsTable() {
           </thead>
           <tbody className="divide-y divide-zinc-800/60">
             {leads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-zinc-900/40 transition-colors">
+              <tr key={lead.id} className="hover:bg-zinc-900/40 transition-colors group">
                 {/* Name / Company */}
                 <td className="px-4 py-3.5">
                   <div className="flex items-center gap-2.5">
@@ -178,6 +181,10 @@ export default async function LeadsTable() {
                 <td className="px-4 py-3.5">
                   <span className="text-zinc-600 text-xs">{formatDate(lead.created_at)}</span>
                 </td>
+                {/* Actions */}
+                <td className="px-4 py-3.5">
+                  <EditLeadModal lead={lead} callerRole={role} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -198,7 +205,10 @@ export default async function LeadsTable() {
                   {lead.company_info && <p className="text-zinc-600 text-xs">{lead.company_info}</p>}
                 </div>
               </div>
-              <PipelineBadge status={lead.pipeline_status} />
+              <div className="flex items-center gap-2 shrink-0">
+                <PipelineBadge status={lead.pipeline_status} />
+                <EditLeadModal lead={lead} callerRole={role} />
+              </div>
             </div>
             <div className="flex items-center justify-between gap-2">
               <div>

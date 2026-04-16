@@ -1,8 +1,10 @@
-import { TrendingUp, Target, Flame, Calendar, Clock } from "lucide-react";
+import { Suspense } from "react";
+import { TrendingUp, Target, Flame, Calendar, Inbox } from "lucide-react";
 import StatCard from "./StatCard";
 import TaskManager from "./TaskManager";
 import CreateLeadModal from "./CreateLeadModal";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
+import LeadsTable from "./LeadsTable";
 import type { Profile } from "./types";
 
 const MY_STATS = [
@@ -12,11 +14,25 @@ const MY_STATS = [
   { label: "Leads calientes",      value: "—", sub: "para contactar",  accent: "#ef4444", icon: Flame      },
 ];
 
-const MY_LEADS = [
-  { name: "Empresa X", status: "Calificado", value: "—", next: "Demo",        color: "#f59e0b" },
-  { name: "Empresa Y", status: "Propuesta",  value: "—", next: "Seguimiento", color: "#38bdf8" },
-  { name: "Empresa Z", status: "Negociando", value: "—", next: "Cierre",      color: "#a78bfa" },
-];
+function SkeletonTable() {
+  return (
+    <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden animate-pulse">
+      <div className="px-5 py-4 border-b border-zinc-800 flex items-center gap-2">
+        <div className="w-4 h-4 rounded bg-zinc-800" />
+        <div className="w-32 h-3.5 rounded bg-zinc-800" />
+      </div>
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="flex items-center gap-4 px-5 py-3.5 border-b border-zinc-800/50 last:border-0">
+          <div className="w-7 h-7 rounded-full bg-zinc-800 shrink-0" />
+          <div className="flex-1 flex gap-4">
+            <div className="w-28 h-3 rounded bg-zinc-800" />
+            <div className="w-40 h-3 rounded bg-zinc-800/60" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function LeadsSection({ name }: { name: string }) {
   return (
@@ -36,53 +52,9 @@ function LeadsSection({ name }: { name: string }) {
         {MY_STATS.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
-      <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-zinc-800">
-          <Target size={14} className="text-zinc-500" />
-          <p className="text-zinc-300 text-sm font-medium">Mis leads activos</p>
-        </div>
-
-        {MY_LEADS.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-12 text-center">
-            <Target size={26} className="text-zinc-700" />
-            <p className="text-zinc-500 text-sm">No hay leads activos aún</p>
-            <p className="text-zinc-700 text-xs">Los leads asignados a ti aparecerán aquí</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-zinc-800/60">
-            {MY_LEADS.map((lead) => (
-              <div
-                key={lead.name}
-                className="flex items-center justify-between px-5 py-4 hover:bg-zinc-900/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{ background: `${lead.color}12`, color: lead.color, border: `1px solid ${lead.color}22` }}
-                  >
-                    {lead.name[0]}
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-medium">{lead.name}</p>
-                    <span
-                      className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{ background: `${lead.color}12`, color: lead.color, border: `1px solid ${lead.color}22` }}
-                    >
-                      {lead.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-white font-semibold text-sm">{lead.value}</p>
-                  <p className="text-xs text-zinc-600 mt-0.5 flex items-center gap-1 justify-end">
-                    <Clock size={10} /> {lead.next}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <Suspense fallback={<SkeletonTable />}>
+        <LeadsTable />
+      </Suspense>
     </div>
   );
 }

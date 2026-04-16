@@ -434,6 +434,45 @@ export async function resetPassword(
   return { success: true };
 }
 
+// ─── updateLead ───────────────────────────────────────────────────────────────
+export async function updateLead(formData: FormData): Promise<ActionResult> {
+  const staff = await getStaffUser();
+  if (!staff) return { error: "No autenticado o sin permisos." };
+
+  const id             = (formData.get("id")             as string | null) ?? "";
+  const name           = (formData.get("name")           as string | null)?.trim() ?? "";
+  const email          = (formData.get("email")          as string | null)?.trim() ?? "";
+  const whatsapp       = (formData.get("whatsapp")       as string | null)?.trim()  || null;
+  const company_info   = (formData.get("company_info")   as string | null)?.trim()  || null;
+  const niche          = (formData.get("niche")          as string | null)?.trim()  || null;
+  const service_type   = (formData.get("service_type")   as string | null)           || null;
+  const pipeline_status = (formData.get("pipeline_status") as string | null)         || "En seguimiento";
+  const lost_reason    = (formData.get("lost_reason")    as string | null)?.trim()  || null;
+  const notes          = (formData.get("notes")          as string | null)?.trim()  || null;
+  const assigned_to    = (formData.get("assigned_to")    as string | null)           || null;
+
+  if (!id)    return { error: "ID de lead requerido." };
+  if (!name)  return { error: "El nombre del lead es obligatorio." };
+  if (!email) return { error: "El email del lead es obligatorio." };
+
+  const ac = getAdminClient();
+
+  // Sales cannot change assignment — all other fields remain editable
+  const payload: Record<string, unknown> = {
+    name, email, whatsapp, company_info, niche,
+    service_type, pipeline_status, lost_reason, notes,
+  };
+  if (staff.role !== "sales") {
+    payload.assigned_to = assigned_to;
+  }
+
+  const { error } = await ac.from("leads").update(payload).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
 // ─── updateProfile ────────────────────────────────────────────────────────────
 export async function updateProfile(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
