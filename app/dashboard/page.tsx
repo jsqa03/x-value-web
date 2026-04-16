@@ -5,6 +5,7 @@ import ManagerView from "@/components/dashboard/ManagerView";
 import SalesView from "@/components/dashboard/SalesView";
 import ClientView from "@/components/dashboard/ClientView";
 import EditProfile from "@/components/dashboard/EditProfile";
+import RealtimeLeadsListener from "@/components/dashboard/RealtimeLeadsListener";
 import Sidebar from "@/components/dashboard/Sidebar";
 import type { Profile, Role } from "@/components/dashboard/types";
 
@@ -70,6 +71,9 @@ export default async function DashboardPage(props: {
         isAdmin={profile.role === "admin"}
         currentView={currentView}
       />
+
+      {/* Realtime leads sync — invisible, active for all roles */}
+      <RealtimeLeadsListener />
 
       {/* ── Main content ────────────────────────────────────────────────── */}
       <main className="flex-1 min-h-screen overflow-y-auto" style={{ marginLeft: "240px" }}>

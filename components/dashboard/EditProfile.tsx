@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateProfile } from "@/app/actions/admin";
 import AvatarUpload from "./AvatarUpload";
-import { COUNTRIES, computeAge } from "./types";
+import { COUNTRIES } from "./types";
 import type { Profile } from "./types";
 import {
   User, GraduationCap, Globe, CalendarDays,
@@ -20,7 +20,11 @@ const inputBase: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.1)",
 };
 
-function Field({ label, icon: Icon, children }: { label: string; icon: React.ElementType; children: React.ReactNode }) {
+function Field({ label, icon: Icon, children }: {
+  label: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-zinc-500 text-xs font-semibold tracking-wide uppercase flex items-center gap-1.5">
@@ -32,22 +36,38 @@ function Field({ label, icon: Icon, children }: { label: string; icon: React.Ele
   );
 }
 
-export default function EditProfile({ profile, userId }: Props) {
-  const [result, setResult]       = useState<{ success?: boolean; error?: string } | null>(null);
-  const [isPending, startTransition] = useTransition();
+/** Compute age in real time from a YYYY-MM-DD string. */
+function calcAge(dateStr: string): number | null {
+  if (!dateStr) return null;
+  const birth = new Date(dateStr);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age >= 0 ? age : null;
+}
 
-  // Local controlled state for select fields
+export default function EditProfile({ profile, userId }: Props) {
+  const [result, setResult]           = useState<{ success?: boolean; error?: string } | null>(null);
+  const [isPending, startTransition]  = useTransition();
+
+  // Controlled fields (need live computation or select state)
+  const [birthDate, setBirthDate]     = useState(profile.birth_date ?? "");
   const [country, setCountry]         = useState(profile.country ?? "");
   const [nationality, setNationality] = useState(profile.nationality ?? "");
 
-  const age = computeAge(profile.birth_date);
+  // Age is derived directly from the controlled birthDate — no useEffect needed
+  const age = calcAge(birthDate);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setResult(null);
     const fd = new FormData(e.currentTarget);
+    // Controlled selects aren't in the form DOM, inject them manually
     if (country)     fd.set("country",     country);
     if (nationality) fd.set("nationality", nationality);
+    if (birthDate)   fd.set("birth_date",  birthDate);
 
     startTransition(async () => {
       const res = await updateProfile(fd);
@@ -78,9 +98,7 @@ export default function EditProfile({ profile, userId }: Props) {
           accentColor="#a855f7"
           size="lg"
         />
-        <p className="text-zinc-600 text-xs text-center">
-          Máximo 50 MB · JPG, PNG, WebP
-        </p>
+        <p className="text-zinc-600 text-xs text-center">Máximo 50 MB · JPG, PNG, WebP</p>
       </div>
 
       {/* Profile form */}
@@ -92,7 +110,7 @@ export default function EditProfile({ profile, userId }: Props) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-          {/* Email — read only */}
+          {/* Email — display only */}
           <Field label="Email" icon={User}>
             <div
               className="rounded-xl px-4 py-2.5 text-sm text-zinc-500 select-all"
@@ -105,7 +123,11 @@ export default function EditProfile({ profile, userId }: Props) {
           {/* Full name */}
           <Field label="Nombre completo" icon={User}>
             <div className="relative">
-              <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.22)" }} />
+              <User
+                size={14}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: "rgba(255,255,255,0.22)" }}
+              />
               <input
                 name="full_name"
                 type="text"
@@ -122,7 +144,11 @@ export default function EditProfile({ profile, userId }: Props) {
           {/* University */}
           <Field label="Universidad / Institución" icon={GraduationCap}>
             <div className="relative">
-              <GraduationCap size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.22)" }} />
+              <GraduationCap
+                size={14}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: "rgba(255,255,255,0.22)" }}
+              />
               <input
                 name="university"
                 type="text"
@@ -136,17 +162,23 @@ export default function EditProfile({ profile, userId }: Props) {
             </div>
           </Field>
 
-          {/* Birth date + age */}
+          {/* Birth date (controlled) + live age display */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Fecha de nacimiento" icon={CalendarDays}>
               <div className="relative">
-                <CalendarDays size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.22)" }} />
+                <CalendarDays
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ color: "rgba(255,255,255,0.22)" }}
+                />
                 <input
-                  name="birth_date"
                   type="date"
-                  defaultValue={profile.birth_date ?? ""}
+                  value={birthDate}
                   min="1930-01-01"
-                  max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split("T")[0]}
+                  max={new Date(new Date().setFullYear(new Date().getFullYear() - 16))
+                    .toISOString()
+                    .split("T")[0]}
+                  onChange={(e) => setBirthDate(e.target.value)}
                   className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all"
                   style={inputBase}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.4)")}
@@ -156,8 +188,12 @@ export default function EditProfile({ profile, userId }: Props) {
             </Field>
             <Field label="Edad" icon={CalendarDays}>
               <div
-                className="rounded-xl px-4 py-2.5 text-sm select-none"
-                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", color: age !== null ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)" }}
+                className="rounded-xl px-4 py-2.5 text-sm select-none transition-colors"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  color: age !== null ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.2)",
+                }}
               >
                 {age !== null ? `${age} años` : "—"}
               </div>
@@ -168,33 +204,51 @@ export default function EditProfile({ profile, userId }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <Field label="País" icon={Globe}>
               <div className="relative">
-                <Globe size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: "rgba(255,255,255,0.22)" }} />
+                <Globe
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+                  style={{ color: "rgba(255,255,255,0.22)" }}
+                />
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all appearance-none"
-                  style={{ ...inputBase, color: country ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)" }}
+                  className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-all appearance-none"
+                  style={{
+                    ...inputBase,
+                    color: country ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+                  }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.4)")}
                   onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                 >
                   <option value="" style={{ background: "#0a0812" }}>— Seleccionar —</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>)}
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>
+                  ))}
                 </select>
               </div>
             </Field>
             <Field label="Nacionalidad" icon={Globe}>
               <div className="relative">
-                <Globe size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: "rgba(255,255,255,0.22)" }} />
+                <Globe
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+                  style={{ color: "rgba(255,255,255,0.22)" }}
+                />
                 <select
                   value={nationality}
                   onChange={(e) => setNationality(e.target.value)}
-                  className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all appearance-none"
-                  style={{ ...inputBase, color: nationality ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)" }}
+                  className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition-all appearance-none"
+                  style={{
+                    ...inputBase,
+                    color: nationality ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+                  }}
                   onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.4)")}
                   onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                 >
                   <option value="" style={{ background: "#0a0812" }}>— Seleccionar —</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>)}
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>
+                  ))}
                 </select>
               </div>
             </Field>
@@ -202,13 +256,19 @@ export default function EditProfile({ profile, userId }: Props) {
 
           {/* Feedback */}
           {result?.error && (
-            <div className="flex items-start gap-2 rounded-xl px-3 py-2.5" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <div
+              className="flex items-start gap-2 rounded-xl px-3 py-2.5"
+              style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}
+            >
               <AlertCircle size={14} className="text-red-400 mt-0.5 shrink-0" />
               <p className="text-red-400 text-xs leading-relaxed">{result.error}</p>
             </div>
           )}
           {result?.success && (
-            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)" }}>
+            <div
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+              style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)" }}
+            >
               <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
               <p className="text-emerald-400 text-xs">Perfil actualizado correctamente.</p>
             </div>
@@ -217,7 +277,7 @@ export default function EditProfile({ profile, userId }: Props) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-black transition-all disabled:opacity-60 hover:opacity-90 mt-1"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-60 hover:opacity-90 mt-1"
             style={{ background: "#a855f7", color: "#fff" }}
           >
             {isPending ? (

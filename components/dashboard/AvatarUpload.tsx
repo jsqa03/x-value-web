@@ -48,12 +48,27 @@ export default function AvatarUpload({
     setError(null);
 
     const supabase = createClient();
-    const ext  = file.name.split(".").pop() ?? "jpg";
-    const path = `${userId}/avatar.${ext}`;
 
+    // Path MUST start with userId/ to satisfy the RLS policy
+    // (Supabase default policy: folder name = auth.uid())
+    const timestamp = Date.now();
+    const path = `${userId}/${timestamp}-${file.name}`;
+
+    // Delete any previous avatar files in the user's folder first
+    const { data: existing } = await supabase.storage
+      .from("avatars")
+      .list(userId);
+
+    if (existing && existing.length > 0) {
+      await supabase.storage
+        .from("avatars")
+        .remove(existing.map((f) => `${userId}/${f.name}`));
+    }
+
+    // Upload new file
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, file, { upsert: true, contentType: file.type });
+      .upload(path, file, { upsert: false, contentType: file.type });
 
     if (uploadError) {
       setError(uploadError.message);
@@ -65,7 +80,8 @@ export default function AvatarUpload({
       .from("avatars")
       .getPublicUrl(path);
 
-    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    // Cache-bust so the browser fetches the new image
+    const publicUrl = `${urlData.publicUrl}?t=${timestamp}`;
 
     const { error: updateError } = await supabase
       .from("profiles")
@@ -82,7 +98,6 @@ export default function AvatarUpload({
     setLoading(false);
     if (fileRef.current) fileRef.current.value = "";
 
-    // Force server re-render so sidebar avatar and other RSCs update
     await revalidateDashboard();
   }
 
@@ -91,15 +106,16 @@ export default function AvatarUpload({
     setError(null);
     const supabase = createClient();
 
-    await supabase.storage
+    // List and remove all files in the user's folder
+    const { data: existing } = await supabase.storage
       .from("avatars")
-      .remove([
-        `${userId}/avatar.jpg`,
-        `${userId}/avatar.jpeg`,
-        `${userId}/avatar.png`,
-        `${userId}/avatar.webp`,
-        `${userId}/avatar.gif`,
-      ]);
+      .list(userId);
+
+    if (existing && existing.length > 0) {
+      await supabase.storage
+        .from("avatars")
+        .remove(existing.map((f) => `${userId}/${f.name}`));
+    }
 
     await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
 
@@ -111,7 +127,10 @@ export default function AvatarUpload({
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Avatar with hover overlay */}
-      <div className="relative group cursor-pointer" onClick={() => !loading && fileRef.current?.click()}>
+      <div
+        className="relative group cursor-pointer"
+        onClick={() => !loading && fileRef.current?.click()}
+      >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
