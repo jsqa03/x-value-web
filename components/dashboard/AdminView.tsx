@@ -3,6 +3,7 @@ import { BarChart2, Users, TrendingUp, Zap, Globe, DollarSign, Activity, ShieldC
 import StatCard from "./StatCard";
 import SectionHeader from "./SectionHeader";
 import LeadsTable from "./LeadsTable";
+import CreateUserModal from "./CreateUserModal";
 import type { Profile } from "./types";
 
 const GLOBAL_STATS = [
@@ -32,10 +33,15 @@ export default function AdminView({ profile }: Props) {
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Welcome */}
-      <div>
-        <p className="text-white/40 text-sm mb-1">Bienvenido de vuelta, {name}</p>
-        <SectionHeader eyebrow="Vista global" title="Resumen de la Empresa" accent="#fcd34d" highlight="Empresa" />
+      {/* Welcome + action button */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-white/40 text-sm mb-1">Bienvenido de vuelta, {name}</p>
+          <SectionHeader eyebrow="Vista global" title="Resumen de la Empresa" accent="#fcd34d" highlight="Empresa" />
+        </div>
+        <div className="mt-6 shrink-0">
+          <CreateUserModal />
+        </div>
       </div>
 
       {/* Global KPI grid */}
