@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { Users, TrendingUp, Target, Award, BarChart2, Clock } from "lucide-react";
 import StatCard from "./StatCard";
 import SectionHeader from "./SectionHeader";
+import LeadsTable from "./LeadsTable";
 import type { Profile } from "./types";
 
 const TEAM_STATS = [
@@ -97,6 +99,34 @@ export default function ManagerView({ profile }: Props) {
           ))}
         </div>
       </div>
+
+      {/* CRM en Vivo */}
+      <Suspense fallback={<LeadsTableSkeleton />}>
+        <LeadsTable />
+      </Suspense>
+    </div>
+  );
+}
+
+function LeadsTableSkeleton() {
+  return (
+    <div className="rounded-2xl overflow-hidden animate-pulse"
+      style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+        <div className="w-3.5 h-3.5 rounded bg-white/10" />
+        <div className="w-28 h-3.5 rounded bg-white/10" />
+      </div>
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center gap-4 px-5 py-3.5 border-b last:border-0"
+          style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+          <div className="w-7 h-7 rounded-full bg-white/8 shrink-0" />
+          <div className="flex-1 flex gap-4">
+            <div className="w-28 h-3 rounded bg-white/8" />
+            <div className="w-40 h-3 rounded bg-white/5" />
+            <div className="w-24 h-3 rounded bg-white/5" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
