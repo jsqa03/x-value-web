@@ -14,9 +14,18 @@ export interface ActionResult {
   userId?: string;
 }
 
+// Alias kept for backward compatibility with CreateUserModal import
+export type CreateUserResult = ActionResult;
+
+export interface ManagerOption {
+  id: string;
+  full_name: string | null;
+  email: string;
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Verify the caller is authenticated and has an admin/manager role. */
+/** Verify caller is authenticated with admin/manager role. */
 async function getCallerProfile(): Promise<{ id: string; role: CallerRole } | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -42,20 +51,35 @@ function getAdminClient() {
   );
 }
 
+// ─── getManagers ──────────────────────────────────────────────────────────────
+/** Returns list of managers for the "Asignar Líder" selector. */
+export async function getManagers(): Promise<ManagerOption[]> {
+  const caller = await getCallerProfile();
+  if (!caller) return [];
+
+  const adminClient = getAdminClient();
+  const { data } = await adminClient
+    .from("profiles")
+    .select("id, full_name, email")
+    .eq("role", "manager")
+    .order("full_name");
+
+  return (data ?? []) as ManagerOption[];
+}
+
 // ─── createUserAccount ────────────────────────────────────────────────────────
 export async function createUserAccount(formData: FormData): Promise<ActionResult> {
-  // 1 — Verify caller identity & role
   const caller = await getCallerProfile();
   if (!caller) return { error: "No autorizado. Inicia sesión de nuevo." };
 
-  // 2 — Parse inputs
+  // Core required fields
   const fullName = (formData.get("full_name") as string | null)?.trim() ?? "";
   const email    = (formData.get("email")     as string | null)?.trim().toLowerCase() ?? "";
   const password = (formData.get("password")  as string | null) ?? "";
   const role     = (formData.get("role")      as string | null) ?? "";
 
   if (!fullName || !email || !password || !role) {
-    return { error: "Todos los campos son obligatorios." };
+    return { error: "Nombre, email, contraseña y rol son obligatorios." };
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Ingresa un email válido." };
@@ -64,7 +88,19 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
     return { error: "La contraseña debe tener al menos 6 caracteres." };
   }
 
-  // 3 — Role permission gate
+  // Optional extended fields
+  const university  = (formData.get("university")   as string | null)?.trim() || null;
+  const birthYearRaw = formData.get("birth_year") as string | null;
+  const birth_year  = birthYearRaw ? parseInt(birthYearRaw, 10) || null : null;
+  const country     = (formData.get("country")      as string | null)?.trim() || null;
+  const nationality = (formData.get("nationality")  as string | null)?.trim() || null;
+
+  // manager_id: explicit selection (admin) OR auto-assign (manager creating their own member)
+  const explicitManagerId = (formData.get("manager_id") as string | null) || null;
+  const manager_id =
+    explicitManagerId ?? (caller.role === "manager" ? caller.id : null);
+
+  // Role permission gate
   const MANAGER_ALLOWED: ManagedRole[] = ["sales", "client"];
   const ADMIN_ALLOWED:   ManagedRole[] = ["manager", "sales", "client"];
 
@@ -75,7 +111,6 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
     return { error: "Rol inválido." };
   }
 
-  // 4 — Create auth user via Service Role
   const adminClient = getAdminClient();
 
   const { data: { user }, error: authError } = await adminClient.auth.admin.createUser({
@@ -93,15 +128,16 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
     return { error: msg };
   }
 
-  // 5 — Insert profile; roll back on failure
-  // If a manager is creating the account, record their ID so the hierarchy
-  // filter in TeamManagementTable can restrict their view to only their own team.
   const { error: profileError } = await adminClient.from("profiles").insert({
-    id: user.id,
+    id:          user.id,
     email,
-    full_name: fullName,
+    full_name:   fullName,
     role,
-    manager_id: caller.role === "manager" ? caller.id : null,
+    manager_id,
+    university,
+    birth_year,
+    country,
+    nationality,
   });
 
   if (profileError) {
@@ -115,16 +151,13 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
 
 // ─── deleteUserAccount ────────────────────────────────────────────────────────
 export async function deleteUserAccount(targetUserId: string): Promise<ActionResult> {
-  // 1 — Verify caller
   const caller = await getCallerProfile();
   if (!caller) return { error: "No autorizado." };
 
-  // 2 — Prevent self-deletion
   if (caller.id === targetUserId) {
     return { error: "No puedes eliminar tu propia cuenta." };
   }
 
-  // 3 — Fetch target role from DB (never trust client-provided data for auth checks)
   const adminClient = getAdminClient();
 
   const { data: targetProfile, error: fetchError } = await adminClient
@@ -137,7 +170,6 @@ export async function deleteUserAccount(targetUserId: string): Promise<ActionRes
     return { error: "Usuario no encontrado." };
   }
 
-  // 4 — Manager restriction: cannot delete admin or other managers
   if (
     caller.role === "manager" &&
     (targetProfile.role === "admin" || targetProfile.role === "manager")
@@ -145,16 +177,36 @@ export async function deleteUserAccount(targetUserId: string): Promise<ActionRes
     return { error: "Un manager no puede eliminar admins ni otros managers." };
   }
 
-  // 5 — Delete from auth (cascades to profiles via FK if configured, else separate delete)
   const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(targetUserId);
-
   if (deleteAuthError) {
     return { error: `Error al eliminar: ${deleteAuthError.message}` };
   }
 
-  // 6 — Explicitly delete profile row (safe even if already cascaded)
   await adminClient.from("profiles").delete().eq("id", targetUserId);
 
   revalidatePath("/dashboard");
+  return { success: true };
+}
+
+// ─── resetPassword ────────────────────────────────────────────────────────────
+/** Admin-only: forcibly change any user's password. */
+export async function resetPassword(
+  targetUserId: string,
+  newPassword: string
+): Promise<ActionResult> {
+  const caller = await getCallerProfile();
+  if (!caller || caller.role !== "admin") {
+    return { error: "Solo el Admin puede resetear contraseñas." };
+  }
+  if (!newPassword || newPassword.length < 6) {
+    return { error: "La contraseña debe tener mínimo 6 caracteres." };
+  }
+
+  const adminClient = getAdminClient();
+  const { error } = await adminClient.auth.admin.updateUserById(targetUserId, {
+    password: newPassword,
+  });
+
+  if (error) return { error: error.message };
   return { success: true };
 }

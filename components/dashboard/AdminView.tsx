@@ -2,12 +2,12 @@ import { Suspense } from "react";
 import {
   Users, TrendingUp, DollarSign, Zap,
   Activity, ShieldCheck, Globe,
-  Settings2, Bell, Lock, Key,
 } from "lucide-react";
 import StatCard from "./StatCard";
 import LeadsTable from "./LeadsTable";
 import CreateUserModal from "./CreateUserModal";
 import TeamManagementTable from "./TeamManagementTable";
+import SecuritySection from "./SecuritySection";
 import SearchBar from "./SearchBar";
 import type { Profile } from "./types";
 
@@ -240,101 +240,22 @@ function TeamSection() {
   );
 }
 
-// ─── Section: Settings ────────────────────────────────────────────────────────
-function SettingsSection() {
-  const items = [
-    {
-      icon: Bell,
-      color: "#fcd34d",
-      title: "Notificaciones",
-      desc: "Configura alertas de nuevos leads y actividad del equipo.",
-      tag: "Próximamente",
-    },
-    {
-      icon: Lock,
-      color: "#a855f7",
-      title: "Seguridad",
-      desc: "Gestiona contraseñas, 2FA y sesiones activas.",
-      tag: "Próximamente",
-    },
-    {
-      icon: Key,
-      color: "#00c0f3",
-      title: "API & Integraciones",
-      desc: "Conecta tu CRM, WhatsApp Business y plataformas externas.",
-      tag: "Próximamente",
-    },
-    {
-      icon: Settings2,
-      color: "#D1FF48",
-      title: "Preferencias generales",
-      desc: "Idioma, zona horaria y formato de datos.",
-      tag: "Próximamente",
-    },
-  ];
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <p className="text-zinc-500 text-xs tracking-widest uppercase mb-1">Sistema</p>
-        <h1 className="text-2xl font-bold text-white tracking-tight">
-          Configuración
-        </h1>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {items.map((item) => (
-          <div
-            key={item.title}
-            className="rounded-2xl p-5 flex items-start gap-4 group cursor-default transition-all hover:border-white/10"
-            style={{
-              background: "rgba(255,255,255,0.025)",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-              style={{
-                background: `${item.color}10`,
-                border: `1px solid ${item.color}20`,
-              }}
-            >
-              <item.icon size={16} style={{ color: item.color }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-white text-sm font-semibold">{item.title}</p>
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    color: "rgba(255,255,255,0.3)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  {item.tag}
-                </span>
-              </div>
-              <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Root component ───────────────────────────────────────────────────────────
 interface Props {
   profile: Profile;
   section: string;
+  userId: string;
 }
 
-export default function AdminView({ profile, section }: Props) {
+export default function AdminView({ profile, section, userId }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "CEO";
 
   if (section === "crm")      return <CrmSection />;
   if (section === "team")     return <TeamSection />;
-  if (section === "settings") return <SettingsSection />;
+  if (section === "settings") return (
+    <Suspense fallback={<div className="text-zinc-600 text-sm py-8 text-center">Cargando seguridad…</div>}>
+      <SecuritySection currentUserId={userId} />
+    </Suspense>
+  );
   return <OverviewSection name={name} />;
 }

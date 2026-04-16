@@ -34,10 +34,10 @@ export default async function DashboardPage(props: {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // 2 — Fetch profile + role
+  // 2 — Fetch profile + all extended fields
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("role, full_name")
+    .select("role, full_name, avatar_url, email, university, birth_year, country, nationality")
     .eq("id", user.id)
     .single();
 
@@ -73,8 +73,8 @@ export default async function DashboardPage(props: {
       {/* ── Main content ────────────────────────────────────────────────── */}
       <main className="flex-1 min-h-screen overflow-y-auto" style={{ marginLeft: "240px" }}>
         <div className="max-w-5xl mx-auto px-8 py-10">
-          {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} />}
-          {effectiveRole === "manager" && <ManagerView profile={profile} section={section} />}
+          {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} />}
+          {effectiveRole === "manager" && <ManagerView profile={profile} section={section} userId={user.id} />}
           {effectiveRole === "sales"   && <SalesView   profile={profile} section={section} />}
           {effectiveRole === "client"  && <ClientView  profile={profile} section={section} />}
         </div>

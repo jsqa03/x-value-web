@@ -1,16 +1,18 @@
 import { Suspense } from "react";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import {
   Users, TrendingUp, Target, BarChart2,
-  Award, Clock,
+  Award, UserX,
 } from "lucide-react";
 import StatCard from "./StatCard";
 import LeadsTable from "./LeadsTable";
 import CreateUserModal from "./CreateUserModal";
 import TeamManagementTable from "./TeamManagementTable";
 import SearchBar from "./SearchBar";
-import type { Profile } from "./types";
+import type { Profile, Role } from "./types";
+import { ROLE_META } from "./types";
 
-// ─── Static data ──────────────────────────────────────────────────────────────
+// ─── Static KPI / Pipeline data ───────────────────────────────────────────────
 const TEAM_STATS = [
   { label: "Deals abiertos (equipo)", value: "—", sub: "este mes",       accent: "#a855f7", icon: Target     },
   { label: "Tasa de cierre",          value: "—", sub: "promedio equipo", accent: "#D1FF48", icon: TrendingUp },
@@ -24,12 +26,6 @@ const PIPELINE_STAGES = [
   { stage: "Propuesta env.", value: "—", accent: "#D1FF48" },
   { stage: "Ganados",        value: "—", accent: "#22c55e" },
   { stage: "Perdidos",       value: "—", accent: "#ef4444" },
-];
-
-const REPS = [
-  { name: "Comercial A", deals: "—", closed: "—", rate: "—", lastActivity: "Hace —", trend: "up"   },
-  { name: "Comercial B", deals: "—", closed: "—", rate: "—", lastActivity: "Hace —", trend: "down" },
-  { name: "Comercial C", deals: "—", closed: "—", rate: "—", lastActivity: "Hace —", trend: "up"   },
 ];
 
 // ─── Shared skeleton ───────────────────────────────────────────────────────────
@@ -66,8 +62,129 @@ function TableSkeleton() {
   );
 }
 
+// ─── Real team roster (async Server Component) ────────────────────────────────
+interface TeamMember {
+  id: string;
+  full_name: string | null;
+  email: string;
+  role: Role;
+  avatar_url: string | null;
+}
+
+async function TeamRoster({ managerId }: { managerId: string }) {
+  const adminClient = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  const { data: members } = await adminClient
+    .from("profiles")
+    .select("id, full_name, email, role, avatar_url")
+    .eq("manager_id", managerId)
+    .order("full_name");
+
+  const team = (members ?? []) as TeamMember[];
+
+  if (team.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-10">
+        <UserX size={28} className="text-white/10" />
+        <p className="text-zinc-600 text-sm">Aún no tienes equipo asignado</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Header row */}
+      <div className="grid grid-cols-5 px-6 py-2 text-[11px] text-zinc-600 uppercase tracking-wider">
+        <span className="col-span-2">Comercial</span>
+        <span className="text-center">Rol</span>
+        <span className="text-center">Deals</span>
+        <span className="text-center">Tasa</span>
+      </div>
+      {team.map((rep) => {
+        const meta = ROLE_META[rep.role] ?? ROLE_META.client;
+        const initial = (rep.full_name ?? rep.email).charAt(0).toUpperCase();
+        return (
+          <div
+            key={rep.id}
+            className="grid grid-cols-5 items-center px-6 py-3 border-t"
+            style={{ borderColor: "rgba(255,255,255,0.04)" }}
+          >
+            <div className="col-span-2 flex items-center gap-3">
+              {rep.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={rep.avatar_url}
+                  alt={rep.full_name ?? rep.email}
+                  className="w-8 h-8 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  style={{
+                    background: `${meta.color}12`,
+                    color: meta.color,
+                    border: `1px solid ${meta.color}25`,
+                  }}
+                >
+                  {initial}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-white text-sm font-medium truncate max-w-[140px]">
+                  {rep.full_name ?? "—"}
+                </p>
+                <p className="text-zinc-600 text-xs truncate max-w-[160px]">{rep.email}</p>
+              </div>
+            </div>
+            <span className="flex justify-center">
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+              >
+                {meta.label}
+              </span>
+            </span>
+            <span className="text-center text-zinc-600 text-sm">—</span>
+            <span className="text-center text-zinc-600 text-sm">—</span>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function TeamRosterSkeleton() {
+  return (
+    <>
+      <div className="grid grid-cols-5 px-6 py-2">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className={`h-3 rounded bg-white/[0.04] ${i === 0 ? "col-span-2 w-20" : "w-10 mx-auto"}`} />
+        ))}
+      </div>
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="grid grid-cols-5 items-center px-6 py-3 border-t animate-pulse" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+          <div className="col-span-2 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/[0.06] shrink-0" />
+            <div className="flex flex-col gap-1.5">
+              <div className="w-24 h-3 rounded bg-white/[0.06]" />
+              <div className="w-32 h-2.5 rounded bg-white/[0.04]" />
+            </div>
+          </div>
+          <div className="w-12 h-4 rounded-full bg-white/[0.04] mx-auto" />
+          <div className="w-4 h-3 rounded bg-white/[0.04] mx-auto" />
+          <div className="w-4 h-3 rounded bg-white/[0.04] mx-auto" />
+        </div>
+      ))}
+    </>
+  );
+}
+
 // ─── Section: Overview ────────────────────────────────────────────────────────
-function OverviewSection({ name }: { name: string }) {
+function OverviewSection({ name, managerId }: { name: string; managerId: string }) {
   return (
     <div className="flex flex-col gap-8">
       {/* Heading */}
@@ -102,44 +219,9 @@ function OverviewSection({ name }: { name: string }) {
           <p className="text-zinc-400 text-sm font-medium">Rendimiento individual</p>
         </div>
         <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-          {/* Header row */}
-          <div className="grid grid-cols-5 px-6 py-2 text-[11px] text-zinc-600 uppercase tracking-wider">
-            <span className="col-span-2">Comercial</span>
-            <span className="text-center">Deals</span>
-            <span className="text-center">Cerrados</span>
-            <span className="text-center">Tasa</span>
-          </div>
-          {REPS.map((rep) => (
-            <div key={rep.name} className="grid grid-cols-5 items-center px-6 py-3">
-              <div className="col-span-2 flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{
-                    background: "rgba(168,85,247,0.1)",
-                    color: "#a855f7",
-                    border: "1px solid rgba(168,85,247,0.2)",
-                  }}
-                >
-                  {rep.name[rep.name.length - 1]}
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{rep.name}</p>
-                  <p className="text-zinc-600 text-xs flex items-center gap-1">
-                    <Clock size={10} /> {rep.lastActivity}
-                  </p>
-                </div>
-              </div>
-              <span className="text-center text-zinc-400 text-sm">{rep.deals}</span>
-              <span className="text-center text-zinc-400 text-sm">{rep.closed}</span>
-              <span
-                className={`text-center text-sm font-semibold ${
-                  rep.trend === "up" ? "text-emerald-400" : "text-red-400"
-                }`}
-              >
-                {rep.rate}
-              </span>
-            </div>
-          ))}
+          <Suspense fallback={<TeamRosterSkeleton />}>
+            <TeamRoster managerId={managerId} />
+          </Suspense>
         </div>
       </div>
 
@@ -229,12 +311,13 @@ function TeamSection() {
 interface Props {
   profile: Profile;
   section: string;
+  userId: string;
 }
 
-export default function ManagerView({ profile, section }: Props) {
+export default function ManagerView({ profile, section, userId }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "Manager";
 
   if (section === "crm")  return <CrmSection />;
   if (section === "team") return <TeamSection />;
-  return <OverviewSection name={name} />;
+  return <OverviewSection name={name} managerId={userId} />;
 }
