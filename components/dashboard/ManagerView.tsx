@@ -7,6 +7,7 @@ import {
 import StatCard from "./StatCard";
 import LeadsTable from "./LeadsTable";
 import CreateUserModal from "./CreateUserModal";
+import CreateLeadModal from "./CreateLeadModal";
 import TeamManagementTable from "./TeamManagementTable";
 import SearchBar from "./SearchBar";
 import type { Profile, Role } from "./types";
@@ -69,17 +70,20 @@ function getAdminClient() {
 // ─── Real pipeline ────────────────────────────────────────────────────────────
 async function ManagerPipelineCard() {
   const ac = getAdminClient();
-  const { data: leads } = await ac.from("leads").select("is_verified");
+  const { data: leads } = await ac.from("leads").select("pipeline_status, is_verified");
   const total    = leads?.length ?? 0;
-  const verified = leads?.filter((l) => l.is_verified).length ?? 0;
-  const open     = total - verified;
+  const closed   = leads?.filter((l) => l.pipeline_status === "Cerrado/Cliente activo").length ?? 0;
+  const lost     = leads?.filter((l) => l.pipeline_status === "Perdido/No").length ?? 0;
+  const meeting  = leads?.filter((l) => l.pipeline_status === "Reunión confirmada").length ?? 0;
+  const quote    = leads?.filter((l) => l.pipeline_status === "Cotización enviada").length ?? 0;
+  const tracking = total - closed - lost - meeting - quote;
 
   const stages = [
-    { stage: "Nuevos leads",   value: String(total),    accent: "#a78bfa", pct: 1 },
-    { stage: "En negociación", value: String(open),     accent: "#38bdf8", pct: total > 0 ? open / total : 0 },
-    { stage: "Propuesta env.", value: "0",              accent: "#22c55e", pct: 0 },
-    { stage: "Ganados",        value: String(verified), accent: "#f59e0b", pct: total > 0 ? verified / total : 0 },
-    { stage: "Perdidos",       value: "0",              accent: "#ef4444", pct: 0 },
+    { stage: "En seguimiento",   value: String(tracking), accent: "#38bdf8", pct: total > 0 ? tracking / total : 0 },
+    { stage: "Reunión conf.",     value: String(meeting),  accent: "#a78bfa", pct: total > 0 ? meeting / total : 0  },
+    { stage: "Cotización env.",   value: String(quote),    accent: "#f59e0b", pct: total > 0 ? quote / total : 0    },
+    { stage: "Cerrados",          value: String(closed),   accent: "#22c55e", pct: total > 0 ? closed / total : 0   },
+    { stage: "Perdidos",          value: String(lost),     accent: "#ef4444", pct: total > 0 ? lost / total : 0     },
   ];
 
   return (
@@ -186,7 +190,6 @@ function OverviewSection({ name, managerId }: { name: string; managerId: string 
         {TEAM_STATS.map((s) => <StatCard key={s.label} {...s} />)}
       </div>
 
-      {/* Individual performance */}
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-zinc-800">
           <Award size={14} className="text-zinc-500" />
@@ -197,7 +200,6 @@ function OverviewSection({ name, managerId }: { name: string; managerId: string 
         </Suspense>
       </div>
 
-      {/* Pipeline */}
       <Suspense fallback={
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 animate-pulse">
           <div className="w-32 h-4 rounded bg-zinc-800 mb-5" />
@@ -221,7 +223,10 @@ function CrmSection() {
           <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">CRM del equipo</p>
           <h1 className="text-2xl font-semibold text-white tracking-tight">Leads del Equipo</h1>
         </div>
-        <SearchBar placeholder="Buscar por nombre o email…" />
+        <div className="flex items-center gap-3 flex-wrap">
+          <CreateLeadModal callerRole="manager" />
+          <SearchBar placeholder="Buscar por nombre o email…" />
+        </div>
       </div>
       <Suspense fallback={<SkeletonTable />}><LeadsTable /></Suspense>
     </div>

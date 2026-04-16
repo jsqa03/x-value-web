@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Users, Inbox, AlertCircle } from "lucide-react";
 import DeleteUserButton from "./DeleteUserButton";
 import ViewAgendaButton from "./ViewAgendaButton";
+import PerformanceModal from "./PerformanceModal";
 import { ROLE_META } from "./types";
 import type { Role } from "./types";
 
@@ -14,10 +15,12 @@ interface ProfileRow {
   created_at: string;
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CO", {
-    day: "2-digit", month: "short", year: "numeric",
-  });
+// Null-safe date formatter
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default async function TeamManagementTable() {
@@ -81,6 +84,10 @@ export default async function TeamManagementTable() {
     return false;
   }
 
+  function canViewPerformance(targetRole: Role): boolean {
+    return targetRole === "sales" || targetRole === "manager";
+  }
+
   return (
     <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
       {/* Header */}
@@ -140,6 +147,9 @@ export default async function TeamManagementTable() {
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-2">
+                      {canViewPerformance(p.role) && (
+                        <PerformanceModal userId={p.id} userName={p.full_name ?? p.email} />
+                      )}
                       <ViewAgendaButton userName={p.full_name ?? p.email} />
                       {canDelete(p.role) && (
                         <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />
@@ -178,7 +188,10 @@ export default async function TeamManagementTable() {
               </div>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-zinc-500 text-xs truncate">{p.email}</p>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                  {canViewPerformance(p.role) && (
+                    <PerformanceModal userId={p.id} userName={p.full_name ?? p.email} />
+                  )}
                   <ViewAgendaButton userName={p.full_name ?? p.email} />
                   {canDelete(p.role) && (
                     <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />

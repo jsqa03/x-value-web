@@ -1,44 +1,106 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { Users, CheckCircle2, Clock, AlertCircle, Inbox } from "lucide-react";
+import type { Role } from "./types";
 
 interface Lead {
   id: string;
   name: string;
   email: string;
-  whatsapp: string;
+  whatsapp: string | null;
+  company_info: string | null;
+  niche: string | null;
+  service_type: string | null;
+  pipeline_status: string | null;
   is_verified: boolean;
+  assigned_to: string | null;
   created_at: string;
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CO", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+interface Assignee { id: string; full_name: string | null }
+
+// Null-safe date formatter — avoids the 1970 epoch fallback
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 }
+
+const PIPELINE_STYLE: Record<string, { color: string; bg: string; border: string; short: string }> = {
+  "En seguimiento":         { color: "#38bdf8", bg: "rgba(56,189,248,0.08)",  border: "rgba(56,189,248,0.2)",  short: "Seguimiento"   },
+  "Reunión confirmada":     { color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)", short: "Reunión"       },
+  "Cotización enviada":     { color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.2)",  short: "Cotización"    },
+  "Perdido/No":             { color: "#ef4444", bg: "rgba(239,68,68,0.08)",   border: "rgba(239,68,68,0.2)",   short: "Perdido"       },
+  "Cerrado/Cliente activo": { color: "#22c55e", bg: "rgba(34,197,94,0.08)",   border: "rgba(34,197,94,0.2)",   short: "Cerrado ✓"     },
+};
+
+function PipelineBadge({ status }: { status: string | null }) {
+  if (!status) return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
+      <Clock size={9} />
+      Pendiente
+    </span>
+  );
+  const s = PIPELINE_STYLE[status];
+  if (!s) return <span className="text-zinc-500 text-xs">{status}</span>;
+  return (
+    <span
+      className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full"
+      style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
+    >
+      {s.short}
+    </span>
+  );
+}
+
+function getAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
+
+const LEAD_COLS = "id, name, email, whatsapp, company_info, niche, service_type, pipeline_status, is_verified, assigned_to, created_at";
 
 export default async function LeadsTable() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
-  // No .limit() — show every lead
-  const { data: leads, error } = await supabase
-    .from("leads")
-    .select("id, name, email, whatsapp, is_verified, created_at")
-    .order("created_at", { ascending: false });
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const role = (profileData?.role ?? "client") as Role;
 
-  if (error) {
-    return (
-      <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-5 flex items-start gap-3">
-        <AlertCircle size={15} className="text-red-400 mt-0.5 shrink-0" />
-        <div>
-          <p className="text-red-400 text-sm font-medium">Error al cargar leads</p>
-          <p className="text-red-400/60 text-xs mt-0.5">{error.message}</p>
-        </div>
-      </div>
-    );
+  const ac = getAdminClient();
+  let leads: Lead[] = [];
+
+  if (role === "admin") {
+    const { data } = await ac.from("leads").select(LEAD_COLS).order("created_at", { ascending: false });
+    leads = (data ?? []) as Lead[];
+
+  } else if (role === "manager") {
+    // Leads assigned to the manager OR any of their team members
+    const { data: team } = await ac.from("profiles").select("id").eq("manager_id", user.id);
+    const teamIds = [user.id, ...(team ?? []).map((t: { id: string }) => t.id)];
+    const { data } = await ac.from("leads").select(LEAD_COLS).in("assigned_to", teamIds).order("created_at", { ascending: false });
+    leads = (data ?? []) as Lead[];
+
+  } else if (role === "sales") {
+    const { data } = await ac.from("leads").select(LEAD_COLS).eq("assigned_to", user.id).order("created_at", { ascending: false });
+    leads = (data ?? []) as Lead[];
+  }
+
+  // Build a name map for assignees
+  const assigneeIds = [...new Set(leads.map((l) => l.assigned_to).filter(Boolean))] as string[];
+  let assigneeMap: Record<string, string> = {};
+  if (assigneeIds.length > 0) {
+    const { data: assignees } = await ac.from("profiles").select("id, full_name").in("id", assigneeIds);
+    assigneeMap = Object.fromEntries((assignees as Assignee[] ?? []).map((a) => [a.id, a.full_name ?? "—"]));
   }
 
   if (!leads || leads.length === 0) {
@@ -46,7 +108,7 @@ export default async function LeadsTable() {
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-10 flex flex-col items-center gap-3 text-center">
         <Inbox size={26} className="text-zinc-700" />
         <p className="text-zinc-500 text-sm">No hay leads registrados</p>
-        <p className="text-zinc-700 text-xs">Los contactos del formulario aparecerán aquí</p>
+        <p className="text-zinc-700 text-xs">Los contactos aparecerán aquí</p>
       </div>
     );
   }
@@ -65,53 +127,55 @@ export default async function LeadsTable() {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-zinc-800/60">
-              {["Nombre", "Email", "WhatsApp", "Estado", "Fecha"].map((col) => (
-                <th
-                  key={col}
-                  className="px-5 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600"
-                >
+              {["Nombre / Empresa", "Contacto", "Servicio", "Estado", "Asignado a", "Fecha"].map((col) => (
+                <th key={col} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
                   {col}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/60">
-            {leads.map((lead: Lead) => (
+            {leads.map((lead) => (
               <tr key={lead.id} className="hover:bg-zinc-900/40 transition-colors">
-                <td className="px-5 py-3.5">
+                {/* Name / Company */}
+                <td className="px-4 py-3.5">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[11px] font-semibold text-orange-400 shrink-0">
                       {lead.name?.charAt(0).toUpperCase() ?? "?"}
                     </div>
-                    <span className="text-white text-sm font-medium truncate max-w-[140px]">
-                      {lead.name}
-                    </span>
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-medium truncate max-w-[130px]">{lead.name}</p>
+                      {lead.company_info && (
+                        <p className="text-zinc-600 text-xs truncate max-w-[130px]">{lead.company_info}</p>
+                      )}
+                    </div>
                   </div>
                 </td>
-                <td className="px-5 py-3.5">
-                  <span className="text-zinc-400 text-sm truncate max-w-[200px] block">{lead.email}</span>
+                {/* Contact */}
+                <td className="px-4 py-3.5">
+                  <p className="text-zinc-400 text-sm truncate max-w-[160px]">{lead.email}</p>
+                  {lead.whatsapp && <p className="text-zinc-600 text-xs">{lead.whatsapp}</p>}
                 </td>
-                <td className="px-5 py-3.5">
-                  <span className="text-zinc-400 text-sm">{lead.whatsapp ?? "—"}</span>
+                {/* Service */}
+                <td className="px-4 py-3.5">
+                  <span className="text-zinc-400 text-xs">{lead.service_type ?? "—"}</span>
                 </td>
-                <td className="px-5 py-3.5">
-                  {lead.is_verified ? (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                      <CheckCircle2 size={10} />
-                      Verificado
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                      <Clock size={10} />
-                      Pendiente
-                    </span>
-                  )}
+                {/* Status */}
+                <td className="px-4 py-3.5">
+                  <PipelineBadge status={lead.pipeline_status} />
                 </td>
-                <td className="px-5 py-3.5">
+                {/* Assignee */}
+                <td className="px-4 py-3.5">
+                  <span className="text-zinc-500 text-xs">
+                    {lead.assigned_to ? (assigneeMap[lead.assigned_to] ?? "—") : "—"}
+                  </span>
+                </td>
+                {/* Date */}
+                <td className="px-4 py-3.5">
                   <span className="text-zinc-600 text-xs">{formatDate(lead.created_at)}</span>
                 </td>
               </tr>
@@ -120,31 +184,31 @@ export default async function LeadsTable() {
         </table>
       </div>
 
-      {/* Mobile cards */}
-      <div className="md:hidden divide-y divide-zinc-800/60">
-        {leads.map((lead: Lead) => (
+      {/* Tablet / Mobile cards */}
+      <div className="lg:hidden divide-y divide-zinc-800/60">
+        {leads.map((lead) => (
           <div key={lead.id} className="px-5 py-4 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[11px] font-semibold text-orange-400 shrink-0">
                   {lead.name?.charAt(0).toUpperCase() ?? "?"}
                 </div>
-                <span className="text-white text-sm font-medium">{lead.name}</span>
+                <div>
+                  <p className="text-white text-sm font-medium">{lead.name}</p>
+                  {lead.company_info && <p className="text-zinc-600 text-xs">{lead.company_info}</p>}
+                </div>
               </div>
-              {lead.is_verified ? (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                  Verificado
-                </span>
-              ) : (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  Pendiente
-                </span>
-              )}
+              <PipelineBadge status={lead.pipeline_status} />
             </div>
-            <p className="text-zinc-500 text-xs">{lead.email}</p>
-            <div className="flex items-center justify-between">
-              <p className="text-zinc-600 text-xs">{lead.whatsapp ?? "—"}</p>
-              <p className="text-zinc-700 text-xs">{formatDate(lead.created_at)}</p>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-zinc-500 text-xs truncate">{lead.email}</p>
+                {lead.service_type && <p className="text-zinc-600 text-xs">{lead.service_type}</p>}
+              </div>
+              <div className="text-right shrink-0">
+                {lead.assigned_to && <p className="text-zinc-600 text-xs">{assigneeMap[lead.assigned_to] ?? "—"}</p>}
+                <p className="text-zinc-700 text-xs">{formatDate(lead.created_at)}</p>
+              </div>
             </div>
           </div>
         ))}

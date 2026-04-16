@@ -27,6 +27,21 @@ export interface LeaderOption {
 // Kept for backward compat — callers that import ManagerOption still work
 export type ManagerOption = LeaderOption;
 
+export interface AssignableUser {
+  id: string;
+  full_name: string | null;
+  email: string;
+  role: string;
+}
+
+export interface LeadStats {
+  total: number;
+  byStatus: { status: string; count: number }[];
+  closed: number;
+  lost: number;
+  inProgress: number;
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 /** Verify caller is authenticated with admin/manager role. */
@@ -46,6 +61,23 @@ async function getCallerProfile(): Promise<{ id: string; role: CallerRole } | nu
   return { id: user.id, role: role as CallerRole };
 }
 
+/** Any authenticated user with a staff role (admin/manager/sales). */
+async function getStaffUser(): Promise<{ id: string; role: string } | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = data?.role as string | undefined;
+  if (!role || !["admin", "manager", "sales"].includes(role)) return null;
+  return { id: user.id, role };
+}
+
 /** Service Role client — bypasses RLS, never persists session. */
 function getAdminClient() {
   return createSupabaseClient(
@@ -62,10 +94,6 @@ export async function revalidateDashboard(): Promise<void> {
 }
 
 // ─── getLeaders ───────────────────────────────────────────────────────────────
-/**
- * Returns managers + sales reps for the "Asignar Líder" selector.
- * Managers can be leaders of sales users; sales reps can be leaders of clients.
- */
 export async function getLeaders(): Promise<LeaderOption[]> {
   const caller = await getCallerProfile();
   if (!caller) return [];
@@ -81,15 +109,129 @@ export async function getLeaders(): Promise<LeaderOption[]> {
   return (data ?? []) as LeaderOption[];
 }
 
-// Backward compat alias
 export const getManagers = getLeaders;
+
+// ─── getAssignableUsers ───────────────────────────────────────────────────────
+/**
+ * Returns the list of profiles that can be set as `assigned_to` for a new lead.
+ * - Admin: all managers + sales reps
+ * - Manager: themselves + their team members (manager_id = their id)
+ * - Sales: only themselves
+ */
+export async function getAssignableUsers(): Promise<AssignableUser[]> {
+  const staff = await getStaffUser();
+  if (!staff) return [];
+
+  const ac = getAdminClient();
+
+  if (staff.role === "admin") {
+    const { data } = await ac
+      .from("profiles")
+      .select("id, full_name, email, role")
+      .in("role", ["manager", "sales"])
+      .order("role")
+      .order("full_name");
+    return (data ?? []) as AssignableUser[];
+  }
+
+  if (staff.role === "manager") {
+    const [{ data: self }, { data: team }] = await Promise.all([
+      ac.from("profiles").select("id, full_name, email, role").eq("id", staff.id).single(),
+      ac.from("profiles").select("id, full_name, email, role").eq("manager_id", staff.id).order("full_name"),
+    ]);
+    return [self, ...(team ?? [])].filter(Boolean) as AssignableUser[];
+  }
+
+  if (staff.role === "sales") {
+    const { data: self } = await ac
+      .from("profiles")
+      .select("id, full_name, email, role")
+      .eq("id", staff.id)
+      .single();
+    return self ? [self as AssignableUser] : [];
+  }
+
+  return [];
+}
+
+// ─── createLead ───────────────────────────────────────────────────────────────
+export async function createLead(formData: FormData): Promise<ActionResult> {
+  const staff = await getStaffUser();
+  if (!staff) return { error: "No autenticado o sin permisos." };
+
+  const name            = (formData.get("name")            as string | null)?.trim() ?? "";
+  const email           = (formData.get("email")           as string | null)?.trim() ?? "";
+  const whatsapp        = (formData.get("whatsapp")        as string | null)?.trim()  || null;
+  const company_info    = (formData.get("company_info")    as string | null)?.trim()  || null;
+  const niche           = (formData.get("niche")           as string | null)?.trim()  || null;
+  const service_type    = (formData.get("service_type")    as string | null)           || null;
+  const pipeline_status = (formData.get("pipeline_status") as string | null)           || "En seguimiento";
+  const lost_reason     = (formData.get("lost_reason")     as string | null)?.trim()  || null;
+  const notes           = (formData.get("notes")           as string | null)?.trim()  || null;
+  const assigned_to_raw = (formData.get("assigned_to")     as string | null)           || null;
+
+  if (!name) return { error: "El nombre del lead es obligatorio." };
+  if (!email) return { error: "El email del lead es obligatorio." };
+
+  // Sales reps are always self-assigned; others use the form field
+  const assigned_to = staff.role === "sales" ? staff.id : (assigned_to_raw || null);
+
+  const ac = getAdminClient();
+  const { error } = await ac.from("leads").insert({
+    name,
+    email,
+    whatsapp,
+    company_info,
+    niche,
+    service_type,
+    pipeline_status,
+    lost_reason,
+    notes,
+    assigned_to,
+    is_verified: false,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
+// ─── getUserLeadStats ─────────────────────────────────────────────────────────
+export async function getUserLeadStats(
+  targetUserId: string
+): Promise<{ stats: LeadStats } | { error: string }> {
+  const caller = await getCallerProfile();
+  if (!caller) return { error: "No autorizado." };
+
+  const ac = getAdminClient();
+  const { data: leads, error } = await ac
+    .from("leads")
+    .select("pipeline_status, is_verified")
+    .eq("assigned_to", targetUserId);
+
+  if (error) return { error: error.message };
+
+  const total = leads?.length ?? 0;
+  const statusCounts: Record<string, number> = {};
+  for (const lead of leads ?? []) {
+    const s = lead.pipeline_status ?? "Sin estado";
+    statusCounts[s] = (statusCounts[s] ?? 0) + 1;
+  }
+
+  const closed     = statusCounts["Cerrado/Cliente activo"] ?? 0;
+  const lost       = statusCounts["Perdido/No"] ?? 0;
+  const inProgress = total - closed - lost;
+  const byStatus   = Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+
+  return { stats: { total, byStatus, closed, lost, inProgress } };
+}
 
 // ─── createUserAccount ────────────────────────────────────────────────────────
 export async function createUserAccount(formData: FormData): Promise<ActionResult> {
   const caller = await getCallerProfile();
   if (!caller) return { error: "No autorizado. Inicia sesión de nuevo." };
 
-  // Core required fields
   const fullName = (formData.get("full_name") as string | null)?.trim() ?? "";
   const email    = (formData.get("email")     as string | null)?.trim().toLowerCase() ?? "";
   const password = (formData.get("password")  as string | null) ?? "";
@@ -105,29 +247,24 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
     return { error: "La contraseña debe tener al menos 6 caracteres." };
   }
 
-  // Optional extended fields
   const university  = (formData.get("university")   as string | null)?.trim() || null;
   const birth_date  = (formData.get("birth_date")   as string | null) || null;
   const country     = (formData.get("country")      as string | null)?.trim() || null;
   const nationality = (formData.get("nationality")  as string | null)?.trim() || null;
   const client_type = (formData.get("client_type")  as string | null)?.trim() || null;
 
-  // Validate client_type when role is client
   if (role === "client" && !client_type) {
     return { error: "Debes seleccionar el Tipo de Cliente." };
   }
 
-  // manager_id: explicit form selection, OR auto-assign caller if manager
   const explicitLeaderId = (formData.get("manager_id") as string | null) || null;
 
-  // Require leader assignment for sales/client when creating from admin
   if ((role === "sales" || role === "client") && !explicitLeaderId && caller.role === "admin") {
     return { error: "Debes asignar un líder para este usuario." };
   }
 
   const manager_id = explicitLeaderId ?? (caller.role === "manager" ? caller.id : null);
 
-  // Role permission gate
   const MANAGER_ALLOWED: ManagedRole[] = ["sales", "client"];
   const ADMIN_ALLOWED:   ManagedRole[] = ["manager", "sales", "client"];
 
@@ -217,7 +354,6 @@ export async function deleteUserAccount(targetUserId: string): Promise<ActionRes
 }
 
 // ─── resetPassword ────────────────────────────────────────────────────────────
-/** Admin-only: forcibly change any user's password. */
 export async function resetPassword(
   targetUserId: string,
   newPassword: string
@@ -241,7 +377,6 @@ export async function resetPassword(
 }
 
 // ─── updateProfile ────────────────────────────────────────────────────────────
-/** Any authenticated user can update their own profile fields. */
 export async function updateProfile(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -255,7 +390,6 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
 
   if (!full_name) return { error: "El nombre no puede estar vacío." };
 
-  // Use service role to bypass any restrictive RLS on UPDATE
   const adminClient = getAdminClient();
   const { error } = await adminClient
     .from("profiles")

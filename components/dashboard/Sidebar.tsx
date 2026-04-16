@@ -5,7 +5,7 @@ import Image from "next/image";
 import {
   LayoutDashboard, Database, Users, Settings,
   Target, Calendar, Bot, TrendingUp,
-  LogOut, Eye, User, type LucideIcon,
+  LogOut, Eye, User, X, type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { Profile, Role } from "./types";
@@ -52,12 +52,15 @@ interface Props {
   activeSection: string;
   isAdmin: boolean;
   currentView: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export default function Sidebar({
   profile, effectiveRole, activeSection, isAdmin, currentView,
+  isOpen = false, onClose,
 }: Props) {
-  const router = useRouter();
+  const router    = useRouter();
   const navItems  = NAV[effectiveRole];
   const roleMeta  = ROLE_META[profile.role];
   const firstName = profile.full_name?.split(" ")[0] ?? "Usuario";
@@ -67,6 +70,7 @@ export default function Sidebar({
     if (isAdmin && currentView !== "admin") params.set("view", currentView);
     params.set("section", section);
     router.push(`/dashboard?${params.toString()}`);
+    onClose?.();
   }
 
   function simulate(role: Role) {
@@ -75,6 +79,7 @@ export default function Sidebar({
     } else {
       router.push(`/dashboard?view=${role}&section=${NAV[role][0].id}`);
     }
+    onClose?.();
   }
 
   async function handleLogout() {
@@ -85,9 +90,18 @@ export default function Sidebar({
   }
 
   return (
-    <aside className="fixed top-0 left-0 h-full w-60 flex flex-col z-30 bg-zinc-950 border-r border-zinc-800">
+    <aside
+      className={[
+        "fixed top-0 left-0 h-full w-60 flex flex-col z-50",
+        "bg-zinc-950 border-r border-zinc-800",
+        "transition-transform duration-300 ease-in-out",
+        // Mobile: controlled by isOpen; md+: always visible
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        "md:translate-x-0",
+      ].join(" ")}
+    >
       {/* Logo */}
-      <div className="px-5 h-[60px] flex items-center shrink-0 border-b border-zinc-800">
+      <div className="px-5 h-[60px] flex items-center justify-between shrink-0 border-b border-zinc-800">
         <Image
           src="/logo.png"
           alt="X-Value"
@@ -96,6 +110,14 @@ export default function Sidebar({
           style={{ height: "22px", width: "auto" }}
           priority
         />
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className="md:hidden p-1 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900 transition-colors"
+          aria-label="Cerrar menú"
+        >
+          <X size={16} />
+        </button>
       </div>
 
       {/* Nav */}

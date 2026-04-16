@@ -7,6 +7,7 @@ import {
 import StatCard from "./StatCard";
 import LeadsTable from "./LeadsTable";
 import CreateUserModal from "./CreateUserModal";
+import CreateLeadModal from "./CreateLeadModal";
 import TeamManagementTable from "./TeamManagementTable";
 import SecuritySection from "./SecuritySection";
 import SearchBar from "./SearchBar";
@@ -65,16 +66,17 @@ function getAdminClient() {
 // ─── Real pipeline ────────────────────────────────────────────────────────────
 async function AdminPipelineCard() {
   const ac = getAdminClient();
-  const { data: leads } = await ac.from("leads").select("is_verified");
+  const { data: leads } = await ac.from("leads").select("pipeline_status, is_verified");
   const total    = leads?.length ?? 0;
-  const verified = leads?.filter((l) => l.is_verified).length ?? 0;
-  const open     = total - verified;
+  const closed   = leads?.filter((l) => l.pipeline_status === "Cerrado/Cliente activo").length ?? 0;
+  const lost     = leads?.filter((l) => l.pipeline_status === "Perdido/No").length ?? 0;
+  const open     = total - closed - lost;
 
   const stages = [
-    { stage: "Total captados",    count: total,    pct: 1,                                  color: "#a78bfa" },
-    { stage: "Abiertos",          count: open,     pct: total > 0 ? open / total : 0,        color: "#38bdf8" },
-    { stage: "Verificados",       count: verified, pct: total > 0 ? verified / total : 0,    color: "#22c55e" },
-    { stage: "Propuesta env.",    count: 0,        pct: 0,                                   color: "#f59e0b" },
+    { stage: "Total captados", count: total,  pct: 1,                              color: "#a78bfa" },
+    { stage: "En proceso",     count: open,   pct: total > 0 ? open / total : 0,   color: "#38bdf8" },
+    { stage: "Cerrados",       count: closed, pct: total > 0 ? closed / total : 0, color: "#22c55e" },
+    { stage: "Perdidos",       count: lost,   pct: total > 0 ? lost / total : 0,   color: "#ef4444" },
   ];
 
   return (
@@ -133,8 +135,8 @@ async function AdminTeamCard() {
       ) : (
         <div className="divide-y divide-zinc-800/60">
           {team.map((m) => {
-            const meta  = ROLE_META[m.role] ?? ROLE_META.client;
-            const init  = (m.full_name ?? m.email).charAt(0).toUpperCase();
+            const meta = ROLE_META[m.role] ?? ROLE_META.client;
+            const init = (m.full_name ?? m.email).charAt(0).toUpperCase();
             return (
               <div key={m.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                 <div className="flex items-center gap-2.5">
@@ -175,9 +177,7 @@ function OverviewSection({ name }: { name: string }) {
     <div className="flex flex-col gap-8">
       <div>
         <p className="text-zinc-500 text-sm mb-1">Bienvenido de vuelta, {name}</p>
-        <h1 className="text-2xl font-semibold text-white tracking-tight">
-          Resumen de la Empresa
-        </h1>
+        <h1 className="text-2xl font-semibold text-white tracking-tight">Resumen de la Empresa</h1>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -189,7 +189,6 @@ function OverviewSection({ name }: { name: string }) {
         <Suspense fallback={<SkeletonCard />}><AdminTeamCard /></Suspense>
       </div>
 
-      {/* Global reach */}
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 flex items-center gap-4">
         <Globe size={16} className="text-orange-400 shrink-0" />
         <div>
@@ -216,7 +215,10 @@ function CrmSection() {
           <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">CRM en vivo</p>
           <h1 className="text-2xl font-semibold text-white tracking-tight">Leads Capturados</h1>
         </div>
-        <SearchBar placeholder="Buscar por nombre o email…" />
+        <div className="flex items-center gap-3 flex-wrap">
+          <CreateLeadModal callerRole="admin" />
+          <SearchBar placeholder="Buscar por nombre o email…" />
+        </div>
       </div>
       <Suspense fallback={<SkeletonTable />}><LeadsTable /></Suspense>
     </div>

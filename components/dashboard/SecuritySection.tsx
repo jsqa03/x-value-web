@@ -3,7 +3,6 @@ import { createClient } from "@/utils/supabase/server";
 import { ShieldCheck, AlertCircle, Inbox } from "lucide-react";
 import ResetPasswordModal from "./ResetPasswordModal";
 import DeleteUserButton from "./DeleteUserButton";
-import AvatarUpload from "./AvatarUpload";
 import { ROLE_META, computeAge } from "./types";
 import type { Role } from "./types";
 
@@ -19,10 +18,12 @@ interface UserRow {
   created_at: string;
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CO", {
-    day: "2-digit", month: "short", year: "numeric",
-  });
+// Null-safe date formatter
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default async function SecuritySection({ currentUserId }: { currentUserId: string }) {
@@ -64,7 +65,7 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
 
       {/* User table */}
       <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
-        {/* Header */}
+        {/* Table header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
             <ShieldCheck size={14} className="text-orange-400" />
@@ -102,7 +103,6 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
 
                     return (
                       <tr key={u.id} className="hover:bg-zinc-900/30 transition-colors">
-                        {/* User */}
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-3">
                             {u.avatar_url ? (
@@ -125,8 +125,6 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                             </div>
                           </div>
                         </td>
-
-                        {/* Role */}
                         <td className="px-5 py-3">
                           <span
                             className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
@@ -135,19 +133,13 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                             {meta.label}
                           </span>
                         </td>
-
-                        {/* Age / Country */}
                         <td className="px-5 py-3">
                           <p className="text-zinc-300 text-sm">{age !== null ? `${age} años` : "—"}</p>
                           {u.country && <p className="text-zinc-600 text-xs">{u.country}</p>}
                         </td>
-
-                        {/* Created */}
                         <td className="px-5 py-3">
                           <span className="text-zinc-600 text-xs">{formatDate(u.created_at)}</span>
                         </td>
-
-                        {/* Actions */}
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
                             {!isSelf ? (
@@ -223,18 +215,6 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
             </div>
           </>
         )}
-      </div>
-
-      {/* Avatar Upload — admin's own photo */}
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-4">
-        <p className="text-zinc-400 text-sm font-medium">Tu foto de perfil</p>
-        <AvatarUpload
-          userId={currentUserId}
-          initialAvatarUrl={null}
-          displayName="Admin"
-          accentColor="#f97316"
-          size="lg"
-        />
       </div>
     </div>
   );
