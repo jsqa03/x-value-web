@@ -2,12 +2,13 @@ import { Suspense } from "react";
 import {
   Users, TrendingUp, DollarSign, Zap,
   Activity, ShieldCheck, Globe,
-  Search, Settings2, Bell, Lock, Key,
+  Settings2, Bell, Lock, Key,
 } from "lucide-react";
 import StatCard from "./StatCard";
 import LeadsTable from "./LeadsTable";
 import CreateUserModal from "./CreateUserModal";
 import TeamManagementTable from "./TeamManagementTable";
+import SearchBar from "./SearchBar";
 import type { Profile } from "./types";
 
 // ─── Static data (replace with real queries when ready) ───────────────────────
@@ -62,35 +63,6 @@ function TableSkeleton() {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-// ─── Search bar (decorative) ──────────────────────────────────────────────────
-function SearchBar({ placeholder }: { placeholder: string }) {
-  return (
-    <div className="relative max-w-sm">
-      <Search
-        size={14}
-        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ color: "rgba(255,255,255,0.25)" }}
-      />
-      <input
-        type="text"
-        placeholder={placeholder}
-        className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          color: "rgba(255,255,255,0.7)",
-        }}
-        onFocus={(e) =>
-          (e.currentTarget.style.borderColor = "rgba(252,211,77,0.35)")
-        }
-        onBlur={(e) =>
-          (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")
-        }
-      />
     </div>
   );
 }

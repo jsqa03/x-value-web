@@ -2,6 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { Users, Inbox, AlertCircle } from "lucide-react";
 import DeleteUserButton from "./DeleteUserButton";
+import ViewAgendaButton from "./ViewAgendaButton";
 import { ROLE_META } from "./types";
 import type { Role } from "./types";
 
@@ -164,12 +165,13 @@ export default async function TeamManagementTable() {
                   </td>
 
                   {/* Actions */}
-                  <td className="px-5 py-3.5 text-right">
-                    {canDelete(p.role) ? (
-                      <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />
-                    ) : (
-                      <span className="text-white/10 text-xs">—</span>
-                    )}
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-2">
+                      <ViewAgendaButton userName={p.full_name ?? p.email} />
+                      {canDelete(p.role) ? (
+                        <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               );
@@ -197,11 +199,14 @@ export default async function TeamManagementTable() {
                   {meta.label}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <p className="text-white/40 text-xs">{p.email}</p>
-                {canDelete(p.role) ? (
-                  <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />
-                ) : null}
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-white/40 text-xs truncate">{p.email}</p>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <ViewAgendaButton userName={p.full_name ?? p.email} />
+                  {canDelete(p.role) ? (
+                    <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />
+                  ) : null}
+                </div>
               </div>
               <p className="text-white/20 text-xs">{formatDate(p.created_at)}</p>
             </div>
