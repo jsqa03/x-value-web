@@ -29,7 +29,7 @@ export default async function TeamManagementTable() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // 2 — Fetch caller role to determine which delete controls to surface
+  // 2 — Fetch caller role to determine query scope and delete controls
   const { data: callerProfile } = await supabase
     .from("profiles")
     .select("role")
@@ -37,18 +37,26 @@ export default async function TeamManagementTable() {
     .single();
   const callerRole = (callerProfile?.role ?? "client") as Role;
 
-  // 3 — Read all profiles using Service Role (bypasses RLS)
+  // 3 — Read profiles using Service Role (bypasses RLS)
+  //     • Admin  → sees everyone except themselves
+  //     • Manager → sees only users they personally created (manager_id = their id)
   const adminClient = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  const { data: profiles, error } = await adminClient
+  const baseQuery = adminClient
     .from("profiles")
     .select("id, email, full_name, role, created_at")
-    .neq("id", user.id)          // exclude self
     .order("created_at", { ascending: false });
+
+  const scopedQuery =
+    callerRole === "manager"
+      ? baseQuery.eq("manager_id", user.id)           // only their direct reports
+      : baseQuery.neq("id", user.id);                 // admin: everyone except self
+
+  const { data: profiles, error } = await scopedQuery;
 
   // ── Error state ────────────────────────────────────────────────────────────
   if (error) {
@@ -66,11 +74,15 @@ export default async function TeamManagementTable() {
 
   // ── Empty state ────────────────────────────────────────────────────────────
   if (!profiles || profiles.length === 0) {
+    const emptyMsg =
+      callerRole === "manager"
+        ? "No hay usuarios en tu equipo aún"
+        : "No hay otros usuarios registrados";
     return (
       <div className="rounded-2xl p-8 flex flex-col items-center gap-3 text-center"
         style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
         <Inbox size={28} className="text-white/15" />
-        <p className="text-white/30 text-sm">No hay otros usuarios registrados</p>
+        <p className="text-white/30 text-sm">{emptyMsg}</p>
         <p className="text-white/15 text-xs">Crea cuentas usando el botón "+ Nuevo Usuario"</p>
       </div>
     );

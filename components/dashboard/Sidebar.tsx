@@ -76,7 +76,10 @@ export default function Sidebar({
 
   function navigate(section: string) {
     const params = new URLSearchParams();
-    if (currentView && currentView !== "admin") params.set("view", currentView);
+    // Only carry the ?view= param when an admin is actively simulating another role.
+    // Real non-admin users must never have ?view= in their URL or it gets ignored anyway,
+    // but keeping it out prevents confusing URLs and potential hydration edge cases.
+    if (isAdmin && currentView !== "admin") params.set("view", currentView);
     params.set("section", section);
     router.push(`/dashboard?${params.toString()}`);
   }
@@ -84,7 +87,7 @@ export default function Sidebar({
   function simulate(role: Role) {
     const defaultSection = NAV[role][0].id;
     if (role === "admin") {
-      router.push(`/dashboard?section=overview`);
+      router.push("/dashboard?section=overview");
     } else {
       router.push(`/dashboard?view=${role}&section=${defaultSection}`);
     }

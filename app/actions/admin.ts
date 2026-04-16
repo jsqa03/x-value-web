@@ -94,11 +94,14 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
   }
 
   // 5 — Insert profile; roll back on failure
+  // If a manager is creating the account, record their ID so the hierarchy
+  // filter in TeamManagementTable can restrict their view to only their own team.
   const { error: profileError } = await adminClient.from("profiles").insert({
     id: user.id,
     email,
     full_name: fullName,
     role,
+    manager_id: caller.role === "manager" ? caller.id : null,
   });
 
   if (profileError) {
