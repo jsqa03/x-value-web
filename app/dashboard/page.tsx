@@ -59,10 +59,7 @@ export default async function DashboardPage(props: {
   const currentView = simulated ?? profile.role;
 
   return (
-    <div
-      className="flex min-h-screen text-white"
-      style={{ background: "#0a0812" }}
-    >
+    <div className="flex min-h-screen text-white bg-black">
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <Sidebar
         profile={profile}

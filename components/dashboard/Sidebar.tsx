@@ -3,24 +3,14 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  LayoutDashboard,
-  Database,
-  Users,
-  Settings,
-  Target,
-  Calendar,
-  Bot,
-  TrendingUp,
-  LogOut,
-  Eye,
-  User,
-  type LucideIcon,
+  LayoutDashboard, Database, Users, Settings,
+  Target, Calendar, Bot, TrendingUp,
+  LogOut, Eye, User, type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
-// ─── Nav items per role ────────────────────────────────────────────────────────
 interface NavItem { id: string; label: string; icon: LucideIcon }
 
 const NAV: Record<Role, NavItem[]> = {
@@ -32,20 +22,20 @@ const NAV: Record<Role, NavItem[]> = {
     { id: "profile",  label: "Mi Perfil",         icon: User            },
   ],
   manager: [
-    { id: "overview", label: "Resumen",            icon: LayoutDashboard },
-    { id: "crm",      label: "Leads del Equipo",   icon: Database        },
-    { id: "team",     label: "Mi Equipo",          icon: Users           },
-    { id: "profile",  label: "Mi Perfil",          icon: User            },
+    { id: "overview", label: "Resumen",          icon: LayoutDashboard },
+    { id: "crm",      label: "Leads del Equipo", icon: Database        },
+    { id: "team",     label: "Mi Equipo",        icon: Users           },
+    { id: "profile",  label: "Mi Perfil",        icon: User            },
   ],
   sales: [
-    { id: "leads",    label: "Mis Leads",          icon: Target          },
-    { id: "schedule", label: "Mi Agenda",          icon: Calendar        },
-    { id: "profile",  label: "Mi Perfil",          icon: User            },
+    { id: "leads",    label: "Mis Leads",  icon: Target   },
+    { id: "schedule", label: "Mi Agenda",  icon: Calendar },
+    { id: "profile",  label: "Mi Perfil",  icon: User     },
   ],
   client: [
-    { id: "agent",   label: "Mi Agente IA",        icon: Bot             },
-    { id: "metrics", label: "ROI y Métricas",      icon: TrendingUp      },
-    { id: "profile", label: "Mi Perfil",           icon: User            },
+    { id: "agent",   label: "Mi Agente IA",  icon: Bot        },
+    { id: "metrics", label: "ROI y Métricas", icon: TrendingUp },
+    { id: "profile", label: "Mi Perfil",      icon: User       },
   ],
 };
 
@@ -56,7 +46,6 @@ const ROLE_VIEWS: { role: Role; label: string }[] = [
   { role: "client",  label: "Cliente"   },
 ];
 
-// ─── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
   profile: Profile;
   effectiveRole: Role;
@@ -65,18 +54,12 @@ interface Props {
   currentView: string;
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────────
 export default function Sidebar({
-  profile,
-  effectiveRole,
-  activeSection,
-  isAdmin,
-  currentView,
+  profile, effectiveRole, activeSection, isAdmin, currentView,
 }: Props) {
   const router = useRouter();
-  const navItems = NAV[effectiveRole];
-  const roleMeta = ROLE_META[profile.role];
-  const accentColor = ROLE_META[effectiveRole].color;
+  const navItems  = NAV[effectiveRole];
+  const roleMeta  = ROLE_META[profile.role];
   const firstName = profile.full_name?.split(" ")[0] ?? "Usuario";
 
   function navigate(section: string) {
@@ -87,11 +70,10 @@ export default function Sidebar({
   }
 
   function simulate(role: Role) {
-    const defaultSection = NAV[role][0].id;
     if (role === "admin") {
       router.push("/dashboard?section=overview");
     } else {
-      router.push(`/dashboard?view=${role}&section=${defaultSection}`);
+      router.push(`/dashboard?view=${role}&section=${NAV[role][0].id}`);
     }
   }
 
@@ -103,92 +85,72 @@ export default function Sidebar({
   }
 
   return (
-    <aside
-      className="fixed top-0 left-0 h-full w-60 flex flex-col z-30 select-none"
-      style={{
-        background: "#05010d",
-        borderRight: "1px solid rgba(255,255,255,0.06)",
-      }}
-    >
-      {/* ── Logo ──────────────────────────────────────────────────────────── */}
-      <div
-        className="px-5 h-[60px] flex items-center shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-      >
+    <aside className="fixed top-0 left-0 h-full w-60 flex flex-col z-30 bg-zinc-950 border-r border-zinc-800">
+      {/* Logo */}
+      <div className="px-5 h-[60px] flex items-center shrink-0 border-b border-zinc-800">
         <Image
           src="/logo.png"
           alt="X-Value"
           width={110}
           height={28}
-          style={{ height: "24px", width: "auto" }}
+          style={{ height: "22px", width: "auto" }}
           priority
         />
       </div>
 
-      {/* ── Navigation ────────────────────────────────────────────────────── */}
+      {/* Nav */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = activeSection === item.id;
+          const active = activeSection === item.id;
           return (
             <button
               key={item.id}
               onClick={() => navigate(item.id)}
-              title={item.label}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-left w-full transition-all group relative"
-              style={{
-                background: isActive ? "rgba(255,255,255,0.07)" : "transparent",
-                color: isActive ? "#fff" : "rgba(255,255,255,0.38)",
-              }}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left w-full transition-colors relative group ${
+                active
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50"
+              }`}
             >
-              {isActive && (
-                <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
-                  style={{ background: accentColor }}
-                />
+              {active && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-orange-500" />
               )}
               <item.icon
-                size={16}
-                className="shrink-0 transition-colors"
-                style={{ color: isActive ? accentColor : "rgba(255,255,255,0.22)" }}
+                size={15}
+                className={active ? "text-orange-400" : "text-zinc-600 group-hover:text-zinc-400 transition-colors"}
               />
-              <span className="group-hover:text-white/70 transition-colors">{item.label}</span>
+              {item.label}
             </button>
           );
         })}
       </nav>
 
-      {/* ── Bottom ────────────────────────────────────────────────────────── */}
-      <div
-        className="px-3 pb-4 pt-3 flex flex-col gap-3 shrink-0"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
-      >
+      {/* Bottom */}
+      <div className="px-3 pb-4 pt-3 flex flex-col gap-3 shrink-0 border-t border-zinc-800">
         {/* Role Simulator — admin only */}
         {isAdmin && (
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-1.5 px-1 mb-0.5">
-              <Eye size={10} style={{ color: "rgba(252,211,77,0.6)" }} />
-              <span
-                className="text-[9px] font-semibold tracking-[0.18em] uppercase"
-                style={{ color: "rgba(255,255,255,0.2)" }}
-              >
+              <Eye size={10} className="text-orange-500/60" />
+              <span className="text-[9px] font-semibold tracking-[0.18em] uppercase text-zinc-600">
                 Simular rol
               </span>
             </div>
             <div className="grid grid-cols-2 gap-1">
               {ROLE_VIEWS.map(({ role, label }) => {
                 const meta = ROLE_META[role];
-                const isActiveView =
+                const isActive =
                   currentView === role ||
                   (role === "admin" && (!currentView || currentView === "admin"));
                 return (
                   <button
                     key={role}
                     onClick={() => simulate(role)}
-                    className="text-[10px] font-semibold px-2 py-1.5 rounded-lg transition-all text-center"
+                    className="text-[10px] font-semibold px-2 py-1.5 rounded-md transition-colors text-center"
                     style={{
-                      background: isActiveView ? meta.bg : "rgba(255,255,255,0.03)",
-                      color: isActiveView ? meta.color : "rgba(255,255,255,0.22)",
-                      border: `1px solid ${isActiveView ? meta.border : "rgba(255,255,255,0.06)"}`,
+                      background: isActive ? meta.bg : "transparent",
+                      color: isActive ? meta.color : "rgba(255,255,255,0.25)",
+                      border: `1px solid ${isActive ? meta.border : "rgba(255,255,255,0.06)"}`,
                     }}
                   >
                     {label}
@@ -200,13 +162,7 @@ export default function Sidebar({
         )}
 
         {/* Profile card */}
-        <div
-          className="rounded-xl p-3 flex items-center gap-2.5"
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 flex items-center gap-2.5">
           {profile.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -217,11 +173,7 @@ export default function Sidebar({
           ) : (
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-              style={{
-                background: `${roleMeta.color}15`,
-                color: roleMeta.color,
-                border: `1px solid ${roleMeta.color}25`,
-              }}
+              style={{ background: `${roleMeta.color}15`, color: roleMeta.color, border: `1px solid ${roleMeta.color}25` }}
             >
               {firstName[0]?.toUpperCase() ?? "?"}
             </div>
@@ -232,11 +184,7 @@ export default function Sidebar({
             </p>
             <span
               className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-              style={{
-                background: roleMeta.bg,
-                color: roleMeta.color,
-                border: `1px solid ${roleMeta.border}`,
-              }}
+              style={{ background: roleMeta.bg, color: roleMeta.color, border: `1px solid ${roleMeta.border}` }}
             >
               {roleMeta.label}
             </span>
@@ -246,16 +194,10 @@ export default function Sidebar({
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/[0.04] group w-full"
-          style={{ color: "rgba(255,255,255,0.28)" }}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-600 hover:text-zinc-400 hover:bg-zinc-900/50 transition-colors w-full group"
         >
-          <LogOut
-            size={13}
-            className="shrink-0 transition-colors group-hover:text-red-400/70"
-          />
-          <span className="text-xs transition-colors group-hover:text-white/50">
-            Cerrar sesión
-          </span>
+          <LogOut size={13} className="shrink-0 group-hover:text-red-400/70 transition-colors" />
+          <span className="text-xs">Cerrar sesión</span>
         </button>
       </div>
     </aside>

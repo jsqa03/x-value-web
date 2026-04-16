@@ -12,30 +12,18 @@ import { COUNTRIES } from "./types";
 
 // ─── Roles available per caller ────────────────────────────────────────────────
 const ALL_ROLES = [
-  { value: "manager", label: "Manager",   color: "#a855f7", bg: "rgba(168,85,247,0.1)",  border: "rgba(168,85,247,0.3)"  },
-  { value: "sales",   label: "Comercial", color: "#D1FF48", bg: "rgba(209,255,72,0.1)",  border: "rgba(209,255,72,0.3)"  },
-  { value: "client",  label: "Cliente",   color: "#00c0f3", bg: "rgba(0,192,243,0.1)",   border: "rgba(0,192,243,0.3)"   },
+  { value: "manager", label: "Manager",   color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)"  },
+  { value: "sales",   label: "Comercial", color: "#22c55e", bg: "rgba(34,197,94,0.08)",   border: "rgba(34,197,94,0.2)"    },
+  { value: "client",  label: "Cliente",   color: "#38bdf8", bg: "rgba(56,189,248,0.08)",  border: "rgba(56,189,248,0.2)"   },
 ] as const;
 
 const CLIENT_TYPES = ["X-Value AI", "X-Value Growth"] as const;
 
-interface Props {
-  callerRole: "admin" | "manager";
-}
-
-const inputBase: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-};
+interface Props { callerRole: "admin" | "manager" }
 
 // ─── Field wrapper ─────────────────────────────────────────────────────────────
-function Field({
-  label, icon: Icon, required: req, children,
-}: {
-  label: string;
-  icon: React.ElementType;
-  required?: boolean;
-  children: React.ReactNode;
+function Field({ label, icon: Icon, required: req, children }: {
+  label: string; icon: React.ElementType; required?: boolean; children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -50,72 +38,34 @@ function Field({
 }
 
 // ─── Input with left icon ──────────────────────────────────────────────────────
-function IconInput({
-  icon: Icon, name, type = "text", placeholder, required, min, max, ...rest
-}: {
-  icon: React.ElementType;
-  name: string;
-  type?: string;
-  placeholder?: string;
-  required?: boolean;
-  min?: string;
-  max?: string;
-  minLength?: number;
+function IconInput({ icon: Icon, name, type = "text", placeholder, required, min, max, ...rest }: {
+  icon: React.ElementType; name: string; type?: string; placeholder?: string;
+  required?: boolean; min?: string; max?: string; minLength?: number;
 }) {
   return (
     <div className="relative">
-      <Icon
-        size={14}
-        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ color: "rgba(255,255,255,0.22)" }}
-      />
+      <Icon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600" />
       <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        required={required}
-        min={min}
-        max={max}
+        name={name} type={type} placeholder={placeholder} required={required} min={min} max={max}
         {...rest}
-        className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-700 outline-none transition-all"
-        style={inputBase}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(252,211,77,0.4)")}
-        onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/50 transition-colors"
       />
     </div>
   );
 }
 
 // ─── Select with left icon ─────────────────────────────────────────────────────
-function IconSelect({
-  icon: Icon, name, value, onChange, required, children,
-}: {
-  icon: React.ElementType;
-  name: string;
-  value: string;
-  onChange: (v: string) => void;
-  required?: boolean;
-  children: React.ReactNode;
+function IconSelect({ icon: Icon, name, value, onChange, required, children }: {
+  icon: React.ElementType; name: string; value: string;
+  onChange: (v: string) => void; required?: boolean; children: React.ReactNode;
 }) {
   return (
     <div className="relative">
-      <Icon
-        size={14}
-        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
-        style={{ color: "rgba(255,255,255,0.22)" }}
-      />
+      <Icon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10 text-zinc-600" />
       <select
-        name={name}
-        value={value}
-        required={required}
+        name={name} value={value} required={required}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all appearance-none"
-        style={{
-          ...inputBase,
-          color: value ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
-        }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(252,211,77,0.4)")}
-        onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white outline-none focus:border-orange-500/50 transition-colors appearance-none"
       >
         {children}
       </select>
@@ -129,30 +79,25 @@ export default function CreateUserModal({ callerRole }: Props) {
     ? ALL_ROLES.filter((r) => r.value !== "manager")
     : ALL_ROLES;
 
-  const [open, setOpen]                         = useState(false);
-  const [showPwd, setShowPwd]                   = useState(false);
-  const [role, setRole]                         = useState<string>(ROLES[ROLES.length - 1].value);
-  const [leaderId, setLeaderId]                 = useState<string>("");
-  const [leaders, setLeaders]                   = useState<LeaderOption[]>([]);
-  const [loadingLeaders, setLoadingLeaders]     = useState(false);
-  const [country, setCountry]                   = useState<string>("");
-  const [nationality, setNationality]           = useState<string>("");
-  const [clientType, setClientType]             = useState<string>("");
-  const [result, setResult]                     = useState<ActionResult | null>(null);
-  const [isPending, startTransition]            = useTransition();
-  const formRef                                 = useRef<HTMLFormElement>(null);
+  const [open, setOpen]                     = useState(false);
+  const [showPwd, setShowPwd]               = useState(false);
+  const [role, setRole]                     = useState<string>(ROLES[ROLES.length - 1].value);
+  const [leaderId, setLeaderId]             = useState<string>("");
+  const [leaders, setLeaders]               = useState<LeaderOption[]>([]);
+  const [loadingLeaders, setLoadingLeaders] = useState(false);
+  const [country, setCountry]               = useState<string>("");
+  const [nationality, setNationality]       = useState<string>("");
+  const [clientType, setClientType]         = useState<string>("");
+  const [result, setResult]                 = useState<ActionResult | null>(null);
+  const [isPending, startTransition]        = useTransition();
+  const formRef                             = useRef<HTMLFormElement>(null);
 
-  // Fetch leaders when modal opens and role requires one
   useEffect(() => {
     if (!open) return;
     setLoadingLeaders(true);
-    getLeaders().then((list) => {
-      setLeaders(list);
-      setLoadingLeaders(false);
-    });
+    getLeaders().then((list) => { setLeaders(list); setLoadingLeaders(false); });
   }, [open]);
 
-  // Reset leader when role changes to manager (not needed)
   useEffect(() => {
     if (role === "manager") setLeaderId("");
     if (role !== "client") setClientType("");
@@ -161,11 +106,7 @@ export default function CreateUserModal({ callerRole }: Props) {
   function handleOpen() {
     setResult(null);
     setRole(ROLES[ROLES.length - 1].value);
-    setLeaderId("");
-    setCountry("");
-    setNationality("");
-    setClientType("");
-    setShowPwd(false);
+    setLeaderId(""); setCountry(""); setNationality(""); setClientType(""); setShowPwd(false);
     setOpen(true);
   }
 
@@ -180,11 +121,10 @@ export default function CreateUserModal({ callerRole }: Props) {
     setResult(null);
     const fd = new FormData(e.currentTarget);
     fd.set("role", role);
-    if (leaderId) fd.set("manager_id", leaderId);
-    if (country) fd.set("country", country);
+    if (leaderId)    fd.set("manager_id",  leaderId);
+    if (country)     fd.set("country",     country);
     if (nationality) fd.set("nationality", nationality);
-    if (clientType) fd.set("client_type", clientType);
-
+    if (clientType)  fd.set("client_type", clientType);
     startTransition(async () => {
       const res = await createUserAccount(fd);
       setResult(res);
@@ -199,8 +139,7 @@ export default function CreateUserModal({ callerRole }: Props) {
       {/* ── Trigger ─────────────────────────────────────────────────────── */}
       <button
         onClick={handleOpen}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-black transition-all hover:scale-[1.02] hover:shadow-[0_0_22px_rgba(252,211,77,0.35)] active:scale-[0.99]"
-        style={{ background: "#fcd34d" }}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors"
       >
         <UserPlus size={14} />
         Nuevo Usuario
@@ -209,39 +148,16 @@ export default function CreateUserModal({ callerRole }: Props) {
       {/* ── Modal overlay ───────────────────────────────────────────────── */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            background: "rgba(0,0,0,0.78)",
-          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && handleClose()}
         >
-          <div
-            className="relative w-full max-w-md rounded-2xl overflow-hidden max-h-[90vh] flex flex-col"
-            style={{
-              background: "rgba(9,7,20,0.98)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 24px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)",
-            }}
-          >
-            {/* Accent line */}
-            <div
-              className="absolute top-0 left-8 right-8 h-px shrink-0"
-              style={{ background: "linear-gradient(to right, transparent, rgba(252,211,77,0.5), transparent)" }}
-            />
+          <div className="relative w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden max-h-[90vh] flex flex-col">
 
             {/* Header */}
-            <div
-              className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-            >
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-zinc-800 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center"
-                  style={{ background: "rgba(252,211,77,0.1)", border: "1px solid rgba(252,211,77,0.2)" }}
-                >
-                  <UserPlus size={15} style={{ color: "#fcd34d" }} />
+                <div className="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                  <UserPlus size={15} className="text-orange-400" />
                 </div>
                 <div>
                   <p className="text-white font-semibold text-sm leading-none">Crear cuenta de usuario</p>
@@ -251,7 +167,7 @@ export default function CreateUserModal({ callerRole }: Props) {
               <button
                 onClick={handleClose}
                 disabled={isPending}
-                className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 rounded-lg hover:bg-white/5"
+                className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 rounded-lg hover:bg-zinc-900"
               >
                 <X size={18} />
               </button>
@@ -263,17 +179,8 @@ export default function CreateUserModal({ callerRole }: Props) {
               {/* ── Success ─────────────────────────────────────────────── */}
               {result?.success ? (
                 <div className="flex flex-col items-center gap-4 py-8 text-center">
-                  <div className="relative">
-                    <div
-                      className="absolute inset-0 rounded-full animate-ping"
-                      style={{ background: "rgba(34,197,94,0.12)" }}
-                    />
-                    <div
-                      className="relative w-14 h-14 rounded-full flex items-center justify-center"
-                      style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)" }}
-                    >
-                      <CheckCircle2 size={26} className="text-emerald-400" />
-                    </div>
+                  <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 size={26} className="text-emerald-400" />
                   </div>
                   <div>
                     <p className="text-white font-semibold text-base mb-1">¡Cuenta creada!</p>
@@ -284,13 +191,9 @@ export default function CreateUserModal({ callerRole }: Props) {
                       setResult(null);
                       formRef.current?.reset();
                       setRole(ROLES[ROLES.length - 1].value);
-                      setLeaderId("");
-                      setCountry("");
-                      setNationality("");
-                      setClientType("");
+                      setLeaderId(""); setCountry(""); setNationality(""); setClientType("");
                     }}
-                    className="text-sm font-semibold transition-colors hover:text-white"
-                    style={{ color: "#fcd34d" }}
+                    className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors"
                   >
                     Crear otro usuario →
                   </button>
@@ -300,7 +203,6 @@ export default function CreateUserModal({ callerRole }: Props) {
                 /* ── Form ─────────────────────────────────────────────── */
                 <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-                  {/* Required identity fields */}
                   <Field label="Nombre completo" icon={User} required>
                     <IconInput icon={User} name="full_name" placeholder="Santiago Martínez" required />
                   </Field>
@@ -311,21 +213,13 @@ export default function CreateUserModal({ callerRole }: Props) {
 
                   <Field label="Contraseña temporal" icon={Lock} required>
                     <div className="relative">
-                      <Lock
-                        size={14}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                        style={{ color: "rgba(255,255,255,0.22)" }}
-                      />
+                      <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600" />
                       <input
                         name="password"
                         type={showPwd ? "text" : "password"}
                         placeholder="Mínimo 6 caracteres"
-                        required
-                        minLength={6}
-                        className="w-full rounded-xl pl-9 pr-11 py-2.5 text-sm text-white placeholder:text-zinc-700 outline-none transition-all"
-                        style={inputBase}
-                        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(252,211,77,0.4)")}
-                        onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                        required minLength={6}
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-11 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/50 transition-colors"
                       />
                       <button
                         type="button"
@@ -350,10 +244,10 @@ export default function CreateUserModal({ callerRole }: Props) {
                             key={r.value}
                             type="button"
                             onClick={() => setRole(r.value)}
-                            className="py-2.5 rounded-xl text-sm font-semibold transition-all hover:brightness-110"
+                            className="py-2.5 rounded-lg text-sm font-semibold transition-all"
                             style={{
-                              background: active ? r.bg : "rgba(255,255,255,0.04)",
-                              border: `1px solid ${active ? r.border : "rgba(255,255,255,0.08)"}`,
+                              background: active ? r.bg : "rgba(255,255,255,0.03)",
+                              border: `1px solid ${active ? r.border : "rgba(255,255,255,0.07)"}`,
                               color: active ? r.color : "rgba(255,255,255,0.3)",
                             }}
                           >
@@ -364,45 +258,32 @@ export default function CreateUserModal({ callerRole }: Props) {
                     </div>
                   </div>
 
-                  {/* Leader assignment — required for sales and client */}
+                  {/* Leader assignment */}
                   {needsLeader && (
                     <Field label="Asignar Líder" icon={Users} required>
                       <div className="relative">
-                        <Users
-                          size={14}
-                          className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
-                          style={{ color: "rgba(255,255,255,0.22)" }}
-                        />
+                        <Users size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10 text-zinc-600" />
                         <select
-                          value={leaderId}
-                          required
+                          value={leaderId} required
                           onChange={(e) => setLeaderId(e.target.value)}
-                          className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all appearance-none"
-                          style={{
-                            ...inputBase,
-                            color: leaderId ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
-                          }}
-                          onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(252,211,77,0.4)")}
-                          onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white outline-none focus:border-orange-500/50 transition-colors appearance-none"
                         >
-                          <option value="" disabled style={{ background: "#0a0812" }}>
+                          <option value="" disabled className="bg-zinc-950">
                             {loadingLeaders ? "Cargando líderes…" : "Selecciona un líder…"}
                           </option>
-                          {/* Group: Managers */}
                           {leaders.filter((l) => l.role === "manager").length > 0 && (
-                            <optgroup label="── Managers ──" style={{ background: "#0a0812", color: "rgba(255,255,255,0.4)" }}>
+                            <optgroup label="── Managers ──" className="bg-zinc-950">
                               {leaders.filter((l) => l.role === "manager").map((m) => (
-                                <option key={m.id} value={m.id} style={{ background: "#0a0812" }}>
+                                <option key={m.id} value={m.id} className="bg-zinc-950">
                                   {m.full_name ?? m.email}
                                 </option>
                               ))}
                             </optgroup>
                           )}
-                          {/* Group: Sales reps */}
                           {leaders.filter((l) => l.role === "sales").length > 0 && (
-                            <optgroup label="── Comerciales ──" style={{ background: "#0a0812", color: "rgba(255,255,255,0.4)" }}>
+                            <optgroup label="── Comerciales ──" className="bg-zinc-950">
                               {leaders.filter((l) => l.role === "sales").map((s) => (
-                                <option key={s.id} value={s.id} style={{ background: "#0a0812" }}>
+                                <option key={s.id} value={s.id} className="bg-zinc-950">
                                   {s.full_name ?? s.email}
                                 </option>
                               ))}
@@ -413,13 +294,13 @@ export default function CreateUserModal({ callerRole }: Props) {
                     </Field>
                   )}
 
-                  {/* Client type — required only for client role */}
+                  {/* Client type */}
                   {role === "client" && (
                     <Field label="Tipo de Cliente" icon={Tag} required>
                       <IconSelect icon={Tag} name="client_type" value={clientType} onChange={setClientType} required>
-                        <option value="" disabled style={{ background: "#0a0812" }}>Selecciona tipo…</option>
+                        <option value="" disabled className="bg-zinc-950">Selecciona tipo…</option>
                         {CLIENT_TYPES.map((t) => (
-                          <option key={t} value={t} style={{ background: "#0a0812" }}>{t}</option>
+                          <option key={t} value={t} className="bg-zinc-950">{t}</option>
                         ))}
                       </IconSelect>
                     </Field>
@@ -427,11 +308,9 @@ export default function CreateUserModal({ callerRole }: Props) {
 
                   {/* Divider */}
                   <div className="flex items-center gap-3 mt-1">
-                    <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
-                    <span className="text-zinc-700 text-[10px] uppercase tracking-widest font-semibold">
-                      Datos adicionales
-                    </span>
-                    <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+                    <div className="flex-1 h-px bg-zinc-800" />
+                    <span className="text-zinc-700 text-[10px] uppercase tracking-widest font-semibold">Datos adicionales</span>
+                    <div className="flex-1 h-px bg-zinc-800" />
                   </div>
 
                   <Field label="Universidad / Institución" icon={GraduationCap}>
@@ -440,9 +319,7 @@ export default function CreateUserModal({ callerRole }: Props) {
 
                   <Field label="Fecha de nacimiento" icon={CalendarDays}>
                     <IconInput
-                      icon={CalendarDays}
-                      name="birth_date"
-                      type="date"
+                      icon={CalendarDays} name="birth_date" type="date"
                       max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split("T")[0]}
                       min="1930-01-01"
                     />
@@ -451,28 +328,21 @@ export default function CreateUserModal({ callerRole }: Props) {
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="País" icon={Globe}>
                       <IconSelect icon={Globe} name="country" value={country} onChange={setCountry}>
-                        <option value="" style={{ background: "#0a0812" }}>— Seleccionar —</option>
-                        {COUNTRIES.map((c) => (
-                          <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>
-                        ))}
+                        <option value="" className="bg-zinc-950">— Seleccionar —</option>
+                        {COUNTRIES.map((c) => <option key={c} value={c} className="bg-zinc-950">{c}</option>)}
                       </IconSelect>
                     </Field>
                     <Field label="Nacionalidad" icon={Globe}>
                       <IconSelect icon={Globe} name="nationality" value={nationality} onChange={setNationality}>
-                        <option value="" style={{ background: "#0a0812" }}>— Seleccionar —</option>
-                        {COUNTRIES.map((c) => (
-                          <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>
-                        ))}
+                        <option value="" className="bg-zinc-950">— Seleccionar —</option>
+                        {COUNTRIES.map((c) => <option key={c} value={c} className="bg-zinc-950">{c}</option>)}
                       </IconSelect>
                     </Field>
                   </div>
 
                   {/* Error */}
                   {result?.error && (
-                    <div
-                      className="flex items-start gap-2 rounded-xl px-3 py-2.5"
-                      style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}
-                    >
+                    <div className="flex items-start gap-2 bg-red-500/5 border border-red-500/20 rounded-lg px-3 py-2.5">
                       <AlertCircle size={14} className="text-red-400 mt-0.5 shrink-0" />
                       <p className="text-red-400 text-xs leading-relaxed">{result.error}</p>
                     </div>
@@ -482,19 +352,12 @@ export default function CreateUserModal({ callerRole }: Props) {
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-black transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 hover:scale-[1.01] mt-1"
-                    style={{ background: "#fcd34d" }}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
                   >
                     {isPending ? (
-                      <>
-                        <Loader2 size={15} className="animate-spin text-black" />
-                        Creando cuenta…
-                      </>
+                      <><Loader2 size={15} className="animate-spin" /> Creando cuenta…</>
                     ) : (
-                      <>
-                        <UserPlus size={15} />
-                        Crear cuenta
-                      </>
+                      <><UserPlus size={15} /> Crear cuenta</>
                     )}
                   </button>
 

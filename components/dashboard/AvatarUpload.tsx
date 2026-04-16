@@ -17,7 +17,7 @@ export default function AvatarUpload({
   userId,
   initialAvatarUrl,
   displayName,
-  accentColor = "#a855f7",
+  accentColor = "#f97316",
   size = "md",
 }: Props) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl ?? null);
@@ -35,52 +35,37 @@ export default function AvatarUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      setError("Máximo 50 MB por imagen.");
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
-      setError("Solo se permiten imágenes.");
-      return;
-    }
+    if (file.size > 50 * 1024 * 1024) { setError("Máximo 50 MB por imagen."); return; }
+    if (!file.type.startsWith("image/")) { setError("Solo se permiten imágenes."); return; }
 
     setLoading(true);
     setError(null);
 
     const supabase = createClient();
 
-    // Path MUST start with userId/ to satisfy the RLS policy
-    // (Supabase default policy: folder name = auth.uid())
-    const timestamp = Date.now();
-    const path = `${userId}/${timestamp}-${file.name}`;
+    // Use the REAL authenticated user id for storage RLS compliance
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError("No autenticado."); setLoading(false); return; }
 
-    // Delete any previous avatar files in the user's folder first
-    const { data: existing } = await supabase.storage
-      .from("avatars")
-      .list(userId);
+    const realUserId = user.id;
+    const timestamp  = Date.now();
+    const path       = `${realUserId}/${timestamp}-${file.name}`;
 
+    // Remove previous files in user's folder
+    const { data: existing } = await supabase.storage.from("avatars").list(realUserId);
     if (existing && existing.length > 0) {
       await supabase.storage
         .from("avatars")
-        .remove(existing.map((f) => `${userId}/${f.name}`));
+        .remove(existing.map((f) => `${realUserId}/${f.name}`));
     }
 
-    // Upload new file
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, file, { upsert: false, contentType: file.type });
 
-    if (uploadError) {
-      setError(uploadError.message);
-      setLoading(false);
-      return;
-    }
+    if (uploadError) { setError(uploadError.message); setLoading(false); return; }
 
-    const { data: urlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(path);
-
-    // Cache-bust so the browser fetches the new image
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     const publicUrl = `${urlData.publicUrl}?t=${timestamp}`;
 
     const { error: updateError } = await supabase
@@ -88,16 +73,11 @@ export default function AvatarUpload({
       .update({ avatar_url: urlData.publicUrl })
       .eq("id", userId);
 
-    if (updateError) {
-      setError(updateError.message);
-      setLoading(false);
-      return;
-    }
+    if (updateError) { setError(updateError.message); setLoading(false); return; }
 
     setAvatarUrl(publicUrl);
     setLoading(false);
     if (fileRef.current) fileRef.current.value = "";
-
     await revalidateDashboard();
   }
 
@@ -106,19 +86,18 @@ export default function AvatarUpload({
     setError(null);
     const supabase = createClient();
 
-    // List and remove all files in the user's folder
-    const { data: existing } = await supabase.storage
-      .from("avatars")
-      .list(userId);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError("No autenticado."); setLoading(false); return; }
 
+    const realUserId = user.id;
+    const { data: existing } = await supabase.storage.from("avatars").list(realUserId);
     if (existing && existing.length > 0) {
       await supabase.storage
         .from("avatars")
-        .remove(existing.map((f) => `${userId}/${f.name}`));
+        .remove(existing.map((f) => `${realUserId}/${f.name}`));
     }
 
     await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
-
     setAvatarUrl(null);
     setLoading(false);
     await revalidateDashboard();
@@ -133,33 +112,17 @@ export default function AvatarUpload({
       >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatarUrl}
-            alt={displayName}
-            className={`${dim} rounded-2xl object-cover`}
-          />
+          <img src={avatarUrl} alt={displayName} className={`${dim} rounded-2xl object-cover`} />
         ) : (
           <div
             className={`${dim} rounded-2xl flex items-center justify-center font-bold`}
-            style={{
-              background: `${accentColor}15`,
-              color: accentColor,
-              border: `1px solid ${accentColor}25`,
-            }}
+            style={{ background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}25` }}
           >
             {initial}
           </div>
         )}
-
-        <div
-          className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: "rgba(0,0,0,0.55)" }}
-        >
-          {loading ? (
-            <Loader2 size={18} className="animate-spin text-white" />
-          ) : (
-            <Camera size={18} className="text-white" />
-          )}
+        <div className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/55">
+          {loading ? <Loader2 size={18} className="animate-spin text-white" /> : <Camera size={18} className="text-white" />}
         </div>
       </div>
 
@@ -168,8 +131,7 @@ export default function AvatarUpload({
         <button
           onClick={() => fileRef.current?.click()}
           disabled={loading}
-          className="text-xs px-3 py-1.5 rounded-lg transition-all hover:bg-white/[0.06] disabled:opacity-40"
-          style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+          className="text-xs px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-40"
         >
           {avatarUrl ? "Cambiar foto" : "Subir foto"}
         </button>
@@ -177,8 +139,7 @@ export default function AvatarUpload({
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="text-xs px-3 py-1.5 rounded-lg transition-all hover:bg-red-500/10 disabled:opacity-40"
-            style={{ color: "rgba(239,68,68,0.7)", border: "1px solid rgba(239,68,68,0.2)" }}
+            className="text-xs px-3 py-1.5 rounded-full bg-zinc-900 border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
           >
             <Trash2 size={11} className="inline mr-1" />
             Eliminar
@@ -186,17 +147,9 @@ export default function AvatarUpload({
         )}
       </div>
 
-      {error && (
-        <p className="text-red-400 text-xs text-center max-w-[200px]">{error}</p>
-      )}
+      {error && <p className="text-red-400 text-xs text-center max-w-[200px]">{error}</p>}
 
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleUpload}
-      />
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
     </div>
   );
 }

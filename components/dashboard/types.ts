@@ -24,11 +24,12 @@ export function computeAge(birthDate: string | null | undefined): number | null 
   return age;
 }
 
+/** Premium SaaS palette — toned-down role colors, no neon */
 export const ROLE_META: Record<Role, { label: string; color: string; bg: string; border: string }> = {
-  admin:   { label: "CEO / Admin", color: "#fcd34d", bg: "rgba(252,211,77,0.08)",  border: "rgba(252,211,77,0.2)"  },
-  manager: { label: "Manager",     color: "#a855f7", bg: "rgba(168,85,247,0.08)", border: "rgba(168,85,247,0.2)"  },
-  sales:   { label: "Comercial",   color: "#D1FF48", bg: "rgba(209,255,72,0.08)", border: "rgba(209,255,72,0.2)"  },
-  client:  { label: "Cliente",     color: "#00c0f3", bg: "rgba(0,192,243,0.08)",  border: "rgba(0,192,243,0.2)"   },
+  admin:   { label: "CEO / Admin", color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.2)"  },
+  manager: { label: "Manager",     color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)" },
+  sales:   { label: "Comercial",   color: "#22c55e", bg: "rgba(34,197,94,0.08)",   border: "rgba(34,197,94,0.2)"   },
+  client:  { label: "Cliente",     color: "#38bdf8", bg: "rgba(56,189,248,0.08)",  border: "rgba(56,189,248,0.2)"  },
 };
 
 /** Alphabetically sorted list of countries (in Spanish) for select inputs. */
