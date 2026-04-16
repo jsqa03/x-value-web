@@ -23,15 +23,17 @@ const NAV: Record<Role, NavItem[]> = {
     { id: "profile",   label: "Mi Perfil",         icon: User            },
   ],
   manager: [
-    { id: "overview", label: "Resumen",          icon: LayoutDashboard },
-    { id: "crm",      label: "Leads del Equipo", icon: Database        },
-    { id: "team",     label: "Mi Equipo",        icon: Users           },
-    { id: "profile",  label: "Mi Perfil",        icon: User            },
+    { id: "overview",  label: "Resumen",          icon: LayoutDashboard },
+    { id: "crm",       label: "Leads del Equipo", icon: Database        },
+    { id: "team",      label: "Mi Equipo",        icon: Users           },
+    { id: "calendar",  label: "Calendario",       icon: Calendar        },
+    { id: "profile",   label: "Mi Perfil",        icon: User            },
   ],
   sales: [
-    { id: "leads",    label: "Mis Leads",  icon: Target   },
-    { id: "schedule", label: "Mi Agenda",  icon: Calendar },
-    { id: "profile",  label: "Mi Perfil",  icon: User     },
+    { id: "leads",     label: "Mis Leads",   icon: Target   },
+    { id: "schedule",  label: "Mi Agenda",   icon: Calendar },
+    { id: "calendar",  label: "Calendario",  icon: Calendar },
+    { id: "profile",   label: "Mi Perfil",   icon: User     },
   ],
   client: [
     { id: "agent",   label: "Mi Agente IA",  icon: Bot        },
@@ -53,14 +55,13 @@ interface Props {
   activeSection: string;
   isAdmin: boolean;
   currentView: string;
-  canViewCalendar?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 export default function Sidebar({
   profile, effectiveRole, activeSection, isAdmin, currentView,
-  canViewCalendar = false, isOpen = false, onClose,
+  isOpen = false, onClose,
 }: Props) {
   const router    = useRouter();
   const navItems  = NAV[effectiveRole];
@@ -148,29 +149,6 @@ export default function Sidebar({
           );
         })}
 
-        {/* Calendario — visible para no-admin con permiso explícito */}
-        {!isAdmin && canViewCalendar && (() => {
-          const active = activeSection === "calendar";
-          return (
-            <button
-              onClick={() => navigate("calendar")}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left w-full transition-colors relative group ${
-                active
-                  ? "bg-zinc-900 text-white"
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50"
-              }`}
-            >
-              {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-orange-500" />
-              )}
-              <Calendar
-                size={15}
-                className={active ? "text-orange-400" : "text-zinc-600 group-hover:text-zinc-400 transition-colors"}
-              />
-              Calendario
-            </button>
-          );
-        })()}
       </nav>
 
       {/* Bottom */}

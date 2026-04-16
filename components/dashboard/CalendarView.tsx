@@ -16,6 +16,11 @@ interface Meeting {
   creator: Creator | null;
 }
 
+interface Props {
+  userId: string;
+  userRole: string;
+}
+
 function getAdminClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,7 +38,6 @@ function parseDate(iso: string) {
     }),
     time: d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
     isPast: d < now,
-    raw: d,
   };
 }
 
@@ -44,9 +48,9 @@ function MeetingCard({ meeting, isPast }: { meeting: Meeting; isPast: boolean })
   return (
     <div
       className="group flex gap-4 px-5 py-4 hover:bg-zinc-900/30 transition-colors border-b border-zinc-800/40 last:border-0"
-      style={{ opacity: isPast ? 0.6 : 1 }}
+      style={{ opacity: isPast ? 0.65 : 1 }}
     >
-      {/* Date pill */}
+      {/* Date column */}
       <div className="shrink-0 flex flex-col items-center justify-center w-12 pt-0.5">
         <span
           className="text-[10px] font-bold uppercase tracking-widest"
@@ -65,7 +69,7 @@ function MeetingCard({ meeting, isPast }: { meeting: Meeting; isPast: boolean })
         </span>
       </div>
 
-      {/* Divider */}
+      {/* Vertical divider */}
       <div
         className="w-px self-stretch rounded-full shrink-0"
         style={{ background: isPast ? "rgba(63,63,70,0.6)" : "rgba(249,115,22,0.4)" }}
@@ -73,6 +77,7 @@ function MeetingCard({ meeting, isPast }: { meeting: Meeting; isPast: boolean })
 
       {/* Content */}
       <div className="flex-1 min-w-0">
+        {/* Top row: company + badge */}
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2 min-w-0">
             <Building2 size={13} className="text-zinc-500 shrink-0" />
@@ -90,53 +95,98 @@ function MeetingCard({ meeting, isPast }: { meeting: Meeting; isPast: boolean })
           </span>
         </div>
 
+        {/* Date + time */}
         <div className="flex items-center gap-1.5 mt-1">
           <Clock size={11} className="text-zinc-600 shrink-0" />
           <p className="text-zinc-400 text-xs capitalize">{date} — {time}</p>
         </div>
 
+        {/* Description */}
         {meeting.description && (
           <p className="text-zinc-500 text-xs mt-1.5 leading-relaxed line-clamp-2">
             {meeting.description}
           </p>
         )}
 
+        {/* Author */}
         <div className="flex items-center gap-1.5 mt-2">
-          <User size={10} className="text-zinc-700 shrink-0" />
-          <p className="text-zinc-700 text-[11px]">Agendada por {creatorName}</p>
+          <User size={11} className="text-zinc-500 shrink-0" />
+          <p className="text-zinc-400 text-sm">
+            Agendado por:{" "}
+            <span className="font-medium text-zinc-300">{creatorName}</span>
+          </p>
         </div>
       </div>
     </div>
   );
 }
 
-export default async function CalendarView() {
+async function fetchMeetings(userId: string, userRole: string) {
   const ac = getAdminClient();
 
-  const { data, error } = await ac
+  const baseSelect = `
+    id,
+    company_name,
+    meeting_date,
+    description,
+    created_at,
+    creator:profiles!created_by(full_name, email)
+  `;
+
+  if (userRole === "admin") {
+    return ac
+      .from("meetings")
+      .select(baseSelect)
+      .order("meeting_date", { ascending: true });
+  }
+
+  if (userRole === "manager") {
+    // Fetch team member IDs first
+    const { data: team } = await ac
+      .from("profiles")
+      .select("id")
+      .eq("manager_id", userId);
+
+    const teamIds = (team ?? []).map((m: { id: string }) => m.id);
+    const visibleIds = [userId, ...teamIds];
+
+    return ac
+      .from("meetings")
+      .select(baseSelect)
+      .in("created_by", visibleIds)
+      .order("meeting_date", { ascending: true });
+  }
+
+  // sales (and any other role): only their own meetings
+  return ac
     .from("meetings")
-    .select(`
-      id,
-      company_name,
-      meeting_date,
-      description,
-      created_at,
-      creator:profiles!created_by(full_name, email)
-    `)
+    .select(baseSelect)
+    .eq("created_by", userId)
     .order("meeting_date", { ascending: true });
+}
+
+export default async function CalendarView({ userId, userRole }: Props) {
+  const { data, error } = await fetchMeetings(userId, userRole);
 
   const meetings = (data ?? []) as Meeting[];
   const now = new Date();
 
   const upcoming = meetings.filter((m) => new Date(m.meeting_date) >= now);
-  const past     = meetings.filter((m) => new Date(m.meeting_date) < now);
+  const past     = meetings.filter((m) => new Date(m.meeting_date) <  now);
+
+  const scopeLabel =
+    userRole === "admin"   ? "empresa" :
+    userRole === "manager" ? "tu equipo" :
+    "ti";
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">Agenda de reuniones</p>
+          <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">
+            Agenda de reuniones · {scopeLabel}
+          </p>
           <h1 className="text-2xl font-semibold text-white tracking-tight">Calendario de Citas</h1>
         </div>
         <ScheduleMeetingModal />
@@ -148,7 +198,7 @@ export default async function CalendarView() {
         </div>
       )}
 
-      {/* Upcoming meetings */}
+      {/* Upcoming */}
       <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
@@ -164,7 +214,7 @@ export default async function CalendarView() {
           <div className="flex flex-col items-center gap-3 py-12">
             <Inbox size={28} className="text-zinc-700" />
             <p className="text-zinc-600 text-sm">No hay citas próximas</p>
-            <p className="text-zinc-700 text-xs">Usa el botón "Agendar Cita" para crear una</p>
+            <p className="text-zinc-700 text-xs">Usa el botón &quot;Agendar Cita&quot; para crear una</p>
           </div>
         ) : (
           <div>
@@ -175,7 +225,7 @@ export default async function CalendarView() {
         )}
       </div>
 
-      {/* Past meetings */}
+      {/* Past */}
       {past.length > 0 && (
         <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">

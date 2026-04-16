@@ -50,7 +50,7 @@ export default async function DashboardPage(props: {
   const section    = searchParams.section ?? DEFAULT_SECTION[effectiveRole];
   const currentView = simulated ?? profile.role;
 
-  const canSeeCalendar = profile.role === "admin" || profile.can_view_calendar === true;
+  const canSeeCalendar = ["admin", "manager", "sales"].includes(profile.role);
 
   return (
     <DashboardLayoutClient
@@ -60,7 +60,6 @@ export default async function DashboardPage(props: {
         activeSection: section,
         isAdmin: profile.role === "admin",
         currentView,
-        canViewCalendar: profile.can_view_calendar ?? false,
       }}
     >
       {/* Realtime leads sync — invisible, active for all roles */}
@@ -70,7 +69,7 @@ export default async function DashboardPage(props: {
         {section === "profile" ? (
           <EditProfile profile={profile} userId={user.id} />
         ) : section === "calendar" && canSeeCalendar ? (
-          <CalendarView />
+          <CalendarView userId={user.id} userRole={profile.role} />
         ) : (
           <>
             {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} />}
