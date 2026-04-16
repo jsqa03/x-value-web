@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition, useRef, useEffect } from "react";
-import { createUserAccount, getManagers } from "@/app/actions/admin";
-import type { ActionResult, ManagerOption } from "@/app/actions/admin";
+import { createUserAccount, getLeaders } from "@/app/actions/admin";
+import type { ActionResult, LeaderOption } from "@/app/actions/admin";
 import {
   UserPlus, X, Loader2, CheckCircle2,
   Eye, EyeOff, AlertCircle,
-  User, Mail, Lock, GraduationCap, Globe, CalendarDays, Users,
+  User, Mail, Lock, GraduationCap, Globe, CalendarDays, Users, Tag,
 } from "lucide-react";
+import { COUNTRIES } from "./types";
 
 // ─── Roles available per caller ────────────────────────────────────────────────
 const ALL_ROLES = [
@@ -16,11 +17,12 @@ const ALL_ROLES = [
   { value: "client",  label: "Cliente",   color: "#00c0f3", bg: "rgba(0,192,243,0.1)",   border: "rgba(0,192,243,0.3)"   },
 ] as const;
 
+const CLIENT_TYPES = ["X-Value AI", "X-Value Growth"] as const;
+
 interface Props {
   callerRole: "admin" | "manager";
 }
 
-// Shared input style
 const inputBase: React.CSSProperties = {
   background: "rgba(255,255,255,0.05)",
   border: "1px solid rgba(255,255,255,0.1)",
@@ -28,10 +30,11 @@ const inputBase: React.CSSProperties = {
 
 // ─── Field wrapper ─────────────────────────────────────────────────────────────
 function Field({
-  label, icon: Icon, children,
+  label, icon: Icon, required: req, children,
 }: {
   label: string;
   icon: React.ElementType;
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -39,6 +42,7 @@ function Field({
       <label className="text-zinc-500 text-xs font-semibold tracking-wide uppercase flex items-center gap-1.5">
         <Icon size={10} className="text-zinc-600" />
         {label}
+        {req && <span className="text-red-400">*</span>}
       </label>
       {children}
     </div>
@@ -82,36 +86,85 @@ function IconInput({
   );
 }
 
+// ─── Select with left icon ─────────────────────────────────────────────────────
+function IconSelect({
+  icon: Icon, name, value, onChange, required, children,
+}: {
+  icon: React.ElementType;
+  name: string;
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <Icon
+        size={14}
+        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+        style={{ color: "rgba(255,255,255,0.22)" }}
+      />
+      <select
+        name={name}
+        value={value}
+        required={required}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all appearance-none"
+        style={{
+          ...inputBase,
+          color: value ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+        }}
+        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(252,211,77,0.4)")}
+        onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+      >
+        {children}
+      </select>
+    </div>
+  );
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 export default function CreateUserModal({ callerRole }: Props) {
   const ROLES = callerRole === "manager"
     ? ALL_ROLES.filter((r) => r.value !== "manager")
     : ALL_ROLES;
 
-  const [open, setOpen]                             = useState(false);
-  const [showPwd, setShowPwd]                       = useState(false);
-  const [role, setRole]                             = useState<string>(ROLES[ROLES.length - 1].value);
-  const [managerId, setManagerId]                   = useState<string>("");
-  const [managers, setManagers]                     = useState<ManagerOption[]>([]);
-  const [loadingManagers, setLoadingManagers]       = useState(false);
-  const [result, setResult]                         = useState<ActionResult | null>(null);
-  const [isPending, startTransition]                = useTransition();
-  const formRef                                     = useRef<HTMLFormElement>(null);
+  const [open, setOpen]                         = useState(false);
+  const [showPwd, setShowPwd]                   = useState(false);
+  const [role, setRole]                         = useState<string>(ROLES[ROLES.length - 1].value);
+  const [leaderId, setLeaderId]                 = useState<string>("");
+  const [leaders, setLeaders]                   = useState<LeaderOption[]>([]);
+  const [loadingLeaders, setLoadingLeaders]     = useState(false);
+  const [country, setCountry]                   = useState<string>("");
+  const [nationality, setNationality]           = useState<string>("");
+  const [clientType, setClientType]             = useState<string>("");
+  const [result, setResult]                     = useState<ActionResult | null>(null);
+  const [isPending, startTransition]            = useTransition();
+  const formRef                                 = useRef<HTMLFormElement>(null);
 
-  // Fetch managers list when admin opens the modal
+  // Fetch leaders when modal opens and role requires one
   useEffect(() => {
-    if (!open || callerRole !== "admin") return;
-    setLoadingManagers(true);
-    getManagers().then((list) => {
-      setManagers(list);
-      setLoadingManagers(false);
+    if (!open) return;
+    setLoadingLeaders(true);
+    getLeaders().then((list) => {
+      setLeaders(list);
+      setLoadingLeaders(false);
     });
-  }, [open, callerRole]);
+  }, [open]);
+
+  // Reset leader when role changes to manager (not needed)
+  useEffect(() => {
+    if (role === "manager") setLeaderId("");
+    if (role !== "client") setClientType("");
+  }, [role]);
 
   function handleOpen() {
     setResult(null);
     setRole(ROLES[ROLES.length - 1].value);
-    setManagerId("");
+    setLeaderId("");
+    setCountry("");
+    setNationality("");
+    setClientType("");
     setShowPwd(false);
     setOpen(true);
   }
@@ -127,7 +180,10 @@ export default function CreateUserModal({ callerRole }: Props) {
     setResult(null);
     const fd = new FormData(e.currentTarget);
     fd.set("role", role);
-    if (managerId) fd.set("manager_id", managerId);
+    if (leaderId) fd.set("manager_id", leaderId);
+    if (country) fd.set("country", country);
+    if (nationality) fd.set("nationality", nationality);
+    if (clientType) fd.set("client_type", clientType);
 
     startTransition(async () => {
       const res = await createUserAccount(fd);
@@ -135,6 +191,8 @@ export default function CreateUserModal({ callerRole }: Props) {
       if (res.success) formRef.current?.reset();
     });
   }
+
+  const needsLeader = role === "sales" || role === "client";
 
   return (
     <>
@@ -170,9 +228,7 @@ export default function CreateUserModal({ callerRole }: Props) {
             {/* Accent line */}
             <div
               className="absolute top-0 left-8 right-8 h-px shrink-0"
-              style={{
-                background: "linear-gradient(to right, transparent, rgba(252,211,77,0.5), transparent)",
-              }}
+              style={{ background: "linear-gradient(to right, transparent, rgba(252,211,77,0.5), transparent)" }}
             />
 
             {/* Header */}
@@ -204,7 +260,7 @@ export default function CreateUserModal({ callerRole }: Props) {
             {/* Body — scrollable */}
             <div className="px-6 py-5 overflow-y-auto">
 
-              {/* ── Success ──────────────────────────────────────────────── */}
+              {/* ── Success ─────────────────────────────────────────────── */}
               {result?.success ? (
                 <div className="flex flex-col items-center gap-4 py-8 text-center">
                   <div className="relative">
@@ -214,10 +270,7 @@ export default function CreateUserModal({ callerRole }: Props) {
                     />
                     <div
                       className="relative w-14 h-14 rounded-full flex items-center justify-center"
-                      style={{
-                        background: "rgba(34,197,94,0.1)",
-                        border: "1px solid rgba(34,197,94,0.25)",
-                      }}
+                      style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)" }}
                     >
                       <CheckCircle2 size={26} className="text-emerald-400" />
                     </div>
@@ -231,7 +284,10 @@ export default function CreateUserModal({ callerRole }: Props) {
                       setResult(null);
                       formRef.current?.reset();
                       setRole(ROLES[ROLES.length - 1].value);
-                      setManagerId("");
+                      setLeaderId("");
+                      setCountry("");
+                      setNationality("");
+                      setClientType("");
                     }}
                     className="text-sm font-semibold transition-colors hover:text-white"
                     style={{ color: "#fcd34d" }}
@@ -241,19 +297,19 @@ export default function CreateUserModal({ callerRole }: Props) {
                 </div>
 
               ) : (
-                /* ── Form ─────────────────────────────────────────────────── */
+                /* ── Form ─────────────────────────────────────────────── */
                 <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-                  {/* Required fields */}
-                  <Field label="Nombre completo" icon={User}>
+                  {/* Required identity fields */}
+                  <Field label="Nombre completo" icon={User} required>
                     <IconInput icon={User} name="full_name" placeholder="Santiago Martínez" required />
                   </Field>
 
-                  <Field label="Email" icon={Mail}>
+                  <Field label="Email" icon={Mail} required>
                     <IconInput icon={Mail} name="email" type="email" placeholder="usuario@empresa.com" required />
                   </Field>
 
-                  <Field label="Contraseña temporal" icon={Lock}>
+                  <Field label="Contraseña temporal" icon={Lock} required>
                     <div className="relative">
                       <Lock
                         size={14}
@@ -283,8 +339,8 @@ export default function CreateUserModal({ callerRole }: Props) {
 
                   {/* Role selector */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-zinc-500 text-xs font-semibold tracking-wide uppercase">
-                      Rol asignado
+                    <label className="text-zinc-500 text-xs font-semibold tracking-wide uppercase flex items-center gap-1.5">
+                      Rol asignado <span className="text-red-400">*</span>
                     </label>
                     <div className={`grid gap-2 ${ROLES.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                       {ROLES.map((r) => {
@@ -308,36 +364,64 @@ export default function CreateUserModal({ callerRole }: Props) {
                     </div>
                   </div>
 
-                  {/* Manager selector — admin only, for sales/client roles */}
-                  {callerRole === "admin" && (role === "sales" || role === "client") && (
-                    <Field label="Asignar Líder (Manager)" icon={Users}>
+                  {/* Leader assignment — required for sales and client */}
+                  {needsLeader && (
+                    <Field label="Asignar Líder" icon={Users} required>
                       <div className="relative">
                         <Users
                           size={14}
-                          className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
                           style={{ color: "rgba(255,255,255,0.22)" }}
                         />
                         <select
-                          value={managerId}
-                          onChange={(e) => setManagerId(e.target.value)}
+                          value={leaderId}
+                          required
+                          onChange={(e) => setLeaderId(e.target.value)}
                           className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm text-white outline-none transition-all appearance-none"
                           style={{
                             ...inputBase,
-                            color: managerId ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+                            color: leaderId ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
                           }}
                           onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(252,211,77,0.4)")}
                           onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                         >
-                          <option value="" style={{ background: "#0a0812" }}>
-                            {loadingManagers ? "Cargando…" : "Sin asignar (opcional)"}
+                          <option value="" disabled style={{ background: "#0a0812" }}>
+                            {loadingLeaders ? "Cargando líderes…" : "Selecciona un líder…"}
                           </option>
-                          {managers.map((m) => (
-                            <option key={m.id} value={m.id} style={{ background: "#0a0812" }}>
-                              {m.full_name ?? m.email}
-                            </option>
-                          ))}
+                          {/* Group: Managers */}
+                          {leaders.filter((l) => l.role === "manager").length > 0 && (
+                            <optgroup label="── Managers ──" style={{ background: "#0a0812", color: "rgba(255,255,255,0.4)" }}>
+                              {leaders.filter((l) => l.role === "manager").map((m) => (
+                                <option key={m.id} value={m.id} style={{ background: "#0a0812" }}>
+                                  {m.full_name ?? m.email}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {/* Group: Sales reps */}
+                          {leaders.filter((l) => l.role === "sales").length > 0 && (
+                            <optgroup label="── Comerciales ──" style={{ background: "#0a0812", color: "rgba(255,255,255,0.4)" }}>
+                              {leaders.filter((l) => l.role === "sales").map((s) => (
+                                <option key={s.id} value={s.id} style={{ background: "#0a0812" }}>
+                                  {s.full_name ?? s.email}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
                         </select>
                       </div>
+                    </Field>
+                  )}
+
+                  {/* Client type — required only for client role */}
+                  {role === "client" && (
+                    <Field label="Tipo de Cliente" icon={Tag} required>
+                      <IconSelect icon={Tag} name="client_type" value={clientType} onChange={setClientType} required>
+                        <option value="" disabled style={{ background: "#0a0812" }}>Selecciona tipo…</option>
+                        {CLIENT_TYPES.map((t) => (
+                          <option key={t} value={t} style={{ background: "#0a0812" }}>{t}</option>
+                        ))}
+                      </IconSelect>
                     </Field>
                   )}
 
@@ -350,38 +434,36 @@ export default function CreateUserModal({ callerRole }: Props) {
                     <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
                   </div>
 
-                  {/* Optional extended fields */}
                   <Field label="Universidad / Institución" icon={GraduationCap}>
                     <IconInput icon={GraduationCap} name="university" placeholder="Universidad Nacional…" />
                   </Field>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Año de nacimiento" icon={CalendarDays}>
-                      <IconInput
-                        icon={CalendarDays}
-                        name="birth_year"
-                        type="number"
-                        placeholder="1990"
-                        min="1940"
-                        max={String(new Date().getFullYear() - 16)}
-                      />
-                    </Field>
-                    <Field label="Edad" icon={CalendarDays}>
-                      <div
-                        className="rounded-xl px-4 py-2.5 text-sm text-zinc-600 select-none"
-                        style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
-                      >
-                        Se calcula automáticamente
-                      </div>
-                    </Field>
-                  </div>
+                  <Field label="Fecha de nacimiento" icon={CalendarDays}>
+                    <IconInput
+                      icon={CalendarDays}
+                      name="birth_date"
+                      type="date"
+                      max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split("T")[0]}
+                      min="1930-01-01"
+                    />
+                  </Field>
 
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="País" icon={Globe}>
-                      <IconInput icon={Globe} name="country" placeholder="Colombia" />
+                      <IconSelect icon={Globe} name="country" value={country} onChange={setCountry}>
+                        <option value="" style={{ background: "#0a0812" }}>— Seleccionar —</option>
+                        {COUNTRIES.map((c) => (
+                          <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>
+                        ))}
+                      </IconSelect>
                     </Field>
                     <Field label="Nacionalidad" icon={Globe}>
-                      <IconInput icon={Globe} name="nationality" placeholder="Colombiano/a" />
+                      <IconSelect icon={Globe} name="nationality" value={nationality} onChange={setNationality}>
+                        <option value="" style={{ background: "#0a0812" }}>— Seleccionar —</option>
+                        {COUNTRIES.map((c) => (
+                          <option key={c} value={c} style={{ background: "#0a0812" }}>{c}</option>
+                        ))}
+                      </IconSelect>
                     </Field>
                   </div>
 

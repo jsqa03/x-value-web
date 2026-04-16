@@ -13,6 +13,7 @@ import {
   TrendingUp,
   LogOut,
   Eye,
+  User,
   type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
@@ -28,19 +29,23 @@ const NAV: Record<Role, NavItem[]> = {
     { id: "crm",      label: "CRM · Leads",       icon: Database        },
     { id: "team",     label: "Gestión de Equipo", icon: Users           },
     { id: "settings", label: "Configuración",     icon: Settings        },
+    { id: "profile",  label: "Mi Perfil",         icon: User            },
   ],
   manager: [
     { id: "overview", label: "Resumen",            icon: LayoutDashboard },
     { id: "crm",      label: "Leads del Equipo",   icon: Database        },
     { id: "team",     label: "Mi Equipo",          icon: Users           },
+    { id: "profile",  label: "Mi Perfil",          icon: User            },
   ],
   sales: [
     { id: "leads",    label: "Mis Leads",          icon: Target          },
     { id: "schedule", label: "Mi Agenda",          icon: Calendar        },
+    { id: "profile",  label: "Mi Perfil",          icon: User            },
   ],
   client: [
     { id: "agent",   label: "Mi Agente IA",        icon: Bot             },
     { id: "metrics", label: "ROI y Métricas",      icon: TrendingUp      },
+    { id: "profile", label: "Mi Perfil",           icon: User            },
   ],
 };
 
@@ -76,9 +81,6 @@ export default function Sidebar({
 
   function navigate(section: string) {
     const params = new URLSearchParams();
-    // Only carry the ?view= param when an admin is actively simulating another role.
-    // Real non-admin users must never have ?view= in their URL or it gets ignored anyway,
-    // but keeping it out prevents confusing URLs and potential hydration edge cases.
     if (isAdmin && currentView !== "admin") params.set("view", currentView);
     params.set("section", section);
     router.push(`/dashboard?${params.toString()}`);
@@ -138,7 +140,6 @@ export default function Sidebar({
                 color: isActive ? "#fff" : "rgba(255,255,255,0.38)",
               }}
             >
-              {/* Active indicator bar */}
               {isActive && (
                 <span
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
@@ -178,25 +179,16 @@ export default function Sidebar({
                 const meta = ROLE_META[role];
                 const isActiveView =
                   currentView === role ||
-                  (role === "admin" &&
-                    (!currentView || currentView === "admin"));
+                  (role === "admin" && (!currentView || currentView === "admin"));
                 return (
                   <button
                     key={role}
                     onClick={() => simulate(role)}
                     className="text-[10px] font-semibold px-2 py-1.5 rounded-lg transition-all text-center"
                     style={{
-                      background: isActiveView
-                        ? meta.bg
-                        : "rgba(255,255,255,0.03)",
-                      color: isActiveView
-                        ? meta.color
-                        : "rgba(255,255,255,0.22)",
-                      border: `1px solid ${
-                        isActiveView
-                          ? meta.border
-                          : "rgba(255,255,255,0.06)"
-                      }`,
+                      background: isActiveView ? meta.bg : "rgba(255,255,255,0.03)",
+                      color: isActiveView ? meta.color : "rgba(255,255,255,0.22)",
+                      border: `1px solid ${isActiveView ? meta.border : "rgba(255,255,255,0.06)"}`,
                     }}
                   >
                     {label}
@@ -215,16 +207,25 @@ export default function Sidebar({
             border: "1px solid rgba(255,255,255,0.06)",
           }}
         >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-            style={{
-              background: `${roleMeta.color}15`,
-              color: roleMeta.color,
-              border: `1px solid ${roleMeta.color}25`,
-            }}
-          >
-            {firstName[0]?.toUpperCase() ?? "?"}
-          </div>
+          {profile.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt={profile.full_name ?? "Avatar"}
+              className="w-8 h-8 rounded-lg object-cover shrink-0"
+            />
+          ) : (
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+              style={{
+                background: `${roleMeta.color}15`,
+                color: roleMeta.color,
+                border: `1px solid ${roleMeta.color}25`,
+              }}
+            >
+              {firstName[0]?.toUpperCase() ?? "?"}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-semibold truncate leading-none mb-1">
               {profile.full_name ?? "Usuario"}

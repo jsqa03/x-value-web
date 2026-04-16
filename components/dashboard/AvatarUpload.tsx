@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Camera, Trash2, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { revalidateDashboard } from "@/app/actions/admin";
 
 interface Props {
   userId: string;
@@ -34,9 +35,8 @@ export default function AvatarUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Basic validation
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Máximo 5 MB por imagen.");
+    if (file.size > 50 * 1024 * 1024) {
+      setError("Máximo 50 MB por imagen.");
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -51,7 +51,6 @@ export default function AvatarUpload({
     const ext  = file.name.split(".").pop() ?? "jpg";
     const path = `${userId}/avatar.${ext}`;
 
-    // Upload (upsert = overwrite previous)
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, file, { upsert: true, contentType: file.type });
@@ -62,14 +61,12 @@ export default function AvatarUpload({
       return;
     }
 
-    // Get the public URL with cache-busting timestamp
     const { data: urlData } = supabase.storage
       .from("avatars")
       .getPublicUrl(path);
 
     const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-    // Persist to profile
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ avatar_url: urlData.publicUrl })
@@ -83,8 +80,10 @@ export default function AvatarUpload({
 
     setAvatarUrl(publicUrl);
     setLoading(false);
-    // Reset file input so same file can be re-selected
     if (fileRef.current) fileRef.current.value = "";
+
+    // Force server re-render so sidebar avatar and other RSCs update
+    await revalidateDashboard();
   }
 
   async function handleDelete() {
@@ -92,15 +91,21 @@ export default function AvatarUpload({
     setError(null);
     const supabase = createClient();
 
-    // Remove common extensions (upsert means we don't know the exact one)
     await supabase.storage
       .from("avatars")
-      .remove([`${userId}/avatar.jpg`, `${userId}/avatar.png`, `${userId}/avatar.webp`, `${userId}/avatar.gif`]);
+      .remove([
+        `${userId}/avatar.jpg`,
+        `${userId}/avatar.jpeg`,
+        `${userId}/avatar.png`,
+        `${userId}/avatar.webp`,
+        `${userId}/avatar.gif`,
+      ]);
 
     await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
 
     setAvatarUrl(null);
     setLoading(false);
+    await revalidateDashboard();
   }
 
   return (
@@ -127,7 +132,6 @@ export default function AvatarUpload({
           </div>
         )}
 
-        {/* Hover overlay */}
         <div
           className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ background: "rgba(0,0,0,0.55)" }}

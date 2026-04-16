@@ -17,11 +17,15 @@ export interface ActionResult {
 // Alias kept for backward compatibility with CreateUserModal import
 export type CreateUserResult = ActionResult;
 
-export interface ManagerOption {
+export interface LeaderOption {
   id: string;
   full_name: string | null;
   email: string;
+  role: "manager" | "sales";
 }
+
+// Kept for backward compat — callers that import ManagerOption still work
+export type ManagerOption = LeaderOption;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -51,21 +55,34 @@ function getAdminClient() {
   );
 }
 
-// ─── getManagers ──────────────────────────────────────────────────────────────
-/** Returns list of managers for the "Asignar Líder" selector. */
-export async function getManagers(): Promise<ManagerOption[]> {
+// ─── revalidateDashboard ──────────────────────────────────────────────────────
+/** Called from client components (e.g. AvatarUpload) to force a page refresh. */
+export async function revalidateDashboard(): Promise<void> {
+  revalidatePath("/dashboard", "layout");
+}
+
+// ─── getLeaders ───────────────────────────────────────────────────────────────
+/**
+ * Returns managers + sales reps for the "Asignar Líder" selector.
+ * Managers can be leaders of sales users; sales reps can be leaders of clients.
+ */
+export async function getLeaders(): Promise<LeaderOption[]> {
   const caller = await getCallerProfile();
   if (!caller) return [];
 
   const adminClient = getAdminClient();
   const { data } = await adminClient
     .from("profiles")
-    .select("id, full_name, email")
-    .eq("role", "manager")
+    .select("id, full_name, email, role")
+    .in("role", ["manager", "sales"])
+    .order("role")
     .order("full_name");
 
-  return (data ?? []) as ManagerOption[];
+  return (data ?? []) as LeaderOption[];
 }
+
+// Backward compat alias
+export const getManagers = getLeaders;
 
 // ─── createUserAccount ────────────────────────────────────────────────────────
 export async function createUserAccount(formData: FormData): Promise<ActionResult> {
@@ -90,15 +107,25 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
 
   // Optional extended fields
   const university  = (formData.get("university")   as string | null)?.trim() || null;
-  const birthYearRaw = formData.get("birth_year") as string | null;
-  const birth_year  = birthYearRaw ? parseInt(birthYearRaw, 10) || null : null;
+  const birth_date  = (formData.get("birth_date")   as string | null) || null;
   const country     = (formData.get("country")      as string | null)?.trim() || null;
   const nationality = (formData.get("nationality")  as string | null)?.trim() || null;
+  const client_type = (formData.get("client_type")  as string | null)?.trim() || null;
 
-  // manager_id: explicit selection (admin) OR auto-assign (manager creating their own member)
-  const explicitManagerId = (formData.get("manager_id") as string | null) || null;
-  const manager_id =
-    explicitManagerId ?? (caller.role === "manager" ? caller.id : null);
+  // Validate client_type when role is client
+  if (role === "client" && !client_type) {
+    return { error: "Debes seleccionar el Tipo de Cliente." };
+  }
+
+  // manager_id: explicit form selection, OR auto-assign caller if manager
+  const explicitLeaderId = (formData.get("manager_id") as string | null) || null;
+
+  // Require leader assignment for sales/client when creating from admin
+  if ((role === "sales" || role === "client") && !explicitLeaderId && caller.role === "admin") {
+    return { error: "Debes asignar un líder para este usuario." };
+  }
+
+  const manager_id = explicitLeaderId ?? (caller.role === "manager" ? caller.id : null);
 
   // Role permission gate
   const MANAGER_ALLOWED: ManagedRole[] = ["sales", "client"];
@@ -135,9 +162,10 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
     role,
     manager_id,
     university,
-    birth_year,
+    birth_date,
     country,
     nationality,
+    client_type,
   });
 
   if (profileError) {
@@ -145,7 +173,7 @@ export async function createUserAccount(formData: FormData): Promise<ActionResul
     return { error: `Error al crear el perfil: ${profileError.message}. Operación revertida.` };
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
   return { success: true, userId: user.id };
 }
 
@@ -184,7 +212,7 @@ export async function deleteUserAccount(targetUserId: string): Promise<ActionRes
 
   await adminClient.from("profiles").delete().eq("id", targetUserId);
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
   return { success: true };
 }
 
@@ -208,5 +236,34 @@ export async function resetPassword(
   });
 
   if (error) return { error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
+// ─── updateProfile ────────────────────────────────────────────────────────────
+/** Any authenticated user can update their own profile fields. */
+export async function updateProfile(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado. Inicia sesión de nuevo." };
+
+  const full_name   = (formData.get("full_name")   as string | null)?.trim() || null;
+  const university  = (formData.get("university")  as string | null)?.trim() || null;
+  const birth_date  = (formData.get("birth_date")  as string | null) || null;
+  const country     = (formData.get("country")     as string | null)?.trim() || null;
+  const nationality = (formData.get("nationality") as string | null)?.trim() || null;
+
+  if (!full_name) return { error: "El nombre no puede estar vacío." };
+
+  // Use service role to bypass any restrictive RLS on UPDATE
+  const adminClient = getAdminClient();
+  const { error } = await adminClient
+    .from("profiles")
+    .update({ full_name, university, birth_date, country, nationality })
+    .eq("id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard", "layout");
   return { success: true };
 }

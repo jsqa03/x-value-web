@@ -14,7 +14,7 @@ interface UserRow {
   full_name: string | null;
   role: Role;
   avatar_url: string | null;
-  birth_year: number | null;
+  birth_date: string | null;
   university: string | null;
   country: string | null;
   created_at: string;
@@ -40,7 +40,7 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
 
   const { data: users, error } = await adminClient
     .from("profiles")
-    .select("id, email, full_name, role, avatar_url, birth_year, university, country, created_at")
+    .select("id, email, full_name, role, avatar_url, birth_date, university, country, created_at")
     .order("role")
     .order("full_name");
 
@@ -120,7 +120,7 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                 <tbody className="divide-y" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
                   {(users as UserRow[]).map((u) => {
                     const meta = ROLE_META[u.role] ?? ROLE_META.client;
-                    const age  = computeAge(u.birth_year);
+                    const age  = computeAge(u.birth_date);
                     const isSelf = u.id === currentUserId;
 
                     return (
@@ -212,7 +212,7 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
             <div className="md:hidden divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
               {(users as UserRow[]).map((u) => {
                 const meta  = ROLE_META[u.role] ?? ROLE_META.client;
-                const age   = computeAge(u.birth_year);
+                const age   = computeAge(u.birth_date);
                 const isSelf = u.id === currentUserId;
 
                 return (

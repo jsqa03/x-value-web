@@ -4,6 +4,7 @@ import AdminView from "@/components/dashboard/AdminView";
 import ManagerView from "@/components/dashboard/ManagerView";
 import SalesView from "@/components/dashboard/SalesView";
 import ClientView from "@/components/dashboard/ClientView";
+import EditProfile from "@/components/dashboard/EditProfile";
 import Sidebar from "@/components/dashboard/Sidebar";
 import type { Profile, Role } from "@/components/dashboard/types";
 
@@ -37,7 +38,7 @@ export default async function DashboardPage(props: {
   // 2 — Fetch profile + all extended fields
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("role, full_name, avatar_url, email, university, birth_year, country, nationality")
+    .select("role, full_name, avatar_url, email, university, birth_date, country, nationality, client_type")
     .eq("id", user.id)
     .single();
 
@@ -73,10 +74,17 @@ export default async function DashboardPage(props: {
       {/* ── Main content ────────────────────────────────────────────────── */}
       <main className="flex-1 min-h-screen overflow-y-auto" style={{ marginLeft: "240px" }}>
         <div className="max-w-5xl mx-auto px-8 py-10">
-          {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} />}
-          {effectiveRole === "manager" && <ManagerView profile={profile} section={section} userId={user.id} />}
-          {effectiveRole === "sales"   && <SalesView   profile={profile} section={section} />}
-          {effectiveRole === "client"  && <ClientView  profile={profile} section={section} />}
+          {/* Mi Perfil — available to all roles */}
+          {section === "profile" ? (
+            <EditProfile profile={profile} userId={user.id} />
+          ) : (
+            <>
+              {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} />}
+              {effectiveRole === "manager" && <ManagerView profile={profile} section={section} userId={user.id} />}
+              {effectiveRole === "sales"   && <SalesView   profile={profile} section={section} />}
+              {effectiveRole === "client"  && <ClientView  profile={profile} section={section} />}
+            </>
+          )}
         </div>
       </main>
     </div>
