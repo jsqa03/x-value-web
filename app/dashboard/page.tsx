@@ -74,7 +74,7 @@ export default async function DashboardPage(props: {
           <>
             {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} />}
             {effectiveRole === "manager" && <ManagerView profile={profile} section={section} userId={user.id} />}
-            {effectiveRole === "sales"   && <SalesView   profile={profile} section={section} />}
+            {effectiveRole === "sales"   && <SalesView   profile={profile} section={section} userId={user.id} />}
             {effectiveRole === "client"  && <ClientView  profile={profile} section={section} />}
           </>
         )}

@@ -32,10 +32,11 @@ const NAV: Record<Role, NavItem[]> = {
     { id: "profile",    label: "Mi Perfil",        icon: User            },
   ],
   sales: [
-    { id: "leads",     label: "Mis Leads",   icon: Target   },
-    { id: "schedule",  label: "Mi Agenda",   icon: Calendar },
-    { id: "calendar",  label: "Calendario",  icon: Calendar },
-    { id: "profile",   label: "Mi Perfil",   icon: User     },
+    { id: "leads",     label: "Mis Leads",      icon: Target     },
+    { id: "ganancias", label: "Mis Ganancias",   icon: TrendingUp },
+    { id: "schedule",  label: "Mi Agenda",      icon: Calendar   },
+    { id: "calendar",  label: "Calendario",     icon: Calendar   },
+    { id: "profile",   label: "Mi Perfil",      icon: User       },
   ],
   client: [
     { id: "agent",   label: "Mi Agente IA",  icon: Bot        },

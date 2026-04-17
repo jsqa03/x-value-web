@@ -5,6 +5,7 @@ import TaskManager from "./TaskManager";
 import CreateLeadModal from "./CreateLeadModal";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import LeadsTable from "./LeadsTable";
+import SalesEarningsView from "./finance/SalesEarningsView";
 import type { Profile } from "./types";
 
 const MY_STATS = [
@@ -71,10 +72,11 @@ function ScheduleSection({ name }: { name: string }) {
   );
 }
 
-interface Props { profile: Profile; section: string }
+interface Props { profile: Profile; section: string; userId: string }
 
-export default function SalesView({ profile, section }: Props) {
+export default function SalesView({ profile, section, userId }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "Comercial";
-  if (section === "schedule") return <ScheduleSection name={name} />;
+  if (section === "schedule")  return <ScheduleSection name={name} />;
+  if (section === "ganancias") return <SalesEarningsView userId={userId} />;
   return <LeadsSection name={name} />;
 }
