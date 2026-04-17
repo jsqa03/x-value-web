@@ -21,7 +21,6 @@ import VoiceAgentDemo from "@/components/VoiceAgentDemo";
 import InstagramMedia from "@/components/InstagramMedia";
 import ConversionModal from "@/components/ConversionModal";
 import CalendlyCTA from "@/components/CalendlyCTA";
-import XBankLanding from "@/components/XBankLanding";
 
 // ─── Integration logos ────────────────────────────────────────────────────────
 
@@ -201,6 +200,17 @@ export default function PlataformaPage() {
               <Link href="/" className="text-white/80 hover:text-white text-sm transition-colors">
                 Home
               </Link>
+              <Link
+                href="/x-bank"
+                className="flex items-center gap-1.5 text-sm font-medium transition-all hover:brightness-125"
+                style={{ color: "#f59e0b" }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                  style={{ background: "#f59e0b" }}
+                />
+                X-Bank
+              </Link>
               <button
                 onClick={() => openModal("Agente x-value IA")}
                 className="text-white/80 hover:text-white text-sm transition-colors"
@@ -230,6 +240,18 @@ export default function PlataformaPage() {
                 className="text-white/80 hover:text-white text-sm transition-colors py-3 px-2 border-b border-white/5"
               >
                 Home
+              </Link>
+              <Link
+                href="/x-bank"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2 text-sm font-medium py-3 px-2 border-b border-white/5 transition-all"
+                style={{ color: "#f59e0b" }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                  style={{ background: "#f59e0b" }}
+                />
+                X-Bank
               </Link>
               <button
                 onClick={() => { openModal("Agente x-value IA"); setIsMobileMenuOpen(false); }}
@@ -547,9 +569,6 @@ export default function PlataformaPage() {
 
         {/* ── GROWTH BANNER CTA ───────────────────────────────────────────── */}
         <GrowthBanner onCTA={() => openModal("Agente x-value IA")} />
-
-        {/* ── X-BANK LANDING ──────────────────────────────────────────────── */}
-        <XBankLanding />
 
         {/* ── CALENDLY INLINE ──────────────────────────────────────────── */}
         <section className="py-20 px-6">
