@@ -2,6 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { Users, Clock, Inbox } from "lucide-react";
 import EditLeadModal from "./EditLeadModal";
+import ContractActivationModal from "./finance/ContractActivationModal";
 import type { Role } from "./types";
 
 export interface Lead {
@@ -106,6 +107,19 @@ export default async function LeadsTable() {
     assigneeMap = Object.fromEntries((assignees as Assignee[] ?? []).map((a) => [a.id, a.full_name ?? "—"]));
   }
 
+  // Find which closed leads already have a contract (to avoid showing "Activar" twice)
+  const closedLeadIds = leads
+    .filter((l) => l.pipeline_status === "Cerrado/Cliente activo")
+    .map((l) => l.id);
+  let activatedLeadIds = new Set<string>();
+  if (closedLeadIds.length > 0) {
+    const { data: contracts } = await ac
+      .from("contracts")
+      .select("lead_id")
+      .in("lead_id", closedLeadIds);
+    activatedLeadIds = new Set((contracts ?? []).map((c: { lead_id: string }) => c.lead_id));
+  }
+
   if (!leads || leads.length === 0) {
     return (
       <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-10 flex flex-col items-center gap-3 text-center">
@@ -183,7 +197,14 @@ export default async function LeadsTable() {
                 </td>
                 {/* Actions */}
                 <td className="px-4 py-3.5">
-                  <EditLeadModal lead={lead} callerRole={role} />
+                  <div className="flex items-center gap-1.5">
+                    {lead.pipeline_status === "Cerrado/Cliente activo" &&
+                      !activatedLeadIds.has(lead.id) &&
+                      (role === "admin" || role === "manager") && (
+                      <ContractActivationModal lead={lead} />
+                    )}
+                    <EditLeadModal lead={lead} callerRole={role} />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -207,6 +228,11 @@ export default async function LeadsTable() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <PipelineBadge status={lead.pipeline_status} />
+                {lead.pipeline_status === "Cerrado/Cliente activo" &&
+                  !activatedLeadIds.has(lead.id) &&
+                  (role === "admin" || role === "manager") && (
+                  <ContractActivationModal lead={lead} />
+                )}
                 <EditLeadModal lead={lead} callerRole={role} />
               </div>
             </div>

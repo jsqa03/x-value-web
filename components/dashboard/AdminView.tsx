@@ -12,6 +12,7 @@ import TeamManagementTable from "./TeamManagementTable";
 import SecuritySection from "./SecuritySection";
 import SearchBar from "./SearchBar";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
+import FinanceView from "./finance/FinanceView";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
@@ -251,8 +252,9 @@ interface Props { profile: Profile; section: string; userId: string }
 
 export default function AdminView({ profile, section, userId }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "CEO";
-  if (section === "crm")  return <CrmSection />;
-  if (section === "team") return <TeamSection />;
+  if (section === "crm")       return <CrmSection />;
+  if (section === "team")      return <TeamSection />;
+  if (section === "finanzas")  return <FinanceView />;
   if (section === "settings") return (
     <Suspense fallback={<div className="text-zinc-600 text-sm py-8 text-center">Cargando…</div>}>
       <SecuritySection currentUserId={userId} />

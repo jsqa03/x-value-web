@@ -11,6 +11,7 @@ import CreateLeadModal from "./CreateLeadModal";
 import TeamManagementTable from "./TeamManagementTable";
 import SearchBar from "./SearchBar";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
+import ManagerEarningsView from "./finance/ManagerEarningsView";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
@@ -256,7 +257,8 @@ interface Props { profile: Profile; section: string; userId: string }
 
 export default function ManagerView({ profile, section, userId }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "Manager";
-  if (section === "crm")  return <CrmSection />;
-  if (section === "team") return <TeamSection />;
+  if (section === "crm")       return <CrmSection />;
+  if (section === "team")      return <TeamSection />;
+  if (section === "ganancias") return <ManagerEarningsView managerId={userId} />;
   return <OverviewSection name={name} managerId={userId} />;
 }
