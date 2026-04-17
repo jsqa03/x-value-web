@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { TrendingUp, Target, Flame, Calendar, Inbox } from "lucide-react";
+// Calendar kept for MY_STATS
 import StatCard from "./StatCard";
-import TaskManager from "./TaskManager";
+import AgendaView from "./AgendaView";
 import CreateLeadModal from "./CreateLeadModal";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import LeadsTable from "./LeadsTable";
@@ -60,23 +61,11 @@ function LeadsSection({ name }: { name: string }) {
   );
 }
 
-function ScheduleSection({ name }: { name: string }) {
-  return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <p className="text-zinc-500 text-sm mb-1">Agenda personal · {name}</p>
-        <h1 className="text-2xl font-semibold text-white tracking-tight">Mi Agenda</h1>
-      </div>
-      <TaskManager />
-    </div>
-  );
-}
-
 interface Props { profile: Profile; section: string; userId: string }
 
 export default function SalesView({ profile, section, userId }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "Comercial";
-  if (section === "schedule")  return <ScheduleSection name={name} />;
+  if (section === "schedule")  return <AgendaView userId={userId} userRole={profile.role} />;
   if (section === "ganancias") return <SalesEarningsView userId={userId} />;
   return <LeadsSection name={name} />;
 }

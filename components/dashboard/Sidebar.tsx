@@ -5,7 +5,7 @@ import Image from "next/image";
 import {
   LayoutDashboard, Database, Users, Settings,
   Target, Calendar, Bot, TrendingUp, DollarSign,
-  LogOut, Eye, User, X, type LucideIcon,
+  LogOut, Eye, User, X, ClipboardList, type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import type { Profile, Role } from "./types";
@@ -19,6 +19,7 @@ const NAV: Record<Role, NavItem[]> = {
     { id: "crm",       label: "CRM · Leads",       icon: Database        },
     { id: "team",      label: "Gestión de Equipo", icon: Users           },
     { id: "finanzas",  label: "Finanzas",          icon: DollarSign      },
+    { id: "agenda",    label: "Mi Agenda",         icon: ClipboardList   },
     { id: "calendar",  label: "Calendario",        icon: Calendar        },
     { id: "settings",  label: "Configuración",     icon: Settings        },
     { id: "profile",   label: "Mi Perfil",         icon: User            },
@@ -28,15 +29,16 @@ const NAV: Record<Role, NavItem[]> = {
     { id: "crm",        label: "Leads del Equipo", icon: Database        },
     { id: "team",       label: "Mi Equipo",        icon: Users           },
     { id: "ganancias",  label: "Mis Ganancias",    icon: TrendingUp      },
+    { id: "agenda",     label: "Mi Agenda",        icon: ClipboardList   },
     { id: "calendar",   label: "Calendario",       icon: Calendar        },
     { id: "profile",    label: "Mi Perfil",        icon: User            },
   ],
   sales: [
-    { id: "leads",     label: "Mis Leads",      icon: Target     },
-    { id: "ganancias", label: "Mis Ganancias",   icon: TrendingUp },
-    { id: "schedule",  label: "Mi Agenda",      icon: Calendar   },
-    { id: "calendar",  label: "Calendario",     icon: Calendar   },
-    { id: "profile",   label: "Mi Perfil",      icon: User       },
+    { id: "leads",     label: "Mis Leads",      icon: Target        },
+    { id: "ganancias", label: "Mis Ganancias",   icon: TrendingUp    },
+    { id: "schedule",  label: "Mi Agenda",      icon: ClipboardList },
+    { id: "calendar",  label: "Calendario",     icon: Calendar      },
+    { id: "profile",   label: "Mi Perfil",      icon: User          },
   ],
   client: [
     { id: "agent",   label: "Mi Agente IA",  icon: Bot        },

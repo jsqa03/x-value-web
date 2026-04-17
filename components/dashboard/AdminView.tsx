@@ -13,6 +13,7 @@ import SecuritySection from "./SecuritySection";
 import SearchBar from "./SearchBar";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import FinanceView from "./finance/FinanceView";
+import AgendaView from "./AgendaView";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
@@ -248,14 +249,22 @@ function TeamSection() {
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-interface Props { profile: Profile; section: string; userId: string; period?: string }
+interface Props {
+  profile: Profile;
+  section: string;
+  userId: string;
+  year?: string;
+  month?: string;
+  agendaUser?: string;
+}
 
-export default function AdminView({ profile, section, userId, period }: Props) {
+export default function AdminView({ profile, section, userId, year, month, agendaUser }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "CEO";
   if (section === "crm")       return <CrmSection />;
   if (section === "team")      return <TeamSection />;
-  if (section === "finanzas")  return <FinanceView period={period} />;
-  if (section === "settings") return (
+  if (section === "finanzas")  return <FinanceView year={year} month={month} />;
+  if (section === "agenda")    return <AgendaView userId={userId} userRole={profile.role} viewUserId={agendaUser} />;
+  if (section === "settings")  return (
     <Suspense fallback={<div className="text-zinc-600 text-sm py-8 text-center">Cargando…</div>}>
       <SecuritySection currentUserId={userId} isAdmin={profile.role === "admin"} />
     </Suspense>

@@ -25,7 +25,7 @@ const DEFAULT_SECTION: Record<Role, string> = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default async function DashboardPage(props: {
-  searchParams: Promise<{ view?: string; section?: string; period?: string }>;
+  searchParams: Promise<{ view?: string; section?: string; year?: string; month?: string; agendaUser?: string }>;
 }) {
   const searchParams = await props.searchParams;
 
@@ -72,7 +72,7 @@ export default async function DashboardPage(props: {
           <CalendarView userId={user.id} userRole={profile.role} />
         ) : (
           <>
-            {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} period={searchParams.period} />}
+            {effectiveRole === "admin"   && <AdminView   profile={profile} section={section} userId={user.id} year={searchParams.year} month={searchParams.month} agendaUser={searchParams.agendaUser} />}
             {effectiveRole === "manager" && <ManagerView profile={profile} section={section} userId={user.id} />}
             {effectiveRole === "sales"   && <SalesView   profile={profile} section={section} userId={user.id} />}
             {effectiveRole === "client"  && <ClientView  profile={profile} section={section} />}

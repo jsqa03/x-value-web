@@ -12,6 +12,7 @@ import TeamManagementTable from "./TeamManagementTable";
 import SearchBar from "./SearchBar";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
 import ManagerEarningsView from "./finance/ManagerEarningsView";
+import AgendaView from "./AgendaView";
 import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
@@ -260,5 +261,6 @@ export default function ManagerView({ profile, section, userId }: Props) {
   if (section === "crm")       return <CrmSection />;
   if (section === "team")      return <TeamSection />;
   if (section === "ganancias") return <ManagerEarningsView managerId={userId} />;
+  if (section === "agenda")    return <AgendaView userId={userId} userRole={profile.role} />;
   return <OverviewSection name={name} managerId={userId} />;
 }

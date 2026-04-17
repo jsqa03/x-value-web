@@ -150,7 +150,7 @@ export default async function TeamManagementTable() {
                       {canViewPerformance(p.role) && (
                         <PerformanceModal userId={p.id} userName={p.full_name ?? p.email} />
                       )}
-                      <ViewAgendaButton userName={p.full_name ?? p.email} />
+                      <ViewAgendaButton userId={p.id} userName={p.full_name ?? p.email} />
                       {canDelete(p.role) && (
                         <DeleteUserButton userId={p.id} userName={p.full_name ?? p.email} />
                       )}

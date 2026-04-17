@@ -55,31 +55,20 @@ interface AssignableUser {
 }
 
 // ─── Period filter helpers ────────────────────────────────────────────────────
-function getDateRange(period: string | undefined): { start: Date; end: Date } | null {
-  if (!period || period === "all") return null;
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth(); // 0-indexed
-
-  if (period === "month") {
-    return { start: new Date(y, m, 1), end: new Date(y, m + 1, 0) };
+function getDateRange(
+  year: string | undefined,
+  month: string | undefined
+): { start: Date; end: Date } | null {
+  if (!year) return null; // no filter = historical total
+  const y = parseInt(year);
+  if (isNaN(y)) return null;
+  const m = month ? parseInt(month) : 0;
+  if (!isNaN(m) && m >= 1 && m <= 12) {
+    // Specific month (1-indexed)
+    return { start: new Date(y, m - 1, 1), end: new Date(y, m, 0) };
   }
-  if (period === "bimester") {
-    const b = Math.floor(m / 2);
-    return { start: new Date(y, b * 2, 1), end: new Date(y, b * 2 + 2, 0) };
-  }
-  if (period === "quarter") {
-    const q = Math.floor(m / 3);
-    return { start: new Date(y, q * 3, 1), end: new Date(y, q * 3 + 3, 0) };
-  }
-  if (period === "semester") {
-    const s = Math.floor(m / 6);
-    return { start: new Date(y, s * 6, 1), end: new Date(y, s * 6 + 6, 0) };
-  }
-  if (period === "year") {
-    return { start: new Date(y, 0, 1), end: new Date(y, 11, 31) };
-  }
-  return null;
+  // Full year
+  return { start: new Date(y, 0, 1), end: new Date(y, 11, 31) };
 }
 
 function inRange(dateStr: string | null | undefined, range: { start: Date; end: Date } | null): boolean {
@@ -334,9 +323,9 @@ function ExpenseRows({ expenses }: { expenses: ExpenseRow[] }) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default async function FinanceView({ period }: { period?: string }) {
+export default async function FinanceView({ year, month }: { year?: string; month?: string }) {
   const ac = getAdminClient();
-  const range = getDateRange(period);
+  const range = getDateRange(year, month);
 
   const [paymentsRes, expensesRes, commissionsRes, usersRes] = await Promise.all([
     ac.from("payments")
@@ -416,7 +405,7 @@ export default async function FinanceView({ period }: { period?: string }) {
           <h1 className="text-2xl font-semibold text-white tracking-tight">Finanzas</h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <FinancePeriodSelect current={period} />
+          <FinancePeriodSelect year={year} month={month} />
           <ExpenseModal users={users} />
         </div>
       </div>

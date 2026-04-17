@@ -10,14 +10,7 @@ interface Task {
   done: boolean;
 }
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_TASKS: Task[] = [
-  { id: "1", text: "Llamar a Lead A para seguimiento",          done: false },
-  { id: "2", text: "Enviar propuesta a Empresa X",              done: false },
-  { id: "3", text: "Confirmar demo con cliente Empresa Z",      done: true  },
-  { id: "4", text: "Revisar contrato firmado de Empresa Y",     done: false },
-  { id: "5", text: "Actualizar CRM con notas de última reunión",done: true  },
-];
+// Mock data removed — use AgendaView + tasks table instead
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface Props {
