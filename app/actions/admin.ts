@@ -411,6 +411,35 @@ export async function scheduleMeeting(formData: FormData): Promise<ActionResult>
   return { success: true };
 }
 
+// ─── changeUserRole ───────────────────────────────────────────────────────────
+export async function changeUserRole(
+  targetUserId: string,
+  newRole: string
+): Promise<ActionResult> {
+  const caller = await getCallerProfile();
+  if (!caller || caller.role !== "admin") {
+    return { error: "Solo el admin puede cambiar roles." };
+  }
+
+  const valid = ["admin", "manager", "sales", "client"];
+  if (!valid.includes(newRole)) return { error: "Rol inválido." };
+
+  // Prevent self-demotion
+  if (caller.id === targetUserId && newRole !== "admin") {
+    return { error: "No puedes cambiar tu propio rol." };
+  }
+
+  const ac = getAdminClient();
+  const { error } = await ac
+    .from("profiles")
+    .update({ role: newRole })
+    .eq("id", targetUserId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
 // ─── resetPassword ────────────────────────────────────────────────────────────
 export async function resetPassword(
   targetUserId: string,

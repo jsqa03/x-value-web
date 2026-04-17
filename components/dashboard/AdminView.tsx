@@ -248,16 +248,16 @@ function TeamSection() {
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-interface Props { profile: Profile; section: string; userId: string }
+interface Props { profile: Profile; section: string; userId: string; period?: string }
 
-export default function AdminView({ profile, section, userId }: Props) {
+export default function AdminView({ profile, section, userId, period }: Props) {
   const name = profile.full_name?.split(" ")[0] ?? "CEO";
   if (section === "crm")       return <CrmSection />;
   if (section === "team")      return <TeamSection />;
-  if (section === "finanzas")  return <FinanceView />;
+  if (section === "finanzas")  return <FinanceView period={period} />;
   if (section === "settings") return (
     <Suspense fallback={<div className="text-zinc-600 text-sm py-8 text-center">Cargando…</div>}>
-      <SecuritySection currentUserId={userId} />
+      <SecuritySection currentUserId={userId} isAdmin={profile.role === "admin"} />
     </Suspense>
   );
   return <OverviewSection name={name} />;

@@ -307,7 +307,7 @@ export default async function ManagerEarningsView({ managerId }: Props) {
 
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
           <SectionHeader
-            title="Comisiones Growth (10% meses 3-4)"
+            title="Comisiones Growth (10% meses 3-6)"
             badge={`${growthCommissions.length} registro${growthCommissions.length !== 1 ? "s" : ""}`}
             color="emerald"
           />
@@ -372,7 +372,7 @@ export default async function ManagerEarningsView({ managerId }: Props) {
 
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
           <SectionHeader
-            title="Comisiones AI (3% del setup fee)"
+            title="Comisiones AI (10% si cierre propio · 3% si cierre por comercial)"
             badge={`${aiCommissions.length} registro${aiCommissions.length !== 1 ? "s" : ""}`}
             color="sky"
           />

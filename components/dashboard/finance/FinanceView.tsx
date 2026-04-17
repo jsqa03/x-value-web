@@ -7,6 +7,8 @@ import {
 import { getPaymentStatus, daysUntil, formatMoney, type PaymentStatus } from "@/lib/finance-utils";
 import RegisterPaymentModal from "./RegisterPaymentModal";
 import ExpenseModal from "./ExpenseModal";
+import DeleteExpenseButton from "./DeleteExpenseButton";
+import FinancePeriodSelect from "./FinancePeriodSelect";
 
 function getAdminClient() {
   return createSupabaseClient(
@@ -52,6 +54,41 @@ interface AssignableUser {
   email: string;
 }
 
+// ─── Period filter helpers ────────────────────────────────────────────────────
+function getDateRange(period: string | undefined): { start: Date; end: Date } | null {
+  if (!period || period === "all") return null;
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth(); // 0-indexed
+
+  if (period === "month") {
+    return { start: new Date(y, m, 1), end: new Date(y, m + 1, 0) };
+  }
+  if (period === "bimester") {
+    const b = Math.floor(m / 2);
+    return { start: new Date(y, b * 2, 1), end: new Date(y, b * 2 + 2, 0) };
+  }
+  if (period === "quarter") {
+    const q = Math.floor(m / 3);
+    return { start: new Date(y, q * 3, 1), end: new Date(y, q * 3 + 3, 0) };
+  }
+  if (period === "semester") {
+    const s = Math.floor(m / 6);
+    return { start: new Date(y, s * 6, 1), end: new Date(y, s * 6 + 6, 0) };
+  }
+  if (period === "year") {
+    return { start: new Date(y, 0, 1), end: new Date(y, 11, 31) };
+  }
+  return null;
+}
+
+function inRange(dateStr: string | null | undefined, range: { start: Date; end: Date } | null): boolean {
+  if (!range) return true;
+  if (!dateStr) return false;
+  const d = new Date(dateStr + "T12:00:00");
+  return d >= range.start && d <= range.end;
+}
+
 // ─── Status badge ─────────────────────────────────────────────────────────────
 const STATUS_META: Record<PaymentStatus, { label: string; color: string; bg: string; border: string; icon: React.ElementType }> = {
   paid:    { label: "Pagado",    color: "#22c55e", bg: "rgba(34,197,94,0.08)",   border: "rgba(34,197,94,0.25)",   icon: CheckCircle2  },
@@ -72,12 +109,12 @@ function StatusBadge({ status }: { status: PaymentStatus }) {
   );
 }
 
-// ─── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, sub, accent, icon: Icon }: {
-  label: string; value: string; sub: string; accent: string; icon: React.ElementType;
+// ─── KPI card (with optional percentage line) ─────────────────────────────────
+function KpiCard({ label, value, pct, sub, accent, icon: Icon }: {
+  label: string; value: string; pct?: string; sub: string; accent: string; icon: React.ElementType;
 }) {
   return (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 flex flex-col gap-3">
+    <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
         <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
         <div className="w-7 h-7 rounded-lg flex items-center justify-center"
@@ -86,6 +123,9 @@ function KpiCard({ label, value, sub, accent, icon: Icon }: {
         </div>
       </div>
       <p className="text-white font-bold text-xl tracking-tight leading-none">{value}</p>
+      {pct !== undefined && (
+        <p className="text-xs font-bold" style={{ color: accent }}>{pct}</p>
+      )}
       <p className="text-zinc-600 text-xs">{sub}</p>
     </div>
   );
@@ -115,13 +155,13 @@ function CurrencySection({ currency, accent, children }: {
   );
 }
 
-// ─── Payment table (shared for both currencies) ───────────────────────────────
+// ─── Payment table ────────────────────────────────────────────────────────────
 function PaymentTable({ payments }: { payments: Payment[] }) {
   if (payments.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-10 text-center">
         <Wallet size={22} className="text-zinc-700" />
-        <p className="text-zinc-500 text-sm">Sin pagos en este bloque</p>
+        <p className="text-zinc-500 text-sm">Sin pagos en este periodo</p>
       </div>
     );
   }
@@ -235,186 +275,17 @@ function PaymentTable({ payments }: { payments: Payment[] }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-export default async function FinanceView() {
-  const ac = getAdminClient();
+// ─── Expense rows (with delete button) ───────────────────────────────────────
+type ExpenseRow = { id: string; expense_date: string; concept: string; amount: number; category: string; currency: string; responsible: { full_name: string | null; email: string } | null };
 
-  // Fetch payments with contract currency
-  const { data: paymentsRaw } = await ac
-    .from("payments")
-    .select("id, contract_id, payment_month, scheduled_date, paid_date, amount, notes, contract:contracts!contract_id(client_name, service_type, currency)")
-    .order("scheduled_date", { ascending: true });
-
-  // Fetch expenses with currency
-  const { data: expensesRaw } = await ac
-    .from("expenses")
-    .select("id, expense_date, concept, amount, category, currency, responsible:profiles!responsible_id(full_name, email)")
-    .order("expense_date", { ascending: false });
-
-  // Fetch commissions for net calculation
-  const { data: commissionsRaw } = await ac
-    .from("commissions")
-    .select("id, service_type, commission_amount, beneficiary_role, contract:contracts!contract_id(client_name)")
-    .order("service_type");
-
-  // Fetch users for expense modal
-  const { data: usersRaw } = await ac
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("role", ["admin", "manager", "sales"])
-    .order("full_name");
-
-  const allPayments    = (paymentsRaw    ?? []) as unknown as Payment[];
-  const allExpenses    = (expensesRaw    ?? []) as unknown as Expense[];
-  const allCommissions = (commissionsRaw ?? []) as unknown as Commission[];
-  const users          = (usersRaw       ?? []) as AssignableUser[];
-
-  // ── Separate by currency ──────────────────────────────────────────────────
-  const copPayments = allPayments.filter((p) => (p.contract?.currency ?? "COP") === "COP");
-  const usdPayments = allPayments.filter((p) => (p.contract?.currency ?? "COP") === "USD");
-
-  const copExpenses = allExpenses.filter((e) => (e.currency ?? "COP") === "COP");
-  const usdExpenses = allExpenses.filter((e) => (e.currency ?? "COP") === "USD");
-
-  const copCommissions = allCommissions.filter((c) => c.service_type === "X-VALUE GROWTH");
-  const usdCommissions = allCommissions.filter((c) => c.service_type === "X-Value AI");
-
-  // ── COP KPIs ──────────────────────────────────────────────────────────────
-  const copPaidPayments  = copPayments.filter((p) => p.paid_date);
-  const copRevenue       = copPaidPayments.reduce((s, p) => s + p.amount, 0);
-  const copExpenseTotal  = copExpenses.reduce((s, e) => s + e.amount, 0);
-  const copCommTotal     = copCommissions.reduce((s, c) => s + c.commission_amount, 0);
-  const copNet           = copRevenue - copExpenseTotal - copCommTotal;
-  const copMargin        = copRevenue > 0 ? (copNet / copRevenue) * 100 : 0;
-  const copOverdue       = copPayments.filter((p) => !p.paid_date && getPaymentStatus(p.scheduled_date, null) === "overdue").length;
-
-  // ── USD KPIs ──────────────────────────────────────────────────────────────
-  const usdPaidPayments  = usdPayments.filter((p) => p.paid_date);
-  const usdRevenue       = usdPaidPayments.reduce((s, p) => s + p.amount, 0);
-  const usdExpenseTotal  = usdExpenses.reduce((s, e) => s + e.amount, 0);
-  const usdCommTotal     = usdCommissions.reduce((s, c) => s + c.commission_amount, 0);
-  const usdNet           = usdRevenue - usdExpenseTotal - usdCommTotal;
-  const usdMargin        = usdRevenue > 0 ? (usdNet / usdRevenue) * 100 : 0;
-  const usdOverdue       = usdPayments.filter((p) => !p.paid_date && getPaymentStatus(p.scheduled_date, null) === "overdue").length;
-
-  return (
-    <div className="flex flex-col gap-10">
-
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">Panel Financiero</p>
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Finanzas</h1>
-        </div>
-        <ExpenseModal users={users} />
-      </div>
-
-      {/* ══ BLOQUE 1: X-VALUE GROWTH (COP) ════════════════════════════════ */}
-      <CurrencySection currency="COP" accent="#a78bfa">
-        {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Ingresos COP" value={formatMoney(copRevenue, "COP")}
-            sub={`${copPaidPayments.length} pagos confirmados`} accent="#22c55e" icon={DollarSign} />
-          <KpiCard label="Egresos COP" value={formatMoney(copExpenseTotal, "COP")}
-            sub={`${copExpenses.length} registro${copExpenses.length !== 1 ? "s" : ""}`} accent="#ef4444" icon={TrendingDown} />
-          <KpiCard label="Comisiones COP" value={formatMoney(copCommTotal, "COP")}
-            sub={`${copCommissions.length} comisión${copCommissions.length !== 1 ? "es" : ""}`} accent="#a78bfa" icon={TrendingUp} />
-          <KpiCard label="Utilidad Neta COP"
-            value={formatMoney(copNet, "COP")}
-            sub={copRevenue > 0 ? `Margen ${copMargin.toFixed(1)}%${copOverdue > 0 ? ` · ${copOverdue} mora${copOverdue !== 1 ? "s" : ""}` : ""}` : "Sin ingresos aún"}
-            accent={copNet >= 0 ? "#22c55e" : "#ef4444"} icon={Percent} />
-        </div>
-
-        {/* Payment schedule */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-            <div className="flex items-center gap-2">
-              <Wallet size={14} className="text-zinc-500" />
-              <p className="text-zinc-300 text-sm font-medium">Schedule de Pagos · COP</p>
-            </div>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
-              {copPayments.length} cuotas
-            </span>
-          </div>
-          <PaymentTable payments={copPayments} />
-        </div>
-
-        {/* COP Expenses */}
-        {copExpenses.length > 0 && (
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-              <div className="flex items-center gap-2">
-                <ReceiptText size={14} className="text-zinc-500" />
-                <p className="text-zinc-300 text-sm font-medium">Egresos COP</p>
-              </div>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
-                {copExpenses.length}
-              </span>
-            </div>
-            <ExpenseRows expenses={copExpenses} />
-          </div>
-        )}
-      </CurrencySection>
-
-      {/* ══ BLOQUE 2: X-VALUE AI (USD) ════════════════════════════════════ */}
-      <CurrencySection currency="USD" accent="#38bdf8">
-        {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Ingresos USD" value={formatMoney(usdRevenue, "USD")}
-            sub={`${usdPaidPayments.length} pagos confirmados`} accent="#22c55e" icon={DollarSign} />
-          <KpiCard label="Egresos USD" value={formatMoney(usdExpenseTotal, "USD")}
-            sub={`${usdExpenses.length} registro${usdExpenses.length !== 1 ? "s" : ""}`} accent="#ef4444" icon={TrendingDown} />
-          <KpiCard label="Comisiones USD" value={formatMoney(usdCommTotal, "USD")}
-            sub={`${usdCommissions.length} comisión${usdCommissions.length !== 1 ? "es" : ""}`} accent="#38bdf8" icon={TrendingUp} />
-          <KpiCard label="Utilidad Neta USD"
-            value={formatMoney(usdNet, "USD")}
-            sub={usdRevenue > 0 ? `Margen ${usdMargin.toFixed(1)}%${usdOverdue > 0 ? ` · ${usdOverdue} mora${usdOverdue !== 1 ? "s" : ""}` : ""}` : "Sin ingresos aún"}
-            accent={usdNet >= 0 ? "#22c55e" : "#ef4444"} icon={Percent} />
-        </div>
-
-        {/* Payment schedule */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-            <div className="flex items-center gap-2">
-              <Wallet size={14} className="text-zinc-500" />
-              <p className="text-zinc-300 text-sm font-medium">Schedule de Pagos · USD</p>
-            </div>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
-              {usdPayments.length} cuotas
-            </span>
-          </div>
-          <PaymentTable payments={usdPayments} />
-        </div>
-
-        {/* USD Expenses */}
-        {usdExpenses.length > 0 && (
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-              <div className="flex items-center gap-2">
-                <ReceiptText size={14} className="text-zinc-500" />
-                <p className="text-zinc-300 text-sm font-medium">Egresos USD</p>
-              </div>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
-                {usdExpenses.length}
-              </span>
-            </div>
-            <ExpenseRows expenses={usdExpenses} />
-          </div>
-        )}
-      </CurrencySection>
-    </div>
-  );
-}
-
-// ─── Shared expense rows component ───────────────────────────────────────────
-function ExpenseRows({ expenses }: { expenses: { id: string; expense_date: string; concept: string; amount: number; category: string; currency: string; responsible: { full_name: string | null; email: string } | null }[] }) {
+function ExpenseRows({ expenses }: { expenses: ExpenseRow[] }) {
   return (
     <>
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-zinc-800/60">
-              {["Fecha", "Concepto", "Categoría", "Responsable", "Monto"].map((col, i) => (
+              {["Fecha", "Concepto", "Categoría", "Responsable", "Monto", ""].map((col, i) => (
                 <th key={i} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">{col}</th>
               ))}
             </tr>
@@ -433,6 +304,9 @@ function ExpenseRows({ expenses }: { expenses: { id: string; expense_date: strin
                 <td className="px-4 py-3.5">
                   <span className="text-red-400 font-semibold text-sm">−{formatMoney(ex.amount, ex.currency)}</span>
                 </td>
+                <td className="px-4 py-3.5">
+                  <DeleteExpenseButton expenseId={ex.id} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -448,10 +322,226 @@ function ExpenseRows({ expenses }: { expenses: { id: string; expense_date: strin
                 <span className="text-[10px] text-zinc-500 px-1.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-700">{ex.category}</span>
               </div>
             </div>
-            <span className="text-red-400 font-semibold text-sm shrink-0">−{formatMoney(ex.amount, ex.currency)}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-red-400 font-semibold text-sm">−{formatMoney(ex.amount, ex.currency)}</span>
+              <DeleteExpenseButton expenseId={ex.id} />
+            </div>
           </div>
         ))}
       </div>
     </>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+export default async function FinanceView({ period }: { period?: string }) {
+  const ac = getAdminClient();
+  const range = getDateRange(period);
+
+  const [paymentsRes, expensesRes, commissionsRes, usersRes] = await Promise.all([
+    ac.from("payments")
+      .select("id, contract_id, payment_month, scheduled_date, paid_date, amount, notes, contract:contracts!contract_id(client_name, service_type, currency)")
+      .order("scheduled_date", { ascending: true }),
+    ac.from("expenses")
+      .select("id, expense_date, concept, amount, category, currency, responsible:profiles!responsible_id(full_name, email)")
+      .order("expense_date", { ascending: false }),
+    ac.from("commissions")
+      .select("id, service_type, commission_amount, beneficiary_role, contract:contracts!contract_id(client_name)")
+      .order("service_type"),
+    ac.from("profiles")
+      .select("id, full_name, email")
+      .in("role", ["admin", "manager", "sales"])
+      .order("full_name"),
+  ]);
+
+  const allPayments    = (paymentsRes.data    ?? []) as unknown as Payment[];
+  const allExpenses    = (expensesRes.data    ?? []) as unknown as Expense[];
+  const allCommissions = (commissionsRes.data ?? []) as unknown as Commission[];
+  const users          = (usersRes.data       ?? []) as AssignableUser[];
+
+  // ── Separate by currency then apply period filter ─────────────────────────
+  const copPaymentsAll = allPayments.filter((p) => (p.contract?.currency ?? "COP") === "COP");
+  const usdPaymentsAll = allPayments.filter((p) => (p.contract?.currency ?? "COP") === "USD");
+
+  // Schedule display: filter by scheduled_date
+  const copPayments = copPaymentsAll.filter((p) => inRange(p.scheduled_date, range));
+  const usdPayments = usdPaymentsAll.filter((p) => inRange(p.scheduled_date, range));
+
+  // Revenue: only paid within the period (filter by paid_date)
+  const copPaidPayments = copPaymentsAll.filter((p) => p.paid_date && inRange(p.paid_date, range));
+  const usdPaidPayments = usdPaymentsAll.filter((p) => p.paid_date && inRange(p.paid_date, range));
+
+  // Expenses: filter by expense_date
+  const copExpenses = allExpenses.filter((e) => (e.currency ?? "COP") === "COP" && inRange(e.expense_date, range));
+  const usdExpenses = allExpenses.filter((e) => (e.currency ?? "COP") === "USD" && inRange(e.expense_date, range));
+
+  // Commissions: not filtered by date (structural)
+  const copCommissions = allCommissions.filter((c) => c.service_type === "X-VALUE GROWTH");
+  const usdCommissions = allCommissions.filter((c) => c.service_type === "X-Value AI");
+
+  // ── COP KPIs ──────────────────────────────────────────────────────────────
+  const copRevenue      = copPaidPayments.reduce((s, p) => s + p.amount, 0);
+  const copExpenseTotal = copExpenses.reduce((s, e) => s + e.amount, 0);
+  const copCommTotal    = copCommissions.reduce((s, c) => s + c.commission_amount, 0);
+  const copNet          = copRevenue - copExpenseTotal - copCommTotal;
+  const copOverdue      = copPaymentsAll.filter((p) => !p.paid_date && getPaymentStatus(p.scheduled_date, null) === "overdue").length;
+
+  const copExpensePct = copRevenue > 0 ? (copExpenseTotal / copRevenue) * 100 : null;
+  const copCommPct    = copRevenue > 0 ? (copCommTotal    / copRevenue) * 100 : null;
+  const copNetPct     = copRevenue > 0 ? (copNet          / copRevenue) * 100 : null;
+
+  // ── USD KPIs ──────────────────────────────────────────────────────────────
+  const usdRevenue      = usdPaidPayments.reduce((s, p) => s + p.amount, 0);
+  const usdExpenseTotal = usdExpenses.reduce((s, e) => s + e.amount, 0);
+  const usdCommTotal    = usdCommissions.reduce((s, c) => s + c.commission_amount, 0);
+  const usdNet          = usdRevenue - usdExpenseTotal - usdCommTotal;
+  const usdOverdue      = usdPaymentsAll.filter((p) => !p.paid_date && getPaymentStatus(p.scheduled_date, null) === "overdue").length;
+
+  const usdExpensePct = usdRevenue > 0 ? (usdExpenseTotal / usdRevenue) * 100 : null;
+  const usdCommPct    = usdRevenue > 0 ? (usdCommTotal    / usdRevenue) * 100 : null;
+  const usdNetPct     = usdRevenue > 0 ? (usdNet          / usdRevenue) * 100 : null;
+
+  function pctStr(v: number | null) {
+    if (v === null) return undefined;
+    return `${v >= 0 ? "+" : ""}${v.toFixed(1)}% del ingreso`;
+  }
+
+  return (
+    <div className="flex flex-col gap-10">
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">Panel Financiero</p>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">Finanzas</h1>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <FinancePeriodSelect current={period} />
+          <ExpenseModal users={users} />
+        </div>
+      </div>
+
+      {/* ══ BLOQUE 1: X-VALUE GROWTH (COP) ════════════════════════════════ */}
+      <CurrencySection currency="COP" accent="#a78bfa">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard
+            label="Ingresos COP"
+            value={formatMoney(copRevenue, "COP")}
+            sub={`${copPaidPayments.length} pagos confirmados`}
+            accent="#22c55e" icon={DollarSign}
+          />
+          <KpiCard
+            label="Egresos COP"
+            value={formatMoney(copExpenseTotal, "COP")}
+            pct={pctStr(copExpensePct)}
+            sub={`${copExpenses.length} registro${copExpenses.length !== 1 ? "s" : ""}`}
+            accent="#ef4444" icon={TrendingDown}
+          />
+          <KpiCard
+            label="Comisiones COP"
+            value={formatMoney(copCommTotal, "COP")}
+            pct={pctStr(copCommPct)}
+            sub={`${copCommissions.length} comisión${copCommissions.length !== 1 ? "es" : ""}`}
+            accent="#a78bfa" icon={TrendingUp}
+          />
+          <KpiCard
+            label="Utilidad Neta COP"
+            value={formatMoney(copNet, "COP")}
+            pct={pctStr(copNetPct)}
+            sub={copOverdue > 0 ? `${copOverdue} mora${copOverdue !== 1 ? "s" : ""}` : "Sin moras"}
+            accent={copNet >= 0 ? "#22c55e" : "#ef4444"} icon={Percent}
+          />
+        </div>
+
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+            <div className="flex items-center gap-2">
+              <Wallet size={14} className="text-zinc-500" />
+              <p className="text-zinc-300 text-sm font-medium">Schedule de Pagos · COP</p>
+            </div>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+              {copPayments.length} cuotas
+            </span>
+          </div>
+          <PaymentTable payments={copPayments} />
+        </div>
+
+        {copExpenses.length > 0 && (
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+              <div className="flex items-center gap-2">
+                <ReceiptText size={14} className="text-zinc-500" />
+                <p className="text-zinc-300 text-sm font-medium">Egresos COP</p>
+              </div>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+                {copExpenses.length}
+              </span>
+            </div>
+            <ExpenseRows expenses={copExpenses} />
+          </div>
+        )}
+      </CurrencySection>
+
+      {/* ══ BLOQUE 2: X-VALUE AI (USD) ════════════════════════════════════ */}
+      <CurrencySection currency="USD" accent="#38bdf8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard
+            label="Ingresos USD"
+            value={formatMoney(usdRevenue, "USD")}
+            sub={`${usdPaidPayments.length} pagos confirmados`}
+            accent="#22c55e" icon={DollarSign}
+          />
+          <KpiCard
+            label="Egresos USD"
+            value={formatMoney(usdExpenseTotal, "USD")}
+            pct={pctStr(usdExpensePct)}
+            sub={`${usdExpenses.length} registro${usdExpenses.length !== 1 ? "s" : ""}`}
+            accent="#ef4444" icon={TrendingDown}
+          />
+          <KpiCard
+            label="Comisiones USD"
+            value={formatMoney(usdCommTotal, "USD")}
+            pct={pctStr(usdCommPct)}
+            sub={`${usdCommissions.length} comisión${usdCommissions.length !== 1 ? "es" : ""}`}
+            accent="#38bdf8" icon={TrendingUp}
+          />
+          <KpiCard
+            label="Utilidad Neta USD"
+            value={formatMoney(usdNet, "USD")}
+            pct={pctStr(usdNetPct)}
+            sub={usdOverdue > 0 ? `${usdOverdue} mora${usdOverdue !== 1 ? "s" : ""}` : "Sin moras"}
+            accent={usdNet >= 0 ? "#22c55e" : "#ef4444"} icon={Percent}
+          />
+        </div>
+
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+            <div className="flex items-center gap-2">
+              <Wallet size={14} className="text-zinc-500" />
+              <p className="text-zinc-300 text-sm font-medium">Schedule de Pagos · USD</p>
+            </div>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+              {usdPayments.length} cuotas
+            </span>
+          </div>
+          <PaymentTable payments={usdPayments} />
+        </div>
+
+        {usdExpenses.length > 0 && (
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+              <div className="flex items-center gap-2">
+                <ReceiptText size={14} className="text-zinc-500" />
+                <p className="text-zinc-300 text-sm font-medium">Egresos USD</p>
+              </div>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+                {usdExpenses.length}
+              </span>
+            </div>
+            <ExpenseRows expenses={usdExpenses} />
+          </div>
+        )}
+      </CurrencySection>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import { ShieldCheck, AlertCircle, Inbox } from "lucide-react";
 import ResetPasswordModal from "./ResetPasswordModal";
 import DeleteUserButton from "./DeleteUserButton";
 import CalendarToggle from "./CalendarToggle";
+import ChangeRoleSelect from "./ChangeRoleSelect";
 import { ROLE_META, computeAge } from "./types";
 import type { Role } from "./types";
 
@@ -20,7 +21,6 @@ interface UserRow {
   can_view_calendar: boolean;
 }
 
-// Null-safe date formatter
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -28,7 +28,13 @@ function formatDate(iso: string | null | undefined): string {
   return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-export default async function SecuritySection({ currentUserId }: { currentUserId: string }) {
+export default async function SecuritySection({
+  currentUserId,
+  isAdmin,
+}: {
+  currentUserId: string;
+  isAdmin: boolean;
+}) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -128,12 +134,21 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                           </div>
                         </td>
                         <td className="px-5 py-3">
-                          <span
-                            className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                            style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
-                          >
-                            {meta.label}
-                          </span>
+                          {/* Admins can change role for others; own role is locked */}
+                          {isAdmin && !isSelf ? (
+                            <ChangeRoleSelect
+                              userId={u.id}
+                              currentRole={u.role}
+                              canAssignAdmin={isAdmin}
+                            />
+                          ) : (
+                            <span
+                              className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                              style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+                            >
+                              {meta.label}
+                            </span>
+                          )}
                         </td>
                         <td className="px-5 py-3">
                           <p className="text-zinc-300 text-sm">{age !== null ? `${age} años` : "—"}</p>
@@ -205,12 +220,21 @@ export default async function SecuritySection({ currentUserId }: { currentUserId
                           <p className="text-zinc-600 text-xs mt-0.5">{u.email}</p>
                         </div>
                       </div>
-                      <span
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
-                      >
-                        {meta.label}
-                      </span>
+                      {/* Role selector or badge on mobile */}
+                      {isAdmin && !isSelf ? (
+                        <ChangeRoleSelect
+                          userId={u.id}
+                          currentRole={u.role}
+                          canAssignAdmin={isAdmin}
+                        />
+                      ) : (
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
+                        >
+                          {meta.label}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between gap-3 flex-wrap">
                       <p className="text-zinc-600 text-xs">

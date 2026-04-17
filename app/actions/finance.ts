@@ -27,11 +27,12 @@ import type { ActionResult } from "./admin";
 //    X-Value AI     → currency = "USD"  (setup_fee + optional monthly_fee in USD)
 //    X-VALUE GROWTH → currency = "COP"  (single monthly_fee in COP, all months)
 // ═══════════════════════════════════════════════════════════════════════════════
-const AI_MANAGER_RATE       = 0.03 as const;  // Rule 1 — 3% of setup_fee (USD)
-const GROWTH_SALES_RATE     = 0.10 as const;  // Rule 2 — 10% of monthly_fee (COP)
-const GROWTH_MANAGER_RATE   = 0.10 as const;  // Rule 3 — 10% of monthly_fee (COP)
-const GROWTH_SALES_MONTHS   = [1, 2] as const;
-const GROWTH_MANAGER_MONTHS = [3, 4] as const;
+const AI_MANAGER_RATE            = 0.03 as const;  // Rule 1a — 3% of setup_fee when team-close (USD)
+const AI_MANAGER_SELF_CLOSE_RATE = 0.10 as const;  // Rule 1b — 10% of setup_fee when self-close (USD)
+const GROWTH_SALES_RATE          = 0.10 as const;  // Rule 2 — 10% of monthly_fee (COP)
+const GROWTH_MANAGER_RATE        = 0.10 as const;  // Rule 3 — 10% of monthly_fee (COP)
+const GROWTH_SALES_MONTHS        = [1, 2] as const;
+const GROWTH_MANAGER_MONTHS      = [3, 4, 5, 6] as const; // Rule 3 revised: months 3-6
 const GROWTH_PAYMENT_MONTHS = 12     as const; // schedule horizon
 const AI_MAINTENANCE_MONTHS = 12     as const; // maintenance schedule horizon
 
@@ -215,8 +216,10 @@ export async function activateClient(formData: FormData): Promise<ActionResult> 
   const commissionRows: object[] = [];
 
   if (isAI) {
-    // Rule 1: Manager 3% of setup_fee (USD), one-time
+    // Rule 1 (revised): Manager gets 10% if self-close, 3% if a sales rep closed the deal
     if (assigned_manager_id) {
+      const isSelfClose = !assigned_sales_id || assigned_sales_id === assigned_manager_id;
+      const rate = isSelfClose ? AI_MANAGER_SELF_CLOSE_RATE : AI_MANAGER_RATE;
       commissionRows.push({
         contract_id:      contractId,
         beneficiary_id:   assigned_manager_id,
@@ -225,8 +228,8 @@ export async function activateClient(formData: FormData): Promise<ActionResult> 
         payment_month:    1,
         commission_type:  "one_time",
         base_amount:      setup_fee,
-        rate:             AI_MANAGER_RATE,
-        commission_amount: Math.round(setup_fee! * AI_MANAGER_RATE * 100) / 100,
+        rate,
+        commission_amount: Math.round(setup_fee! * rate * 100) / 100,
       });
     }
   } else {
@@ -333,6 +336,21 @@ export async function addExpense(formData: FormData): Promise<ActionResult> {
     expense_date, concept, amount, category, currency, responsible_id,
     created_by: caller.id,
   });
+
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  deleteExpense — removes a company expense (admin only)
+// ═══════════════════════════════════════════════════════════════════════════════
+export async function deleteExpense(expenseId: string): Promise<ActionResult> {
+  const caller = await requireRole(["admin"]);
+  if (!caller) return { error: "Solo el admin puede eliminar gastos." };
+
+  const ac = getAdminClient();
+  const { error } = await ac.from("expenses").delete().eq("id", expenseId);
 
   if (error) return { error: error.message };
   revalidatePath("/dashboard", "layout");
