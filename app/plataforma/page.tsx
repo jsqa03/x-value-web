@@ -21,6 +21,7 @@ import VoiceAgentDemo from "@/components/VoiceAgentDemo";
 import InstagramMedia from "@/components/InstagramMedia";
 import ConversionModal from "@/components/ConversionModal";
 import CalendlyCTA from "@/components/CalendlyCTA";
+import XBankLanding from "@/components/XBankLanding";
 
 // ─── Integration logos ────────────────────────────────────────────────────────
 
@@ -546,6 +547,9 @@ export default function PlataformaPage() {
 
         {/* ── GROWTH BANNER CTA ───────────────────────────────────────────── */}
         <GrowthBanner onCTA={() => openModal("Agente x-value IA")} />
+
+        {/* ── X-BANK LANDING ──────────────────────────────────────────────── */}
+        <XBankLanding />
 
         {/* ── CALENDLY INLINE ──────────────────────────────────────────── */}
         <section className="py-20 px-6">
