@@ -11,9 +11,10 @@ import {
 interface Props {
   paymentId: string;
   scheduledDate: string;
-  amount: string;        // pre-formatted COP string
+  amount: string;        // pre-formatted string (currency-aware)
   contractName: string;
   paymentMonth: number;
+  currency: string;
 }
 
 const inputCls = "w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/50 transition-colors";
@@ -34,7 +35,7 @@ function Field({ label, icon: Icon, required: req, children }: {
 }
 
 export default function RegisterPaymentModal({
-  paymentId, scheduledDate, amount, contractName, paymentMonth,
+  paymentId, scheduledDate, amount, contractName, paymentMonth, currency,
 }: Props) {
   const [open, setOpen]               = useState(false);
   const [result, setResult]           = useState<ActionResult | null>(null);
@@ -119,7 +120,7 @@ export default function RegisterPaymentModal({
                       <p className="text-white font-semibold text-sm">{amount}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-zinc-600 text-[10px]">Programado</p>
+                      <p className="text-zinc-600 text-[10px]">Programado · <span className="font-bold">{currency}</span></p>
                       <p className="text-zinc-400 text-xs">{scheduledDate}</p>
                     </div>
                   </div>

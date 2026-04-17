@@ -7,7 +7,7 @@ import type { ActionResult, AssignableUser } from "@/app/actions/admin";
 import {
   Zap, X, Loader2, CheckCircle2, AlertCircle,
   Building2, DollarSign, Calendar, Tag, Users, FileText,
-  TrendingUp, ChevronDown,
+  TrendingUp, ChevronDown, Globe,
 } from "lucide-react";
 import type { Lead } from "../LeadsTable";
 
@@ -15,12 +15,31 @@ interface Props { lead: Lead }
 
 const SERVICE_TYPES = ["X-Value AI", "X-VALUE GROWTH"] as const;
 const SERVICE_COLORS: Record<string, { color: string; bg: string; border: string }> = {
-  "X-Value AI":     { color: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.25)" },
-  "X-VALUE GROWTH": { color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.25)" },
+  "X-Value AI":     { color: "#f97316", bg: "rgba(249,115,22,0.08)",   border: "rgba(249,115,22,0.25)"   },
+  "X-VALUE GROWTH": { color: "#a78bfa", bg: "rgba(167,139,250,0.08)",  border: "rgba(167,139,250,0.25)"  },
 };
 
-function Field({ label, icon: Icon, required: req, children, hint }: {
-  label: string; icon: React.ElementType; required?: boolean; children: React.ReactNode; hint?: string;
+// ─── Currency badge ───────────────────────────────────────────────────────────
+function CurrencyBadge({ currency }: { currency: "USD" | "COP" }) {
+  const isUSD = currency === "USD";
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wider uppercase"
+      style={isUSD
+        ? { background: "rgba(56,189,248,0.1)", color: "#38bdf8", border: "1px solid rgba(56,189,248,0.25)" }
+        : { background: "rgba(34,197,94,0.1)",  color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }
+      }
+    >
+      <Globe size={8} />
+      {currency}
+    </span>
+  );
+}
+
+function Field({ label, icon: Icon, required: req, children, hint, badge }: {
+  label: string; icon: React.ElementType; required?: boolean;
+  children: React.ReactNode; hint?: string;
+  badge?: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -28,6 +47,7 @@ function Field({ label, icon: Icon, required: req, children, hint }: {
         <Icon size={10} className="text-zinc-600" />
         {label}
         {req && <span className="text-orange-400">*</span>}
+        {badge}
       </label>
       {children}
       {hint && <p className="text-zinc-700 text-[10px] pl-0.5">{hint}</p>}
@@ -37,6 +57,7 @@ function Field({ label, icon: Icon, required: req, children, hint }: {
 
 const inputCls  = "w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/50 transition-colors";
 const selectCls = "w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white outline-none focus:border-orange-500/50 transition-colors appearance-none";
+const inputUSD  = "w-full bg-zinc-900 border border-sky-500/25 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-sky-400/50 transition-colors";
 
 export default function ContractActivationModal({ lead }: Props) {
   const [open, setOpen]                       = useState(false);
@@ -49,8 +70,11 @@ export default function ContractActivationModal({ lead }: Props) {
   const [isPending, startTransition]          = useTransition();
   const formRef                               = useRef<HTMLFormElement>(null);
 
+  const isAI     = serviceType === "X-Value AI";
   const isGrowth = serviceType === "X-VALUE GROWTH";
-  const managers = users.filter((u) => u.role === "manager");
+  const currency  = isAI ? "USD" : "COP";
+
+  const managers  = users.filter((u) => u.role === "manager");
   const salesReps = users.filter((u) => u.role === "sales");
 
   useEffect(() => {
@@ -59,17 +83,18 @@ export default function ContractActivationModal({ lead }: Props) {
     getAssignableUsers().then((list) => { setUsers(list); setLoadingUsers(false); });
   }, [open]);
 
-  function handleOpen() { setResult(null); setOpen(true); }
+  function handleOpen()  { setResult(null); setOpen(true); }
   function handleClose() { if (isPending) return; setOpen(false); setTimeout(() => setResult(null), 250); }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setResult(null);
     const fd = new FormData(e.currentTarget);
-    fd.set("lead_id",           lead.id);
-    fd.set("service_type",      serviceType);
-    fd.set("assigned_sales_id", assignedSalesId);
-    fd.set("assigned_manager_id", assignedMgrId);
+    fd.set("lead_id",              lead.id);
+    fd.set("service_type",         serviceType);
+    fd.set("currency",             currency);
+    fd.set("assigned_sales_id",    assignedSalesId);
+    fd.set("assigned_manager_id",  assignedMgrId);
     startTransition(async () => {
       const res = await activateClient(fd);
       setResult(res);
@@ -103,8 +128,13 @@ export default function ContractActivationModal({ lead }: Props) {
                   <Zap size={14} className="text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm leading-none">Activar Cliente</p>
-                  <p className="text-zinc-600 text-xs mt-0.5 truncate max-w-[230px]">{lead.name}{lead.company_info ? ` · ${lead.company_info}` : ""}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-semibold text-sm leading-none">Activar Cliente</p>
+                    <CurrencyBadge currency={currency as "USD" | "COP"} />
+                  </div>
+                  <p className="text-zinc-600 text-xs mt-0.5 truncate max-w-[210px]">
+                    {lead.name}{lead.company_info ? ` · ${lead.company_info}` : ""}
+                  </p>
                 </div>
               </div>
               <button onClick={handleClose} disabled={isPending}
@@ -162,38 +192,55 @@ export default function ContractActivationModal({ lead }: Props) {
                     </div>
                   </Field>
 
-                  {/* Closing amount */}
-                  <Field label="Monto de Cierre" icon={DollarSign} required
-                    hint={isGrowth ? "Monto de la venta inicial (no el fee mensual)." : "Pago único — base para la comisión del 3% del Manager."}>
-                    <div className="relative">
-                      <DollarSign size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600" />
-                      <input name="closing_amount" type="text" placeholder="5000000"
-                        required className={inputCls} />
-                    </div>
-                  </Field>
-
-                  {/* X-VALUE GROWTH: fee escalation */}
-                  {isGrowth && (
-                    <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border border-purple-500/20 bg-purple-500/5">
-                      <div className="col-span-2">
-                        <p className="text-purple-400/80 text-[10px] font-semibold tracking-wider uppercase flex items-center gap-1.5">
-                          <TrendingUp size={9} /> Fee mensual X-VALUE GROWTH
+                  {/* ── X-VALUE AI FIELDS (USD) ──────────────────────────── */}
+                  {isAI && (
+                    <div className="flex flex-col gap-3 p-3 rounded-xl border border-sky-500/20 bg-sky-500/5">
+                      <div className="flex items-center gap-1.5">
+                        <Globe size={9} className="text-sky-400/70" />
+                        <p className="text-sky-400/80 text-[10px] font-semibold tracking-wider uppercase">
+                          Facturación en USD · X-Value AI
                         </p>
                       </div>
-                      <Field label="Fee meses 1-2" icon={DollarSign} required
-                        hint="Sales cobra 10% sobre este fee (meses 1-2).">
+
+                      <Field label="Pago Único Vitalicio / Setup" icon={DollarSign} required
+                        badge={<CurrencyBadge currency="USD" />}
+                        hint="Base para comisión del 3% al Manager.">
                         <div className="relative">
-                          <DollarSign size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600" />
-                          <input name="fee_month_1_2" type="text" placeholder="5000000"
-                            required={isGrowth} className={inputCls} />
+                          <DollarSign size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-sky-500/50" />
+                          <input name="setup_fee" type="text" placeholder="1500.00"
+                            required className={inputUSD} />
                         </div>
                       </Field>
-                      <Field label="Fee mes 3 en adelante" icon={DollarSign} required
-                        hint="Manager cobra 10% sobre este fee (meses 3-4).">
+
+                      <Field label="Fee Mantenimiento Mensual" icon={TrendingUp}
+                        badge={<CurrencyBadge currency="USD" />}
+                        hint="Escribe 0 si no aplica. Se factura a partir del mes 2.">
                         <div className="relative">
-                          <DollarSign size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600" />
-                          <input name="fee_month_3_plus" type="text" placeholder="6000000"
-                            required={isGrowth} className={inputCls} />
+                          <TrendingUp size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-sky-500/50" />
+                          <input name="monthly_fee" type="text" placeholder="0.00"
+                            defaultValue="0" className={inputUSD} />
+                        </div>
+                      </Field>
+                    </div>
+                  )}
+
+                  {/* ── X-VALUE GROWTH FIELDS (COP) ─────────────────────── */}
+                  {isGrowth && (
+                    <div className="flex flex-col gap-3 p-3 rounded-xl border border-purple-500/20 bg-purple-500/5">
+                      <div className="flex items-center gap-1.5">
+                        <TrendingUp size={9} className="text-purple-400/70" />
+                        <p className="text-purple-400/80 text-[10px] font-semibold tracking-wider uppercase">
+                          Facturación en COP · X-VALUE GROWTH
+                        </p>
+                      </div>
+
+                      <Field label="Fee Mensual" icon={DollarSign} required
+                        badge={<CurrencyBadge currency="COP" />}
+                        hint="Comercial cobra 10% meses 1-2. Manager cobra 10% meses 3-4.">
+                        <div className="relative">
+                          <DollarSign size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-purple-500/50" />
+                          <input name="monthly_fee" type="text" placeholder="5000000"
+                            required className="w-full bg-zinc-900 border border-purple-500/25 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-purple-400/50 transition-colors" />
                         </div>
                       </Field>
                     </div>
@@ -253,15 +300,15 @@ export default function ContractActivationModal({ lead }: Props) {
                       className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/50 resize-none transition-colors" />
                   </Field>
 
-                  {/* Commission summary (informational) */}
+                  {/* Commission summary */}
                   <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-500 flex flex-col gap-1">
                     <p className="text-zinc-400 font-semibold text-[11px] uppercase tracking-wider mb-1">Comisiones que se generarán</p>
-                    {serviceType === "X-Value AI" ? (
-                      <p>• Manager: <span className="text-orange-400 font-semibold">3%</span> del monto de cierre (pago único)</p>
+                    {isAI ? (
+                      <p>• Manager: <span className="text-sky-400 font-semibold">3%</span> del setup fee (<span className="text-sky-400">USD</span>) — pago único</p>
                     ) : (
                       <>
-                        <p>• Comercial meses 1-2: <span className="text-emerald-400 font-semibold">10%</span> del fee mensual</p>
-                        <p>• Manager meses 3-4: <span className="text-purple-400 font-semibold">10%</span> del fee mensual</p>
+                        <p>• Comercial meses 1-2: <span className="text-emerald-400 font-semibold">10%</span> del fee mensual (<span className="text-emerald-400">COP</span>)</p>
+                        <p>• Manager meses 3-4: <span className="text-purple-400 font-semibold">10%</span> del fee mensual (<span className="text-purple-400">COP</span>)</p>
                       </>
                     )}
                   </div>

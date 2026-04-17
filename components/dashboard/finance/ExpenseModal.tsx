@@ -5,7 +5,7 @@ import { addExpense } from "@/app/actions/finance";
 import type { ActionResult } from "@/app/actions/admin";
 import {
   PlusCircle, X, Loader2, CheckCircle2, AlertCircle,
-  Calendar, DollarSign, FileText, Tag, User, ChevronDown,
+  Calendar, DollarSign, FileText, Tag, User, ChevronDown, Globe,
 } from "lucide-react";
 
 interface AssignableUser { id: string; full_name: string | null; email: string }
@@ -41,16 +41,18 @@ function Field({ label, icon: Icon, required: req, children }: {
 
 export default function ExpenseModal({ users }: Props) {
   const [open, setOpen]               = useState(false);
+  const [currency, setCurrency]       = useState<"COP" | "USD">("COP");
   const [result, setResult]           = useState<ActionResult | null>(null);
   const [isPending, startTransition]  = useTransition();
 
-  function handleOpen()  { setResult(null); setOpen(true); }
+  function handleOpen()  { setResult(null); setCurrency("COP"); setOpen(true); }
   function handleClose() { if (isPending) return; setOpen(false); setTimeout(() => setResult(null), 250); }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setResult(null);
     const fd = new FormData(e.currentTarget);
+    fd.set("currency", currency);
     startTransition(async () => {
       const res = await addExpense(fd);
       setResult(res);
@@ -110,6 +112,33 @@ export default function ExpenseModal({ users }: Props) {
               ) : (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
+                  {/* Moneda */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-500 text-xs font-semibold tracking-wide uppercase flex items-center gap-1.5">
+                      <Globe size={10} className="text-zinc-600" />
+                      Moneda <span className="text-orange-400">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["COP", "USD"] as const).map((c) => (
+                        <button key={c} type="button" onClick={() => setCurrency(c)}
+                          className="py-2 px-3 rounded-xl text-xs font-bold transition-all text-center"
+                          style={{
+                            background: currency === c
+                              ? (c === "COP" ? "rgba(34,197,94,0.08)" : "rgba(56,189,248,0.08)")
+                              : "rgba(255,255,255,0.02)",
+                            border: `1px solid ${currency === c
+                              ? (c === "COP" ? "rgba(34,197,94,0.3)" : "rgba(56,189,248,0.3)")
+                              : "rgba(255,255,255,0.06)"}`,
+                            color: currency === c
+                              ? (c === "COP" ? "#22c55e" : "#38bdf8")
+                              : "rgba(255,255,255,0.25)",
+                          }}>
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Fecha + Monto */}
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Fecha" icon={Calendar} required>
@@ -119,10 +148,12 @@ export default function ExpenseModal({ users }: Props) {
                           className={`${inputCls} [color-scheme:dark]`} />
                       </div>
                     </Field>
-                    <Field label="Monto (COP)" icon={DollarSign} required>
+                    <Field label={`Monto (${currency})`} icon={DollarSign} required>
                       <div className="relative">
                         <DollarSign size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600" />
-                        <input name="amount" type="text" placeholder="500000" required className={inputCls} />
+                        <input name="amount" type="text"
+                          placeholder={currency === "USD" ? "500.00" : "500000"}
+                          required className={inputCls} />
                       </div>
                     </Field>
                   </div>

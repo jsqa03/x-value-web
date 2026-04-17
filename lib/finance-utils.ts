@@ -30,9 +30,31 @@ export function daysUntil(scheduled: string): number {
   return Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
-export function formatCOP(amount: number): string {
+/**
+ * Format a monetary amount based on its currency.
+ *  COP → "$ 26.000.000"   (es-CO locale, 0 decimals)
+ *  USD → "$1,500.00"      (en-US locale, 2 decimals)
+ */
+export function formatMoney(amount: number, currency: string): string {
+  if (currency === "USD") {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency", currency: "USD",
+      minimumFractionDigits: 2, maximumFractionDigits: 2,
+    }).format(amount);
+  }
+  // Default: COP
   return new Intl.NumberFormat("es-CO", {
     style: "currency", currency: "COP",
     minimumFractionDigits: 0, maximumFractionDigits: 0,
   }).format(amount);
+}
+
+/** Convenience alias — kept for backward compat. */
+export function formatCOP(amount: number): string {
+  return formatMoney(amount, "COP");
+}
+
+/** Infer currency from service type string. */
+export function currencyOf(serviceType: string): "USD" | "COP" {
+  return serviceType === "X-Value AI" ? "USD" : "COP";
 }
