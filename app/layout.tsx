@@ -34,6 +34,11 @@ export const metadata: Metadata = {
   title: "x-value IA — Inteligencia Artificial para Empresas",
   description:
     "Plataforma B2B de inteligencia artificial. Automatiza procesos, multiplica tu rentabilidad y escala con agentes de IA a medida.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -44,8 +49,6 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${bebas.variable} ${instrumentSerif.variable} ${barlow.variable} h-full`}>
       <head>
-        {/* Favicon */}
-        <link rel="icon" href="/logo.png" />
         {/* Geist Sans — Vercel's typeface */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
