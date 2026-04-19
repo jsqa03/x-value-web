@@ -1,6 +1,21 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useEffect } from "react";
+
+// ─── Waitlist counter — increments by 1 each day at 15:00 Colombia (UTC-5) ───
+const WAITLIST_BASE       = 47;
+// Midnight April 19 2026 in Colombia (UTC-5) expressed as UTC: 05:00 UTC
+const WAITLIST_BASE_UTC   = new Date("2026-04-19T05:00:00Z").getTime();
+const MS_PER_DAY          = 86_400_000;
+
+function calcWaitlistCount(): number {
+  const nowMs      = Date.now();
+  const diasPasados = Math.floor((nowMs - WAITLIST_BASE_UTC) / MS_PER_DAY);
+  // Colombia hour = (UTC hour − 5 + 24) % 24
+  const colombiaHour = ((new Date().getUTCHours() - 5) + 24) % 24;
+  const adjustment   = colombiaHour >= 15 ? 0 : -1;
+  return Math.max(WAITLIST_BASE, WAITLIST_BASE + diasPasados + adjustment);
+}
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import {
   Rocket, Lock, CheckCircle2, ArrowRight,
@@ -350,6 +365,12 @@ export default function XBankLanding({ stats }: Props) {
   const [submitted, setSubmitted]     = useState(false);
   const [serverError, setServerError] = useState("");
   const [isPending, startTransition]  = useTransition();
+
+  // Starts at base to avoid hydration mismatch; real value set in effect
+  const [waitlistCount, setWaitlistCount] = useState(WAITLIST_BASE);
+  useEffect(() => {
+    setWaitlistCount(calcWaitlistCount());
+  }, []);
 
   function handleWaitlist(e: React.FormEvent) {
     e.preventDefault();
@@ -956,7 +977,7 @@ export default function XBankLanding({ stats }: Props) {
                 className="text-xs"
                 style={{ color: "rgba(255,255,255,0.32)" }}
               >
-                <strong style={{ color: "rgba(255,255,255,0.55)" }}>+47</strong> empresas ya en lista de espera
+                <strong style={{ color: "rgba(255,255,255,0.55)" }}>+{waitlistCount}</strong> empresas ya en lista de espera
               </span>
             </div>
 
