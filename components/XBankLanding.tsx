@@ -366,9 +366,9 @@ function CreditCardMockup({ companyName }: { companyName: string }) {
 
 // ─── Hero feature pills ───────────────────────────────────────────────────────
 const HERO_PILLS = [
-  { icon: Zap,    label: "Sin cuota de manejo",   accent: "#f59e0b" },
-  { icon: Shield, label: "Antifraude 24/7",        accent: "#22c55e" },
-  { icon: Star,   label: "Cashback corporativo",   accent: "#a78bfa" },
+  { icon: Zap,    label: "Sin cuota de manejo",   iconClass: "text-amber-400/80"  },
+  { icon: Shield, label: "Antifraude 24/7",        iconClass: "text-emerald-400/80" },
+  { icon: Star,   label: "Cashback corporativo",   iconClass: "text-violet-400/80" },
 ];
 
 // ─── Card feature list ────────────────────────────────────────────────────────
@@ -490,22 +490,19 @@ export default function XBankLanding({ stats }: Props) {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <span
-              className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-[0.22em] uppercase"
+              className="inline-flex items-center gap-3 px-6 py-1.5 rounded-full text-xs font-medium tracking-widest uppercase"
               style={{
-                background: "rgba(245,158,11,0.07)",
-                border: "1px solid rgba(245,158,11,0.22)",
-                color: "#e8a60a",
-                letterSpacing: "0.2em",
+                background: "rgba(245,158,11,0.04)",
+                outline: "1px solid rgba(245,158,11,0.18)",
+                outlineOffset: "-1px",
+                color: "rgba(251,191,36,0.88)",
               }}
             >
-              <Rocket size={11} className="shrink-0" style={{ color: "#f59e0b" }} />
-              Próximamente · Servicio en Desarrollo
-              <motion.span
-                className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ background: "#f59e0b" }}
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              <span
+                className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
+                style={{ background: "rgb(245,158,11)" }}
               />
+              Próximamente · Servicio en Desarrollo
             </span>
           </motion.div>
 
@@ -567,14 +564,22 @@ export default function XBankLanding({ stats }: Props) {
             {HERO_PILLS.map((p) => (
               <span
                 key={p.label}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-medium"
+                className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-[20px] text-sm font-medium transition-all duration-300 cursor-default select-none"
                 style={{
-                  background: `${p.accent}0b`,
-                  border: `1px solid ${p.accent}1e`,
-                  color: "rgba(255,255,255,0.5)",
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  color: "rgba(255,255,255,0.8)",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.10)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.05)";
                 }}
               >
-                <p.icon size={10} style={{ color: p.accent }} />
+                <p.icon size={16} className={`shrink-0 ${p.iconClass}`} />
                 {p.label}
               </span>
             ))}
