@@ -228,10 +228,8 @@ function PaymentTable({ payments }: { payments: Payment[] }) {
               return (
                 <tr
                   key={p.id}
-                  className="transition-colors group"
+                  className="neural-row group"
                   style={{ borderBottom: "1px solid var(--neural-border)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
                   <td className="px-4 py-3.5">
                     <p
@@ -398,10 +396,8 @@ function ExpenseRows({ expenses }: { expenses: ExpenseRow[] }) {
             {expenses.map((ex) => (
               <tr
                 key={ex.id}
-                className="transition-colors"
+                className="neural-row"
                 style={{ borderBottom: "1px solid var(--neural-border)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
                 <td className="px-4 py-3.5">
                   <span

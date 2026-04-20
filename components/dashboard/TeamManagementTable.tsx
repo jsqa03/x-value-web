@@ -144,10 +144,8 @@ export default async function TeamManagementTable() {
               return (
                 <tr
                   key={p.id}
-                  className="transition-colors"
+                  className="neural-row"
                   style={{ borderBottom: "1px solid var(--neural-border)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">

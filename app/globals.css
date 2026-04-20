@@ -264,6 +264,14 @@ body {
   animation: neural-fade-in 150ms ease both;
 }
 
+/* Table row hover — CSS-only, safe in Server Components */
+.neural-row {
+  transition: background 120ms ease;
+}
+.neural-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 /* ── Glassmorphism ─────────────────────────────────────────────────────────── */
 .glass {
   background: rgba(255, 255, 255, 0.04);

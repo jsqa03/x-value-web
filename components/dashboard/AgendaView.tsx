@@ -45,10 +45,8 @@ function TaskCard({ task }: { task: Task }) {
 
   return (
     <div
-      className={`group flex items-start gap-3 px-5 py-4 transition-colors last:border-0 ${isDone ? "opacity-55" : ""}`}
+      className={`neural-row group flex items-start gap-3 px-5 py-4 last:border-0 ${isDone ? "opacity-55" : ""}`}
       style={{ borderBottom: "1px solid var(--neural-border)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       <div className="pt-0.5">
         <TaskCompleteButton taskId={task.id} isDone={isDone} />
