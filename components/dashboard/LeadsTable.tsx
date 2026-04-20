@@ -41,17 +41,27 @@ const PIPELINE_STYLE: Record<string, { color: string; bg: string; border: string
 
 function PipelineBadge({ status }: { status: string | null }) {
   if (!status) return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
-      <Clock size={9} />
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+      style={{
+        fontFamily: "var(--font-ui)",
+        color: "var(--neural-yellow)",
+        background: "rgba(255,208,0,0.08)",
+        border: "1px solid rgba(255,208,0,0.2)",
+      }}
+    >
+      <Clock size={8} />
       Pendiente
     </span>
   );
   const s = PIPELINE_STYLE[status];
-  if (!s) return <span className="text-zinc-500 text-xs">{status}</span>;
+  if (!s) return (
+    <span className="text-xs" style={{ color: "var(--neural-text-muted)" }}>{status}</span>
+  );
   return (
     <span
-      className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full"
-      style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
+      className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+      style={{ fontFamily: "var(--font-ui)", color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
     >
       {s.short}
     </span>
@@ -122,64 +132,120 @@ export default async function LeadsTable() {
 
   if (!leads || leads.length === 0) {
     return (
-      <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-10 flex flex-col items-center gap-3 text-center">
-        <Inbox size={26} className="text-zinc-700" />
-        <p className="text-zinc-500 text-sm">No hay leads registrados</p>
-        <p className="text-zinc-700 text-xs">Los contactos aparecerán aquí</p>
+      <div className="neural-card p-10 flex flex-col items-center gap-3 text-center">
+        <Inbox size={24} style={{ color: "var(--neural-text-muted)" }} />
+        <p className="text-sm" style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}>
+          No hay leads registrados
+        </p>
+        <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>Los contactos aparecerán aquí</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+    <div className="neural-card overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+      <div
+        className="flex items-center justify-between px-5 py-3.5"
+        style={{ borderBottom: "1px solid var(--neural-border)" }}
+      >
         <div className="flex items-center gap-2">
-          <Users size={14} className="text-zinc-500" />
-          <p className="text-zinc-300 text-sm font-medium">Todos los leads</p>
+          <Users size={12} style={{ color: "var(--neural-purple)", opacity: 0.8 }} />
+          <p
+            className="text-[12px] font-semibold"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+          >
+            Todos los leads
+          </p>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+        <span
+          className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+          style={{
+            fontFamily: "var(--font-mono)",
+            background: "rgba(168,85,247,0.06)",
+            color: "var(--neural-purple)",
+            border: "1px solid rgba(168,85,247,0.2)",
+          }}
+        >
           {leads.length} registros
         </span>
       </div>
 
       {/* Desktop table */}
-      <div className="hidden lg:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto transform-gpu">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-800/60">
+            <tr style={{ borderBottom: "1px solid var(--neural-border)" }}>
               {["Nombre / Empresa", "Contacto", "Servicio", "Estado", "Asignado a", "Fecha", ""].map((col, i) => (
-                <th key={i} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
+                <th
+                  key={i}
+                  className="px-4 py-3 text-left text-[10px] font-semibold uppercase"
+                  style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)", letterSpacing: "0.12em" }}
+                >
                   {col}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60">
+          <tbody>
             {leads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-zinc-900/40 transition-colors group">
+              <tr
+                key={lead.id}
+                className="transition-colors group"
+                style={{ borderBottom: "1px solid var(--neural-border)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
                 {/* Name / Company */}
                 <td className="px-4 py-3.5">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[11px] font-semibold text-orange-400 shrink-0">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                      style={{
+                        background: "rgba(249,115,22,0.08)",
+                        color: "var(--neural-accent)",
+                        border: "1px solid rgba(249,115,22,0.2)",
+                      }}
+                    >
                       {lead.name?.charAt(0).toUpperCase() ?? "?"}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-white text-sm font-medium truncate max-w-[130px]">{lead.name}</p>
+                      <p
+                        className="text-sm font-medium truncate max-w-[130px]"
+                        style={{ color: "var(--neural-text)" }}
+                      >
+                        {lead.name}
+                      </p>
                       {lead.company_info && (
-                        <p className="text-zinc-600 text-xs truncate max-w-[130px]">{lead.company_info}</p>
+                        <p className="text-xs truncate max-w-[130px]" style={{ color: "var(--neural-text-muted)" }}>
+                          {lead.company_info}
+                        </p>
                       )}
                     </div>
                   </div>
                 </td>
                 {/* Contact */}
                 <td className="px-4 py-3.5">
-                  <p className="text-zinc-400 text-sm truncate max-w-[160px]">{lead.email}</p>
-                  {lead.whatsapp && <p className="text-zinc-600 text-xs">{lead.whatsapp}</p>}
+                  <p
+                    className="text-xs truncate max-w-[160px]"
+                    style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                  >
+                    {lead.email}
+                  </p>
+                  {lead.whatsapp && (
+                    <p
+                      className="text-[10px] mt-0.5"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                    >
+                      {lead.whatsapp}
+                    </p>
+                  )}
                 </td>
                 {/* Service */}
                 <td className="px-4 py-3.5">
-                  <span className="text-zinc-400 text-xs">{lead.service_type ?? "—"}</span>
+                  <span className="text-xs" style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}>
+                    {lead.service_type ?? "—"}
+                  </span>
                 </td>
                 {/* Status */}
                 <td className="px-4 py-3.5">
@@ -187,13 +253,18 @@ export default async function LeadsTable() {
                 </td>
                 {/* Assignee */}
                 <td className="px-4 py-3.5">
-                  <span className="text-zinc-500 text-xs">
+                  <span className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
                     {lead.assigned_to ? (assigneeMap[lead.assigned_to] ?? "—") : "—"}
                   </span>
                 </td>
                 {/* Date */}
                 <td className="px-4 py-3.5">
-                  <span className="text-zinc-600 text-xs">{formatDate(lead.created_at)}</span>
+                  <span
+                    className="text-xs tabular-nums"
+                    style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                  >
+                    {formatDate(lead.created_at)}
+                  </span>
                 </td>
                 {/* Actions */}
                 <td className="px-4 py-3.5">
@@ -213,17 +284,30 @@ export default async function LeadsTable() {
       </div>
 
       {/* Tablet / Mobile cards */}
-      <div className="lg:hidden divide-y divide-zinc-800/60">
+      <div className="lg:hidden">
         {leads.map((lead) => (
-          <div key={lead.id} className="px-5 py-4 flex flex-col gap-2">
+          <div
+            key={lead.id}
+            className="px-5 py-4 flex flex-col gap-2"
+            style={{ borderBottom: "1px solid var(--neural-border)" }}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[11px] font-semibold text-orange-400 shrink-0">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                  style={{
+                    background: "rgba(249,115,22,0.08)",
+                    color: "var(--neural-accent)",
+                    border: "1px solid rgba(249,115,22,0.2)",
+                  }}
+                >
                   {lead.name?.charAt(0).toUpperCase() ?? "?"}
                 </div>
                 <div>
-                  <p className="text-white text-sm font-medium">{lead.name}</p>
-                  {lead.company_info && <p className="text-zinc-600 text-xs">{lead.company_info}</p>}
+                  <p className="text-sm font-medium" style={{ color: "var(--neural-text)" }}>{lead.name}</p>
+                  {lead.company_info && (
+                    <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>{lead.company_info}</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -238,12 +322,28 @@ export default async function LeadsTable() {
             </div>
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-zinc-500 text-xs truncate">{lead.email}</p>
-                {lead.service_type && <p className="text-zinc-600 text-xs">{lead.service_type}</p>}
+                <p
+                  className="text-xs truncate"
+                  style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                >
+                  {lead.email}
+                </p>
+                {lead.service_type && (
+                  <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>{lead.service_type}</p>
+                )}
               </div>
               <div className="text-right shrink-0">
-                {lead.assigned_to && <p className="text-zinc-600 text-xs">{assigneeMap[lead.assigned_to] ?? "—"}</p>}
-                <p className="text-zinc-700 text-xs">{formatDate(lead.created_at)}</p>
+                {lead.assigned_to && (
+                  <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
+                    {assigneeMap[lead.assigned_to] ?? "—"}
+                  </p>
+                )}
+                <p
+                  className="text-xs tabular-nums"
+                  style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                >
+                  {formatDate(lead.created_at)}
+                </p>
               </div>
             </div>
           </div>

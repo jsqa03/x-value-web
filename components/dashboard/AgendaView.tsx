@@ -44,32 +44,59 @@ function TaskCard({ task }: { task: Task }) {
   const assignerName = task.assigner?.full_name ?? task.assigner?.email;
 
   return (
-    <div className={`group flex items-start gap-3 px-5 py-4 hover:bg-zinc-900/30 transition-colors border-b border-zinc-800/40 last:border-0 ${isDone ? "opacity-55" : ""}`}>
+    <div
+      className={`group flex items-start gap-3 px-5 py-4 transition-colors last:border-0 ${isDone ? "opacity-55" : ""}`}
+      style={{ borderBottom: "1px solid var(--neural-border)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+    >
       <div className="pt-0.5">
         <TaskCompleteButton taskId={task.id} isDone={isDone} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium leading-snug ${isDone ? "line-through text-zinc-500" : "text-white"}`}>
+        <p
+          className={`text-sm font-medium leading-snug ${isDone ? "line-through" : ""}`}
+          style={{
+            fontFamily: "var(--font-ui)",
+            color: isDone ? "var(--neural-text-muted)" : "var(--neural-text)",
+          }}
+        >
           {task.title}
         </p>
         {task.description && (
-          <p className="text-zinc-600 text-xs mt-0.5 leading-relaxed line-clamp-2">{task.description}</p>
+          <p
+            className="text-xs mt-0.5 leading-relaxed line-clamp-2"
+            style={{ color: "var(--neural-text-muted)" }}
+          >
+            {task.description}
+          </p>
         )}
-        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold"
-            style={{ color: isDone ? "#52525b" : due.color }}>
-            <Calendar size={9} />
+        <div className="flex items-center gap-3 mt-2 flex-wrap">
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-semibold"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: isDone ? "var(--neural-text-muted)" : due.color,
+            }}
+          >
+            <Calendar size={8} />
             {due.text}
           </span>
           {assignerName && (
-            <span className="inline-flex items-center gap-1 text-[10px] text-zinc-700">
-              <User size={9} />
+            <span
+              className="inline-flex items-center gap-1 text-[10px]"
+              style={{ color: "var(--neural-text-muted)" }}
+            >
+              <User size={8} />
               {assignerName}
             </span>
           )}
           {isDone && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-              <CheckCircle2 size={9} /> Completada
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-semibold"
+              style={{ color: "var(--neural-green)" }}
+            >
+              <CheckCircle2 size={8} /> Completada
             </span>
           )}
         </div>
@@ -128,10 +155,18 @@ export default async function AgendaView({ userId, userRole, viewUserId }: Props
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">
+          <p
+            className="text-[10px] font-semibold uppercase mb-1"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)", letterSpacing: "0.14em" }}
+          >
             {isAdmin ? "Sistema de Tareas" : "Agenda personal"}
           </p>
-          <h1 className="text-2xl font-semibold text-white tracking-tight">{viewingLabel}</h1>
+          <h1
+            className="text-[20px] font-semibold tracking-tight"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text)" }}
+          >
+            {viewingLabel}
+          </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* Admin: user selector */}
@@ -151,22 +186,42 @@ export default async function AgendaView({ userId, userRole, viewUserId }: Props
       </div>
 
       {/* ── Pending tasks ───────────────────────────────────────────────── */}
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+      <div className="neural-card overflow-hidden">
+        <div
+          className="flex items-center justify-between px-5 py-3.5"
+          style={{ borderBottom: "1px solid var(--neural-border)" }}
+        >
           <div className="flex items-center gap-2">
-            <Clock size={14} className="text-orange-400" />
-            <p className="text-zinc-300 text-sm font-medium">Tareas Pendientes</p>
+            <Clock size={12} style={{ color: "var(--neural-accent)", opacity: 0.8 }} />
+            <p
+              className="text-[12px] font-semibold"
+              style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+            >
+              Tareas Pendientes
+            </p>
           </div>
-          <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-orange-500/10 border border-orange-500/20 text-orange-400">
+          <span
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+            style={{
+              fontFamily: "var(--font-mono)",
+              background: "rgba(249,115,22,0.06)",
+              color: "var(--neural-accent)",
+              border: "1px solid rgba(249,115,22,0.2)",
+            }}
+          >
             {pending.length} pendiente{pending.length !== 1 ? "s" : ""}
           </span>
         </div>
 
         {pending.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-12 text-center">
-            <ClipboardList size={28} className="text-zinc-700" />
-            <p className="text-zinc-600 text-sm">La agenda está libre</p>
-            <p className="text-zinc-700 text-xs">Usa "Nueva Tarea" para agregar una</p>
+            <ClipboardList size={24} style={{ color: "var(--neural-text-muted)" }} />
+            <p className="text-sm" style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}>
+              La agenda está libre
+            </p>
+            <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
+              Usa "Nueva Tarea" para agregar una
+            </p>
           </div>
         ) : (
           <div>
@@ -177,13 +232,29 @@ export default async function AgendaView({ userId, userRole, viewUserId }: Props
 
       {/* ── Completed tasks ─────────────────────────────────────────────── */}
       {completed.length > 0 && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+        <div className="neural-card overflow-hidden">
+          <div
+            className="flex items-center justify-between px-5 py-3.5"
+            style={{ borderBottom: "1px solid var(--neural-border)" }}
+          >
             <div className="flex items-center gap-2">
-              <CheckCircle2 size={14} className="text-zinc-600" />
-              <p className="text-zinc-500 text-sm font-medium">Completadas</p>
+              <CheckCircle2 size={12} style={{ color: "var(--neural-green)", opacity: 0.6 }} />
+              <p
+                className="text-[12px] font-semibold"
+                style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)" }}
+              >
+                Completadas
+              </p>
             </div>
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-zinc-900 border border-zinc-800 text-zinc-600">
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+              style={{
+                fontFamily: "var(--font-mono)",
+                background: "rgba(0,255,136,0.06)",
+                color: "var(--neural-green)",
+                border: "1px solid rgba(0,255,136,0.15)",
+              }}
+            >
               {completed.length}
             </span>
           </div>
@@ -194,11 +265,16 @@ export default async function AgendaView({ userId, userRole, viewUserId }: Props
       )}
 
       {tasks.length === 0 && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className="neural-card overflow-hidden">
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <Inbox size={32} className="text-zinc-700" />
-            <p className="text-zinc-500 text-sm font-medium">Sin tareas registradas</p>
-            <p className="text-zinc-700 text-xs max-w-xs">
+            <Inbox size={28} style={{ color: "var(--neural-text-muted)" }} />
+            <p
+              className="text-sm font-medium"
+              style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+            >
+              Sin tareas registradas
+            </p>
+            <p className="text-xs max-w-xs" style={{ color: "var(--neural-text-muted)" }}>
               {isAdmin
                 ? "Crea tareas y asígnalas a cualquier miembro del equipo."
                 : "Crea tareas para organizar tu agenda de trabajo."}

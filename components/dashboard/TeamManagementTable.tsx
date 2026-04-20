@@ -55,11 +55,14 @@ export default async function TeamManagementTable() {
 
   if (error) {
     return (
-      <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-5 flex items-start gap-3">
-        <AlertCircle size={15} className="text-red-400 mt-0.5 shrink-0" />
+      <div
+        className="p-5 flex items-start gap-3 rounded-[4px]"
+        style={{ background: "rgba(255,68,68,0.05)", border: "1px solid rgba(255,68,68,0.15)" }}
+      >
+        <AlertCircle size={14} style={{ color: "var(--neural-red)" }} className="mt-0.5 shrink-0" />
         <div>
-          <p className="text-red-400 text-sm font-medium">Error al cargar usuarios</p>
-          <p className="text-red-400/60 text-xs mt-0.5">{error.message}</p>
+          <p className="text-sm font-medium" style={{ color: "var(--neural-red)" }}>Error al cargar usuarios</p>
+          <p className="text-xs mt-0.5" style={{ color: "rgba(255,68,68,0.5)" }}>{error.message}</p>
         </div>
       </div>
     );
@@ -70,10 +73,12 @@ export default async function TeamManagementTable() {
       ? "No hay usuarios en tu equipo aún"
       : "No hay otros usuarios registrados";
     return (
-      <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-10 flex flex-col items-center gap-3 text-center">
-        <Inbox size={26} className="text-zinc-700" />
-        <p className="text-zinc-500 text-sm">{emptyMsg}</p>
-        <p className="text-zinc-700 text-xs">Crea cuentas usando el botón "+ Nuevo Usuario"</p>
+      <div className="neural-card p-10 flex flex-col items-center gap-3 text-center">
+        <Inbox size={24} style={{ color: "var(--neural-text-muted)" }} />
+        <p className="text-sm" style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}>{emptyMsg}</p>
+        <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
+          Crea cuentas usando el botón "+ Nuevo Usuario"
+        </p>
       </div>
     );
   }
@@ -89,61 +94,105 @@ export default async function TeamManagementTable() {
   }
 
   return (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+    <div className="neural-card overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+      <div
+        className="flex items-center justify-between px-5 py-3.5"
+        style={{ borderBottom: "1px solid var(--neural-border)" }}
+      >
         <div className="flex items-center gap-2">
-          <Users size={14} className="text-zinc-500" />
-          <p className="text-zinc-300 text-sm font-medium">Gestión del equipo</p>
+          <Users size={12} style={{ color: "var(--neural-cyan)", opacity: 0.8 }} />
+          <p
+            className="text-[12px] font-semibold"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+          >
+            Gestión del equipo
+          </p>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+        <span
+          className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+          style={{
+            fontFamily: "var(--font-mono)",
+            background: "var(--neural-surface-2)",
+            color: "var(--neural-text-2)",
+            border: "1px solid var(--neural-border)",
+          }}
+        >
           {profiles.length} {profiles.length === 1 ? "usuario" : "usuarios"}
         </span>
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-x-auto transform-gpu">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-800/60">
+            <tr style={{ borderBottom: "1px solid var(--neural-border)" }}>
               {["Usuario", "Email", "Rol", "Creado", ""].map((col, i) => (
-                <th key={i} className="px-5 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
+                <th
+                  key={i}
+                  className="px-5 py-3 text-left text-[10px] font-semibold uppercase"
+                  style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)", letterSpacing: "0.12em" }}
+                >
                   {col}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60">
+          <tbody>
             {(profiles as ProfileRow[]).map((p) => {
               const meta = ROLE_META[p.role] ?? ROLE_META.client;
               return (
-                <tr key={p.id} className="hover:bg-zinc-900/40 transition-colors">
+                <tr
+                  key={p.id}
+                  className="transition-colors"
+                  style={{ borderBottom: "1px solid var(--neural-border)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0"
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
                         style={{ background: `${meta.color}12`, color: meta.color, border: `1px solid ${meta.color}22` }}
                       >
                         {(p.full_name ?? p.email).charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-white text-sm font-medium truncate max-w-[140px]">
+                      <span
+                        className="text-sm font-medium truncate max-w-[140px]"
+                        style={{ color: "var(--neural-text)" }}
+                      >
                         {p.full_name ?? "—"}
                       </span>
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <span className="text-zinc-400 text-sm truncate max-w-[200px] block">{p.email}</span>
+                    <span
+                      className="text-xs truncate max-w-[200px] block tabular-nums"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                    >
+                      {p.email}
+                    </span>
                   </td>
                   <td className="px-5 py-3.5">
                     <span
-                      className="inline-flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                      style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+                      className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+                      style={{
+                        fontFamily: "var(--font-ui)",
+                        background: meta.bg,
+                        border: `1px solid ${meta.border}`,
+                        color: meta.color,
+                      }}
                     >
                       {meta.label}
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
-                    <span className="text-zinc-600 text-xs">{formatDate(p.created_at)}</span>
+                    <span
+                      className="text-xs tabular-nums"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                    >
+                      {formatDate(p.created_at)}
+                    </span>
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-2">
@@ -164,30 +213,46 @@ export default async function TeamManagementTable() {
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden divide-y divide-zinc-800/60">
+      <div className="md:hidden">
         {(profiles as ProfileRow[]).map((p) => {
           const meta = ROLE_META[p.role] ?? ROLE_META.client;
           return (
-            <div key={p.id} className="px-5 py-4 flex flex-col gap-2">
+            <div
+              key={p.id}
+              className="px-5 py-4 flex flex-col gap-2"
+              style={{ borderBottom: "1px solid var(--neural-border)" }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0"
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
                     style={{ background: `${meta.color}12`, color: meta.color, border: `1px solid ${meta.color}22` }}
                   >
                     {(p.full_name ?? p.email).charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-white text-sm font-medium">{p.full_name ?? "—"}</span>
+                  <span className="text-sm font-medium" style={{ color: "var(--neural-text)" }}>
+                    {p.full_name ?? "—"}
+                  </span>
                 </div>
                 <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    background: meta.bg,
+                    color: meta.color,
+                    border: `1px solid ${meta.border}`,
+                  }}
                 >
                   {meta.label}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <p className="text-zinc-500 text-xs truncate">{p.email}</p>
+                <p
+                  className="text-xs truncate"
+                  style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                >
+                  {p.email}
+                </p>
                 <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                   {canViewPerformance(p.role) && (
                     <PerformanceModal userId={p.id} userName={p.full_name ?? p.email} />
@@ -198,7 +263,12 @@ export default async function TeamManagementTable() {
                   )}
                 </div>
               </div>
-              <p className="text-zinc-700 text-xs">{formatDate(p.created_at)}</p>
+              <p
+                className="text-xs tabular-nums"
+                style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+              >
+                {formatDate(p.created_at)}
+              </p>
             </div>
           );
         })}

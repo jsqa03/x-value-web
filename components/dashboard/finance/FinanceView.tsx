@@ -103,19 +103,53 @@ function KpiCard({ label, value, pct, sub, accent, icon: Icon }: {
   label: string; value: string; pct?: string; sub: string; accent: string; icon: React.ElementType;
 }) {
   return (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 flex flex-col gap-2.5">
-      <div className="flex items-center justify-between">
-        <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: `${accent}12`, border: `1px solid ${accent}20` }}>
-          <Icon size={13} style={{ color: accent }} />
+    <div
+      className="neural-kpi flex flex-col gap-2.5 relative overflow-hidden"
+      style={{ borderTop: `2px solid ${accent}` }}
+    >
+      {/* Subtle top glow */}
+      <div
+        className="absolute top-0 left-0 right-0 h-8 pointer-events-none"
+        style={{ background: `linear-gradient(to bottom, ${accent}10, transparent)`, transform: "translateZ(0)" }}
+      />
+      {/* Header row */}
+      <div className="flex items-center justify-between relative">
+        <div className="flex items-center gap-1.5">
+          <span className="w-[6px] h-[6px] rounded-full shrink-0" style={{ background: accent, opacity: 0.8 }} />
+          <p
+            className="text-[10px] font-semibold uppercase truncate"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)", letterSpacing: "0.1em" }}
+          >
+            {label}
+          </p>
         </div>
+        <Icon size={12} style={{ color: accent, opacity: 0.5 }} />
       </div>
-      <p className="text-white font-bold text-xl tracking-tight leading-none">{value}</p>
+      {/* Value */}
+      <p
+        className="text-[22px] font-medium leading-none tabular-nums"
+        style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text)" }}
+      >
+        {value}
+      </p>
+      {/* Percentage badge */}
       {pct !== undefined && (
-        <p className="text-xs font-bold" style={{ color: accent }}>{pct}</p>
+        <span
+          className="self-start text-[10px] font-semibold px-1.5 py-0.5 rounded-[3px]"
+          style={{
+            fontFamily: "var(--font-mono)",
+            color: accent,
+            background: `${accent}10`,
+            border: `1px solid ${accent}25`,
+            letterSpacing: "0.04em",
+          }}
+        >
+          {pct}
+        </span>
       )}
-      <p className="text-zinc-600 text-xs">{sub}</p>
+      <p className="text-[11px]" style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)" }}>
+        {sub}
+      </p>
     </div>
   );
 }
@@ -126,18 +160,31 @@ function CurrencySection({ currency, accent, children }: {
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: `${accent}12`, border: `1px solid ${accent}25` }}>
-          <Globe size={13} style={{ color: accent }} />
+      <div className="flex items-center gap-3">
+        <div
+          className="w-6 h-6 rounded-[3px] flex items-center justify-center shrink-0"
+          style={{ background: `${accent}12`, border: `1px solid ${accent}25` }}
+        >
+          <Globe size={12} style={{ color: accent }} />
         </div>
-        <h2 className="text-white font-semibold text-base tracking-tight">
+        <h2
+          className="text-[15px] font-semibold tracking-tight"
+          style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text)" }}
+        >
           Finanzas X-Value {currency === "COP" ? "Growth" : "AI"}
-          <span className="ml-2 text-[11px] font-bold px-2 py-0.5 rounded-full align-middle"
-            style={{ background: `${accent}12`, color: accent, border: `1px solid ${accent}25` }}>
-            {currency}
-          </span>
         </h2>
+        <span
+          className="text-[9px] font-bold px-2 py-0.5 rounded-[3px] align-middle"
+          style={{
+            fontFamily: "var(--font-mono)",
+            background: `${accent}12`,
+            color: accent,
+            border: `1px solid ${accent}25`,
+            letterSpacing: "0.1em",
+          }}
+        >
+          {currency}
+        </span>
       </div>
       {children}
     </div>
@@ -158,45 +205,88 @@ function PaymentTable({ payments }: { payments: Payment[] }) {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden lg:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto transform-gpu">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-800/60">
+            <tr style={{ borderBottom: "1px solid var(--neural-border)" }}>
               {["Cliente", "Mes", "Programado", "Monto", "Estado", ""].map((col, i) => (
-                <th key={i} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">
+                <th
+                  key={i}
+                  className="px-4 py-3 text-left text-[10px] font-semibold uppercase"
+                  style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)", letterSpacing: "0.12em" }}
+                >
                   {col}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60">
+          <tbody>
             {payments.map((p) => {
               const currency = p.contract?.currency ?? "COP";
               const status   = getPaymentStatus(p.scheduled_date, p.paid_date);
               const days     = p.paid_date ? null : daysUntil(p.scheduled_date);
               return (
-                <tr key={p.id} className="hover:bg-zinc-900/40 transition-colors">
+                <tr
+                  key={p.id}
+                  className="transition-colors group"
+                  style={{ borderBottom: "1px solid var(--neural-border)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
                   <td className="px-4 py-3.5">
-                    <p className="text-white text-sm font-medium truncate max-w-[140px]">
+                    <p
+                      className="text-sm font-medium truncate max-w-[140px]"
+                      style={{ color: "var(--neural-text)" }}
+                    >
                       {p.contract?.client_name ?? "—"}
                     </p>
-                    <p className="text-zinc-600 text-xs">{p.contract?.service_type ?? "—"}</p>
+                    <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
+                      {p.contract?.service_type ?? "—"}
+                    </p>
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="text-zinc-400 text-xs font-semibold">#{p.payment_month}</span>
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                    >
+                      #{p.payment_month}
+                    </span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <p className="text-zinc-400 text-xs">{p.scheduled_date}</p>
-                    {p.paid_date && <p className="text-zinc-600 text-[10px]">Recibido: {p.paid_date}</p>}
+                    <p
+                      className="text-xs tabular-nums"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                    >
+                      {p.scheduled_date}
+                    </p>
+                    {p.paid_date && (
+                      <p
+                        className="text-[10px] tabular-nums mt-0.5"
+                        style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                      >
+                        ✓ {p.paid_date}
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="text-white text-sm font-semibold">{formatMoney(p.amount, currency)}</span>
+                    <span
+                      className="text-sm font-semibold tabular-nums"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        color: p.paid_date ? "var(--neural-green)" : "var(--neural-text)",
+                      }}
+                    >
+                      {formatMoney(p.amount, currency)}
+                    </span>
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex flex-col items-start gap-1">
                       <StatusBadge status={status} />
                       {!p.paid_date && days !== null && status !== "overdue" && Math.abs(days) <= 14 && (
-                        <span className="text-[10px] text-zinc-600">
+                        <span
+                          className="text-[10px]"
+                          style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                        >
                           {days >= 0 ? `en ${days}d` : `hace ${Math.abs(days)}d`}
                         </span>
                       )}
@@ -222,25 +312,44 @@ function PaymentTable({ payments }: { payments: Payment[] }) {
       </div>
 
       {/* Mobile */}
-      <div className="lg:hidden divide-y divide-zinc-800/60">
+      <div className="lg:hidden">
         {payments.map((p) => {
           const currency = p.contract?.currency ?? "COP";
           const status   = getPaymentStatus(p.scheduled_date, p.paid_date);
           const days     = p.paid_date ? null : daysUntil(p.scheduled_date);
           return (
-            <div key={p.id} className="px-5 py-4 flex flex-col gap-2">
+            <div
+              key={p.id}
+              className="px-5 py-4 flex flex-col gap-2"
+              style={{ borderBottom: "1px solid var(--neural-border)" }}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white text-sm font-medium">{p.contract?.client_name ?? "—"}</p>
-                  <p className="text-zinc-600 text-xs">{p.contract?.service_type ?? "—"} · Mes {p.payment_month}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--neural-text)" }}>
+                    {p.contract?.client_name ?? "—"}
+                  </p>
+                  <p className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
+                    {p.contract?.service_type ?? "—"} · Mes {p.payment_month}
+                  </p>
                 </div>
-                <span className="text-white font-semibold text-sm">{formatMoney(p.amount, currency)}</span>
+                <span
+                  className="font-semibold text-sm tabular-nums"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    color: p.paid_date ? "var(--neural-green)" : "var(--neural-text)",
+                  }}
+                >
+                  {formatMoney(p.amount, currency)}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <StatusBadge status={status} />
                   {!p.paid_date && days !== null && status !== "overdue" && Math.abs(days) <= 14 && (
-                    <span className="text-[10px] text-zinc-600">
+                    <span
+                      className="text-[10px]"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                    >
                       {days >= 0 ? `en ${days}d` : `hace ${Math.abs(days)}d`}
                     </span>
                   )}
@@ -270,28 +379,68 @@ type ExpenseRow = { id: string; expense_date: string; concept: string; amount: n
 function ExpenseRows({ expenses }: { expenses: ExpenseRow[] }) {
   return (
     <>
-      <div className="hidden lg:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto transform-gpu">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-800/60">
+            <tr style={{ borderBottom: "1px solid var(--neural-border)" }}>
               {["Fecha", "Concepto", "Categoría", "Responsable", "Monto", ""].map((col, i) => (
-                <th key={i} className="px-4 py-3 text-left text-[11px] font-semibold tracking-wider uppercase text-zinc-600">{col}</th>
+                <th
+                  key={i}
+                  className="px-4 py-3 text-left text-[10px] font-semibold uppercase"
+                  style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)", letterSpacing: "0.12em" }}
+                >
+                  {col}
+                </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60">
+          <tbody>
             {expenses.map((ex) => (
-              <tr key={ex.id} className="hover:bg-zinc-900/40 transition-colors">
-                <td className="px-4 py-3.5"><span className="text-zinc-500 text-xs">{ex.expense_date}</span></td>
-                <td className="px-4 py-3.5"><p className="text-white text-sm truncate max-w-[200px]">{ex.concept}</p></td>
+              <tr
+                key={ex.id}
+                className="transition-colors"
+                style={{ borderBottom: "1px solid var(--neural-border)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
                 <td className="px-4 py-3.5">
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">{ex.category}</span>
+                  <span
+                    className="text-xs tabular-nums"
+                    style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-2)" }}
+                  >
+                    {ex.expense_date}
+                  </span>
                 </td>
                 <td className="px-4 py-3.5">
-                  <span className="text-zinc-500 text-xs">{ex.responsible?.full_name ?? ex.responsible?.email ?? "—"}</span>
+                  <p className="text-sm truncate max-w-[200px]" style={{ color: "var(--neural-text)" }}>
+                    {ex.concept}
+                  </p>
                 </td>
                 <td className="px-4 py-3.5">
-                  <span className="text-red-400 font-semibold text-sm">−{formatMoney(ex.amount, ex.currency)}</span>
+                  <span
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+                    style={{
+                      fontFamily: "var(--font-ui)",
+                      background: "var(--neural-surface-2)",
+                      color: "var(--neural-text-2)",
+                      border: "1px solid var(--neural-border)",
+                    }}
+                  >
+                    {ex.category}
+                  </span>
+                </td>
+                <td className="px-4 py-3.5">
+                  <span className="text-xs" style={{ color: "var(--neural-text-muted)" }}>
+                    {ex.responsible?.full_name ?? ex.responsible?.email ?? "—"}
+                  </span>
+                </td>
+                <td className="px-4 py-3.5">
+                  <span
+                    className="font-semibold text-sm tabular-nums"
+                    style={{ fontFamily: "var(--font-mono)", color: "var(--neural-red)" }}
+                  >
+                    −{formatMoney(ex.amount, ex.currency)}
+                  </span>
                 </td>
                 <td className="px-4 py-3.5">
                   <DeleteExpenseButton expenseId={ex.id} />
@@ -301,18 +450,44 @@ function ExpenseRows({ expenses }: { expenses: ExpenseRow[] }) {
           </tbody>
         </table>
       </div>
-      <div className="lg:hidden divide-y divide-zinc-800/60">
+      <div className="lg:hidden">
         {expenses.map((ex) => (
-          <div key={ex.id} className="px-5 py-4 flex items-center justify-between gap-3">
+          <div
+            key={ex.id}
+            className="px-5 py-4 flex items-center justify-between gap-3"
+            style={{ borderBottom: "1px solid var(--neural-border)" }}
+          >
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{ex.concept}</p>
+              <p className="text-sm font-medium truncate" style={{ color: "var(--neural-text)" }}>
+                {ex.concept}
+              </p>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-zinc-600 text-xs">{ex.expense_date}</span>
-                <span className="text-[10px] text-zinc-500 px-1.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-700">{ex.category}</span>
+                <span
+                  className="text-xs tabular-nums"
+                  style={{ fontFamily: "var(--font-mono)", color: "var(--neural-text-muted)" }}
+                >
+                  {ex.expense_date}
+                </span>
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-[3px]"
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    background: "var(--neural-surface-2)",
+                    color: "var(--neural-text-2)",
+                    border: "1px solid var(--neural-border)",
+                  }}
+                >
+                  {ex.category}
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="text-red-400 font-semibold text-sm">−{formatMoney(ex.amount, ex.currency)}</span>
+              <span
+                className="font-semibold text-sm tabular-nums"
+                style={{ fontFamily: "var(--font-mono)", color: "var(--neural-red)" }}
+              >
+                −{formatMoney(ex.amount, ex.currency)}
+              </span>
               <DeleteExpenseButton expenseId={ex.id} />
             </div>
           </div>
@@ -401,8 +576,18 @@ export default async function FinanceView({ year, month }: { year?: string; mont
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-zinc-600 text-xs tracking-widest uppercase mb-1">Panel Financiero</p>
-          <h1 className="text-2xl font-semibold text-white tracking-tight">Finanzas</h1>
+          <p
+            className="text-[10px] font-semibold uppercase mb-1"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-muted)", letterSpacing: "0.14em" }}
+          >
+            Panel Financiero
+          </p>
+          <h1
+            className="text-[20px] font-semibold tracking-tight"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text)" }}
+          >
+            Finanzas
+          </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <FinancePeriodSelect year={year} month={month} />
@@ -442,13 +627,29 @@ export default async function FinanceView({ year, month }: { year?: string; mont
           />
         </div>
 
-        <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+        <div className="neural-card overflow-hidden">
+          <div
+            className="flex items-center justify-between px-5 py-3.5"
+            style={{ borderBottom: "1px solid var(--neural-border)" }}
+          >
             <div className="flex items-center gap-2">
-              <Wallet size={14} className="text-zinc-500" />
-              <p className="text-zinc-300 text-sm font-medium">Schedule de Pagos · COP</p>
+              <Wallet size={12} style={{ color: "var(--neural-cyan)", opacity: 0.7 }} />
+              <p
+                className="text-[12px] font-semibold"
+                style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+              >
+                Schedule de Pagos · COP
+              </p>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+              style={{
+                fontFamily: "var(--font-mono)",
+                background: "var(--neural-surface-2)",
+                color: "var(--neural-text-2)",
+                border: "1px solid var(--neural-border)",
+              }}
+            >
               {copPayments.length} cuotas
             </span>
           </div>
@@ -456,13 +657,29 @@ export default async function FinanceView({ year, month }: { year?: string; mont
         </div>
 
         {copExpenses.length > 0 && (
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+          <div className="neural-card overflow-hidden">
+            <div
+              className="flex items-center justify-between px-5 py-3.5"
+              style={{ borderBottom: "1px solid var(--neural-border)" }}
+            >
               <div className="flex items-center gap-2">
-                <ReceiptText size={14} className="text-zinc-500" />
-                <p className="text-zinc-300 text-sm font-medium">Egresos COP</p>
+                <ReceiptText size={12} style={{ color: "var(--neural-red)", opacity: 0.7 }} />
+                <p
+                  className="text-[12px] font-semibold"
+                  style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+                >
+                  Egresos COP
+                </p>
               </div>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  background: "rgba(255,68,68,0.06)",
+                  color: "var(--neural-red)",
+                  border: "1px solid rgba(255,68,68,0.2)",
+                }}
+              >
                 {copExpenses.length}
               </span>
             </div>
@@ -503,13 +720,29 @@ export default async function FinanceView({ year, month }: { year?: string; mont
           />
         </div>
 
-        <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+        <div className="neural-card overflow-hidden">
+          <div
+            className="flex items-center justify-between px-5 py-3.5"
+            style={{ borderBottom: "1px solid var(--neural-border)" }}
+          >
             <div className="flex items-center gap-2">
-              <Wallet size={14} className="text-zinc-500" />
-              <p className="text-zinc-300 text-sm font-medium">Schedule de Pagos · USD</p>
+              <Wallet size={12} style={{ color: "var(--neural-cyan)", opacity: 0.7 }} />
+              <p
+                className="text-[12px] font-semibold"
+                style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+              >
+                Schedule de Pagos · USD
+              </p>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+              style={{
+                fontFamily: "var(--font-mono)",
+                background: "var(--neural-surface-2)",
+                color: "var(--neural-text-2)",
+                border: "1px solid var(--neural-border)",
+              }}
+            >
               {usdPayments.length} cuotas
             </span>
           </div>
@@ -517,13 +750,29 @@ export default async function FinanceView({ year, month }: { year?: string; mont
         </div>
 
         {usdExpenses.length > 0 && (
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+          <div className="neural-card overflow-hidden">
+            <div
+              className="flex items-center justify-between px-5 py-3.5"
+              style={{ borderBottom: "1px solid var(--neural-border)" }}
+            >
               <div className="flex items-center gap-2">
-                <ReceiptText size={14} className="text-zinc-500" />
-                <p className="text-zinc-300 text-sm font-medium">Egresos USD</p>
+                <ReceiptText size={12} style={{ color: "var(--neural-red)", opacity: 0.7 }} />
+                <p
+                  className="text-[12px] font-semibold"
+                  style={{ fontFamily: "var(--font-ui)", color: "var(--neural-text-2)" }}
+                >
+                  Egresos USD
+                </p>
               </div>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px]"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  background: "rgba(255,68,68,0.06)",
+                  color: "var(--neural-red)",
+                  border: "1px solid rgba(255,68,68,0.2)",
+                }}
+              >
                 {usdExpenses.length}
               </span>
             </div>

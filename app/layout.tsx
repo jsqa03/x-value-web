@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Bebas_Neue, Instrument_Serif, Barlow } from "next/font/google";
+import {
+  Inter, Bebas_Neue, Instrument_Serif, Barlow,
+  Space_Grotesk, JetBrains_Mono,
+} from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -30,6 +33,21 @@ const barlow = Barlow({
   display: "swap",
 });
 
+/* Neural Grid typefaces */
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "x-value IA — Inteligencia Artificial para Empresas",
   description:
@@ -47,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${bebas.variable} ${instrumentSerif.variable} ${barlow.variable} h-full`}>
+    <html lang="es" className={`${inter.variable} ${bebas.variable} ${instrumentSerif.variable} ${barlow.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}>
       <head>
         {/* Geist Sans — Vercel's typeface */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

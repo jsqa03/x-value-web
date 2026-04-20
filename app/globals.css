@@ -1,17 +1,52 @@
 @import "tailwindcss";
 
-/* ── Official brand token ──────────────────────────────────────────────────── */
+/* ── Brand + Neural Grid tokens ────────────────────────────────────────────── */
 :root {
+  /* X-Value brand (preserved) */
   --brand-primary:      #00c0f3;
   --brand-primary-glow: rgba(0, 192, 243, 0.3);
   --brand-primary-dim:  rgba(0, 192, 243, 0.08);
+  --brand-orange:       #f97316;
+  --brand-orange-dim:   rgba(249, 115, 22, 0.12);
   --font-geist: 'Geist', system-ui, sans-serif;
 
-  /* Liquid glass design tokens */
+  /* Liquid glass */
   --glass-bg:     rgba(255, 255, 255, 0.12);
   --glass-border: rgba(255, 255, 255, 0.25);
   --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
   --glass-blur:   16px;
+
+  /* ── Neural Grid core ───────────────────────────────────────────────────── */
+  --neural-bg:          #080c10;
+  --neural-surface:     #0d1117;
+  --neural-surface-2:   #111520;
+  --neural-sidebar:     #080c10;
+  --neural-border:      #1a2030;
+  --neural-border-active: #2a3550;
+
+  /* Neural accents */
+  --neural-cyan:        #00d4ff;
+  --neural-cyan-dim:    rgba(0, 212, 255, 0.08);
+  --neural-cyan-glow:   rgba(0, 212, 255, 0.15);
+  --neural-green:       #00ff88;
+  --neural-green-dim:   rgba(0, 255, 136, 0.08);
+  --neural-purple:      #a855f7;
+  --neural-purple-dim:  rgba(168, 85, 247, 0.08);
+  --neural-yellow:      #ffd000;
+  --neural-red:         #ff4444;
+
+  /* Neural accent — X-Value orange with neural finish */
+  --neural-accent:      #f97316;
+  --neural-accent-dim:  rgba(249, 115, 22, 0.08);
+  --neural-accent-glow: rgba(249, 115, 22, 0.2);
+
+  /* Neural text */
+  --neural-text:        #e8edf5;
+  --neural-text-2:      #6b7a99;
+  --neural-text-muted:  #3a4560;
+
+  /* Neural grid line opacity */
+  --grid-line:          rgba(0, 212, 255, 0.04);
 }
 
 @theme inline {
@@ -21,7 +56,24 @@
   --color-foreground: #f5f5f5;
   --color-muted: #6b7280;
 
-  /* Brand colors */
+  /* Neural Grid palette — mapped to Tailwind utilities */
+  --color-neural-bg:       #080c10;
+  --color-neural-surface:  #0d1117;
+  --color-neural-surface2: #111520;
+  --color-neural-border:   #1a2030;
+
+  --color-neural-cyan:     #00d4ff;
+  --color-neural-green:    #00ff88;
+  --color-neural-purple:   #a855f7;
+  --color-neural-yellow:   #ffd000;
+  --color-neural-red:      #ff4444;
+  --color-neural-accent:   #f97316;
+
+  --color-neural-text:     #e8edf5;
+  --color-neural-text2:    #6b7a99;
+  --color-neural-muted:    #3a4560;
+
+  /* Legacy brand */
   --color-cyan: #00c0f3;
   --color-cyan-glow: rgba(0, 192, 243, 0.2);
   --color-lime: #D1FF48;
@@ -31,9 +83,11 @@
   --color-glass-border: rgba(255, 255, 255, 0.08);
 
   /* Fonts */
-  --font-display: var(--font-bebas), 'Bebas Neue', sans-serif;
-  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-general: 'General Sans', system-ui, sans-serif;
+  --font-display:  var(--font-bebas), 'Bebas Neue', sans-serif;
+  --font-sans:     var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-general:  'General Sans', system-ui, sans-serif;
+  --font-ui:       var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-mono:     var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
 }
 
 * {
@@ -52,12 +106,162 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Mesh grid background ──────────────────────────────────────────────────── */
+/* ── Mesh grid background (legacy, marketing pages) ───────────────────────── */
 .mesh-bg {
   background-image:
     linear-gradient(rgba(0, 192, 243, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 192, 243, 0.025) 1px, transparent 1px);
   background-size: 60px 60px;
+}
+
+/* ── Neural Grid background ────────────────────────────────────────────────── */
+/*
+ * Pure-CSS grid — no heavy images. GPU-composited via transform3d on
+ * pseudo-elements so Safari never repaints the main layer.
+ */
+.neural-bg {
+  position: relative;
+  background-color: var(--neural-bg);
+  isolation: isolate;
+}
+
+/* Grid lines layer */
+.neural-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  /* GPU layer — prevents Safari repaints */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Depth radial — fixed at top-center for ambient glow */
+.neural-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -5%, rgba(0, 212, 255, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 100%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Neural card / panel */
+.neural-card {
+  background: var(--neural-surface);
+  border: 1px solid var(--neural-border);
+  border-radius: 4px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.neural-card:hover {
+  border-color: var(--neural-border-active);
+}
+
+/* KPI card — colored top border per accent */
+.neural-kpi {
+  background: var(--neural-surface);
+  border: 1px solid var(--neural-border);
+  border-radius: 4px;
+  padding: 14px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.neural-kpi:hover {
+  box-shadow: 0 0 12px var(--neural-cyan-glow);
+}
+
+/* Panel header */
+.neural-panel-header {
+  background: var(--neural-surface);
+  border-bottom: 1px solid var(--neural-border);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neural-text-2);
+  letter-spacing: 0.04em;
+}
+
+/* CTA button — Neural Grid style */
+.neural-btn {
+  background: var(--neural-cyan);
+  color: #000;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 150ms ease, box-shadow 150ms ease;
+  letter-spacing: 0.02em;
+}
+
+.neural-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 16px var(--neural-cyan-glow);
+}
+
+/* Status bar (OS-style, top of dashboard) */
+.neural-status-bar {
+  height: 20px;
+  background: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: #555;
+  /* GPU layer */
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+/* ── Neural Grid animations ─────────────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+@keyframes neural-count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes neural-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.agent-active .dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.neural-mount {
+  animation: neural-count-up 0.5s ease-out both;
+}
+
+.neural-fade {
+  animation: neural-fade-in 150ms ease both;
 }
 
 /* ── Glassmorphism ─────────────────────────────────────────────────────────── */
