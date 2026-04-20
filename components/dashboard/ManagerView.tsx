@@ -17,10 +17,10 @@ import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
 const TEAM_STATS = [
-  { label: "Deals abiertos (equipo)", value: "—", sub: "este mes",        accent: "#a78bfa", icon: Target     },
-  { label: "Tasa de cierre",          value: "—", sub: "promedio equipo", accent: "#22c55e", icon: TrendingUp },
-  { label: "Comerciales activos",     value: "—", sub: "en pipeline",     accent: "#38bdf8", icon: Users      },
-  { label: "Revenue generado",        value: "—", sub: "acumulado",       accent: "#f59e0b", icon: BarChart2  },
+  { label: "Deals abiertos (equipo)", value: "—", sub: "este mes",        accent: "#a78bfa", icon: <Target    size={12} style={{ color: "#a78bfa", opacity: 0.6 }} /> },
+  { label: "Tasa de cierre",          value: "—", sub: "promedio equipo", accent: "#22c55e", icon: <TrendingUp size={12} style={{ color: "#22c55e", opacity: 0.6 }} /> },
+  { label: "Comerciales activos",     value: "—", sub: "en pipeline",     accent: "#38bdf8", icon: <Users     size={12} style={{ color: "#38bdf8", opacity: 0.6 }} /> },
+  { label: "Revenue generado",        value: "—", sub: "acumulado",       accent: "#f59e0b", icon: <BarChart2  size={12} style={{ color: "#f59e0b", opacity: 0.6 }} /> },
 ];
 
 function SkeletonTable() {

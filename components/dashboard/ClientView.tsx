@@ -6,10 +6,10 @@ import StatCard from "./StatCard";
 import type { Profile } from "./types";
 
 const ROI_STATS = [
-  { label: "ROI generado",         value: "—", sub: "desde implementación", accent: "#38bdf8", icon: TrendingUp },
-  { label: "Tareas automatizadas", value: "—", sub: "por mes",              accent: "#22c55e", icon: Zap        },
-  { label: "Disponibilidad IA",    value: "—", sub: "uptime garantizado",   accent: "#a78bfa", icon: Activity   },
-  { label: "Ahorro operativo",     value: "—", sub: "vs. equipo manual",    accent: "#f59e0b", icon: BarChart2  },
+  { label: "ROI generado",         value: "—", sub: "desde implementación", accent: "#38bdf8", icon: <TrendingUp size={12} style={{ color: "#38bdf8", opacity: 0.6 }} /> },
+  { label: "Tareas automatizadas", value: "—", sub: "por mes",              accent: "#22c55e", icon: <Zap        size={12} style={{ color: "#22c55e", opacity: 0.6 }} /> },
+  { label: "Disponibilidad IA",    value: "—", sub: "uptime garantizado",   accent: "#a78bfa", icon: <Activity   size={12} style={{ color: "#a78bfa", opacity: 0.6 }} /> },
+  { label: "Ahorro operativo",     value: "—", sub: "vs. equipo manual",    accent: "#f59e0b", icon: <BarChart2  size={12} style={{ color: "#f59e0b", opacity: 0.6 }} /> },
 ];
 
 const MILESTONES = [

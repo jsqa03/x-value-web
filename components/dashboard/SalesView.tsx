@@ -10,10 +10,10 @@ import SalesEarningsView from "./finance/SalesEarningsView";
 import type { Profile } from "./types";
 
 const MY_STATS = [
-  { label: "Mis deals activos",    value: "—", sub: "en seguimiento",  accent: "#f59e0b", icon: Target     },
-  { label: "Reuniones esta semana",value: "—", sub: "confirmadas",     accent: "#38bdf8", icon: Calendar   },
-  { label: "Tasa de cierre",       value: "—", sub: "últimos 30 días", accent: "#a78bfa", icon: TrendingUp },
-  { label: "Leads calientes",      value: "—", sub: "para contactar",  accent: "#ef4444", icon: Flame      },
+  { label: "Mis deals activos",    value: "—", sub: "en seguimiento",  accent: "#f59e0b", icon: <Target    size={12} style={{ color: "#f59e0b", opacity: 0.6 }} /> },
+  { label: "Reuniones esta semana",value: "—", sub: "confirmadas",     accent: "#38bdf8", icon: <Calendar  size={12} style={{ color: "#38bdf8", opacity: 0.6 }} /> },
+  { label: "Tasa de cierre",       value: "—", sub: "últimos 30 días", accent: "#a78bfa", icon: <TrendingUp size={12} style={{ color: "#a78bfa", opacity: 0.6 }} /> },
+  { label: "Leads calientes",      value: "—", sub: "para contactar",  accent: "#ef4444", icon: <Flame     size={12} style={{ color: "#ef4444", opacity: 0.6 }} /> },
 ];
 
 function SkeletonTable() {

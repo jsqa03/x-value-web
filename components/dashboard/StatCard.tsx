@@ -2,10 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { animate } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
 
 interface TrendBadge {
-  /** Positive = up, negative = down */
   delta: number;
   label?: string;
 }
@@ -15,7 +13,7 @@ interface StatCardProps {
   value: string;
   sub?: string;
   accent: string;
-  icon: LucideIcon;
+  icon: React.ReactNode;
   trend?: TrendBadge;
 }
 
@@ -129,7 +127,7 @@ function TrendChip({ trend, accent }: { trend: TrendBadge; accent: string }) {
 }
 
 /* ── Main component ──────────────────────────────────────────────────────── */
-export default function StatCard({ label, value, sub, accent, icon: Icon, trend }: StatCardProps) {
+export default function StatCard({ label, value, sub, accent, icon, trend }: StatCardProps) {
   return (
     <div
       className="neural-kpi neural-mount flex flex-col gap-3 relative overflow-hidden"
@@ -150,11 +148,7 @@ export default function StatCard({ label, value, sub, accent, icon: Icon, trend 
           className="w-[8px] h-[8px] rounded-full shrink-0"
           style={{ background: accent, opacity: 0.85 }}
         />
-        <Icon
-          size={12}
-          style={{ color: accent, opacity: 0.6 }}
-          className="shrink-0"
-        />
+        <span className="shrink-0">{icon}</span>
         <span
           className="text-[10px] font-semibold uppercase truncate"
           style={{

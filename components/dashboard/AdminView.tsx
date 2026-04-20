@@ -18,10 +18,10 @@ import type { Profile, Role } from "./types";
 import { ROLE_META } from "./types";
 
 const GLOBAL_STATS = [
-  { label: "Clientes activos",       value: "—", sub: "Total empresa",    accent: "#38bdf8", icon: Users      },
-  { label: "Revenue este mes",        value: "—", sub: "vs. mes anterior", accent: "#22c55e", icon: DollarSign },
-  { label: "Leads procesados por IA", value: "—", sub: "últimos 30 días",  accent: "#a78bfa", icon: TrendingUp },
-  { label: "Agentes IA activos",      value: "—", sub: "en producción",    accent: "#f59e0b", icon: Zap        },
+  { label: "Clientes activos",       value: "—", sub: "Total empresa",    accent: "#38bdf8", icon: <Users      size={12} style={{ color: "#38bdf8", opacity: 0.6 }} /> },
+  { label: "Revenue este mes",        value: "—", sub: "vs. mes anterior", accent: "#22c55e", icon: <DollarSign size={12} style={{ color: "#22c55e", opacity: 0.6 }} /> },
+  { label: "Leads procesados por IA", value: "—", sub: "últimos 30 días",  accent: "#a78bfa", icon: <TrendingUp size={12} style={{ color: "#a78bfa", opacity: 0.6 }} /> },
+  { label: "Agentes IA activos",      value: "—", sub: "en producción",    accent: "#f59e0b", icon: <Zap        size={12} style={{ color: "#f59e0b", opacity: 0.6 }} /> },
 ];
 
 function SkeletonTable() {

@@ -6,7 +6,7 @@ import { getUserTasks } from "@/app/actions/tasks";
 import type { Task } from "@/app/actions/tasks";
 
 interface Props {
-  userId: string;
+  userId?: string;
   userName: string;
 }
 
@@ -31,7 +31,7 @@ export default function ViewAgendaButton({ userId, userName }: Props) {
 
   function handleOpen() {
     setOpen(true);
-    if (tasks === null) {
+    if (tasks === null && userId) {
       startTransition(async () => {
         const result = await getUserTasks(userId);
         setTasks(result);
